@@ -98,7 +98,7 @@
 </template>
 <script setup lang="ts">
 import type { FormInstance } from "element-plus";
-import { LocationQuery, RouteLocationRaw, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { type LoginFormData } from "@/api/myuser.api";
 import router from "@/router";
@@ -211,32 +211,6 @@ async function handleLoginSubmit() {
     console.error("登录失败:", error);
   } finally {
     loading.value = false;
-  }
-}
-
-/**
- * 解析重定向目标
- *
- * @param query 路由查询参数
- * @returns 标准化后的路由地址
- */
-function resolveRedirectTarget(query: LocationQuery): RouteLocationRaw {
-  // 默认跳转路径
-  const defaultPath = "/";
-
-  // 获取原始重定向路径
-  const rawRedirect = (query.redirect as string) || defaultPath;
-
-  try {
-    // 6. 使用Vue Router解析路径
-    const resolved = router.resolve(rawRedirect);
-    return {
-      path: resolved.path,
-      query: resolved.query,
-    };
-  } catch {
-    // 7. 异常处理：返回安全路径
-    return { path: defaultPath };
   }
 }
 

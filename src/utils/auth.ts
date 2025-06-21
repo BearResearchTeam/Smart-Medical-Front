@@ -21,7 +21,7 @@ export class Auth {
 
   /**
    * 获取当前有效的访问令牌
-   * 会根据"记住我"状态从适当的存储位置获取
+   * 会根据"记住我的"状态从适当的存储位置获取
    * @returns 当前有效的访问令牌
    */
   static getAccessToken(): string {
