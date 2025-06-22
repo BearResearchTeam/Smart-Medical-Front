@@ -9,7 +9,7 @@ console.log("DEBUG: modules object keys:", Object.keys(modules));
 const Layout = () => import("@/layouts/index.vue");
 
 export const usePermissionStore = defineStore("permission", () => {
-  // 存储所有路由，包括静态路由和动态路由
+  // 存储所有路由
   const routes = ref<RouteRecordRaw[]>([]);
   // 混合模式左侧菜单路由
   const sideMenuRoutes = ref<RouteRecordRaw[]>([]);
@@ -18,31 +18,22 @@ export const usePermissionStore = defineStore("permission", () => {
 
   /**
    * 生成静态路由数据并注册到全局路由
-   *
-   * @returns Promise<RouteRecordRaw[]> 解析后的动态路由列表
    */
   function generateRoutes() {
     return new Promise<RouteRecordRaw[]>((resolve) => {
-      console.log("🔧 Starting to generate static routes...");
+      console.log("🔧 生成静态菜单...");
 
-      // 定义您的硬编码静态路由
-      const staticDynamicRoutes: RouteRecordRaw[] = [
-        {
-          path: "/",
-          component: Layout,
-          redirect: "/dashboard",
-          meta: { hidden: true },
-        },
+      // 定义静态路由
+      const staticRoutes = [
         {
           path: "/dashboard",
           component: Layout,
           redirect: "/dashboard/index",
-          meta: { title: "仪表盘", icon: "ep:home-filled", affix: true },
           children: [
             {
               path: "index",
               name: "Dashboard",
-              component: modules["../../views/dashboard/index.vue"],
+              component: () => import("@/views/dashboard/index.vue"),
               meta: { title: "仪表盘", icon: "ep:home-filled", affix: true },
             },
           ],
@@ -56,33 +47,92 @@ export const usePermissionStore = defineStore("permission", () => {
             {
               path: "user",
               name: "UserManagement",
-              component: modules["../../views/system/user/index.vue"],
+              component: () => import("@/views/system/user/index.vue"),
               meta: { title: "用户管理", icon: "ep:user" },
             },
           ],
         },
-        // 根据您的实际需求添加其他静态路由
+        {
+          path: "/medical",
+          component: Layout,
+          redirect: "/medical/doctor",
+          meta: { title: "医疗管理", icon: "ep:first-aid-kit" },
+          children: [
+            {
+              path: "doctor",
+              name: "DoctorManagement",
+              component: () => import("@/views/system/user/index.vue"),
+              meta: { title: "医生管理", icon: "ep:user" },
+            },
+            {
+              path: "department",
+              name: "DepartmentManagement",
+              component: () => import("@/views/system/dept/index.vue"),
+              meta: { title: "科室管理", icon: "ep:office-building" },
+            },
+          ],
+        },
+        {
+          path: "/pharmacy",
+          component: Layout,
+          redirect: "/pharmacy/medicine",
+          meta: { title: "药房管理", icon: "ep:medicine-box" },
+          children: [
+            {
+              path: "medicine",
+              name: "MedicineManagement",
+              component: () => import("@/views/system/dict/index.vue"),
+              meta: { title: "药品管理", icon: "ep:medicine-box" },
+            },
+            {
+              path: "prescription",
+              name: "PrescriptionManagement",
+              component: () => import("@/views/system/user/index.vue"),
+              meta: { title: "处方管理", icon: "ep:document" },
+            },
+          ],
+        },
+        {
+          path: "/clinic",
+          component: Layout,
+          redirect: "/clinic/outpatient",
+          meta: { title: "门诊管理", icon: "ep:service" },
+          children: [
+            {
+              path: "outpatient",
+              name: "OutpatientManagement",
+              component: () => import("@/views/system/user/index.vue"),
+              meta: { title: "门诊管理", icon: "ep:service" },
+            },
+          ],
+        },
+        {
+          path: "/404",
+          component: () => import("@/views/error/404.vue"),
+          meta: { hidden: true },
+        },
+        {
+          path: "/:pathMatch(.*)*",
+          redirect: "/404",
+          meta: { hidden: true },
+        },
       ];
 
-      // 添加调试日志，检查组件是否正确导入
-      console.log("DEBUG: Dashboard component value:", modules["../../views/dashboard/index.vue"]);
-      console.log(
-        "DEBUG: UserManagement component value:",
-        modules["../../views/system/user/index.vue"]
-      );
+      // 注册路由
+      staticRoutes.forEach((route) => {
+        router.addRoute(route);
+      });
 
-      routes.value = [...constantRoutes, ...staticDynamicRoutes];
+      routes.value = [...constantRoutes, ...staticRoutes];
       routesLoaded.value = true;
 
-      console.log("✅ Static routes generation completed successfully");
-      resolve(staticDynamicRoutes);
+      console.log("✅ 静态菜单生成完成");
+      resolve(staticRoutes);
     });
   }
 
   /**
    * 根据父菜单路径设置侧边菜单
-   *
-   * @param parentPath 父菜单的路径，用于查找对应的菜单项
    */
   const updateSideMenu = (parentPath: string) => {
     const matchedItem = routes.value.find((item) => item.path === parentPath);
@@ -95,7 +145,7 @@ export const usePermissionStore = defineStore("permission", () => {
    * 重置路由
    */
   const resetRouter = () => {
-    // 创建常量路由名称集合，用于O(1)时间复杂度的查找
+    // 创建常量路由名称集合
     const constantRouteNames = new Set(constantRoutes.map((route) => route.name).filter(Boolean));
 
     // 从 router 实例中移除动态路由
@@ -152,10 +202,7 @@ export const usePermissionStore = defineStore("permission", () => {
 // };
 
 /**
- * 导出此hook函数用于在非组件环境(如其他store、工具函数等)中获取权限store实例
- *
- * 在组件中可直接使用usePermissionStore()，但在组件外部需要传入store实例
- * 此函数简化了这个过程，避免每次都手动传入store参数
+ * 导出此hook函数用于在非组件环境中获取权限store实例
  */
 export function usePermissionStoreHook() {
   return usePermissionStore(store);

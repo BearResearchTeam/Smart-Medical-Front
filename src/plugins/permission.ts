@@ -12,42 +12,38 @@ export function setupPermission() {
   // 白名单路由
   const whiteList = ["/login"];
 
-  // 重新启用全局路由守卫以正确处理路由生成和跳转
+  // 恢复路由守卫，检查登录状态
   router.beforeEach(async (to, from, next) => {
     NProgress.start();
-    console.log("🚀 Route guard triggered:", {
-      to: to.path,
-      from: from.path,
-      isLoggedIn: Auth.isLoggedIn(),
-    });
 
+    // 判断用户是否已登录
     const isLoggedIn = Auth.isLoggedIn();
+    console.log(`🔍 Route guard checking: ${to.path}, logged in: ${isLoggedIn}`);
 
+    // 访问白名单页面，直接放行
+    if (whiteList.includes(to.path)) {
+      console.log(`✅ Whitelist route: ${to.path}, allowing access`);
+      next();
+      return;
+    }
+
+    // 已登录用户处理逻辑
     if (isLoggedIn) {
-      console.log("✅ User is logged in. Current path:", to.path);
-
-      // 如果已登录但访问登录页，重定向到首页
+      // 如果已登录用户尝试访问登录页，重定向到首页
       if (to.path === "/login") {
-        console.log("🔄 Redirecting from login to home because already logged in.");
+        console.log("已登录用户访问登录页，重定向到首页");
         next({ path: "/" });
         return;
       }
 
-      // 处理已登录用户的路由访问
+      // 处理已登录用户的其他路由访问
       await handleAuthenticatedUser(to, from, next);
-    } else {
-      console.log("❌ User not logged in. Current path:", to.path);
-
-      // 未登录用户的处理
-      if (whiteList.includes(to.path)) {
-        console.log("➡️ Allowing access to whitelisted route:", to.path);
-        next();
-      } else {
-        console.log("🚫 Not whitelisted, redirecting to login. Target path:", to.path);
-        redirectToLogin(to, next);
-        NProgress.done();
-      }
+      return;
     }
+
+    // 未登录用户访问非白名单页面，重定向到登录页
+    console.log(`⚠️ User not logged in, redirecting to login page from: ${to.path}`);
+    redirectToLogin(to, next);
   });
 
   // 后置守卫，确保进度条关闭

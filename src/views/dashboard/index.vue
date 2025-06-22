@@ -368,7 +368,7 @@ watch(onlineUserCount, (newCount, oldCount) => {
 // 格式化时间戳
 const formattedTime = computed(() => {
   if (!lastUpdateTime.value) return "--";
-  return useDateFormat(lastUpdateTime, "HH:mm:ss").value;
+  return useDateFormat(lastUpdateTime.value, "HH:mm:ss").value;
 });
 
 interface VersionItem {

@@ -3,20 +3,15 @@
   <el-card shadow="never">
     <el-input v-model="deptName" placeholder="部门名称" clearable>
       <template #prefix>
-        <el-icon><Search /></el-icon>
+        <el-icon>
+          <Search />
+        </el-icon>
       </template>
     </el-input>
 
-    <el-tree
-      ref="deptTreeRef"
-      class="mt-2"
-      :data="deptList"
-      :props="{ children: 'children', label: 'label', disabled: '' }"
-      :expand-on-click-node="false"
-      :filter-node-method="handleFilter"
-      default-expand-all
-      @node-click="handleNodeClick"
-    />
+    <el-tree ref="deptTreeRef" class="mt-2" :data="deptList"
+      :props="{ children: 'children', label: 'label', disabled: '' }" :expand-on-click-node="false"
+      :filter-node-method="handleFilter" default-expand-all @node-click="handleNodeClick" />
   </el-card>
 </template>
 
@@ -29,22 +24,20 @@ const props = defineProps({
   },
 });
 
-const deptList = ref<OptionType[]>(); // 部门列表
+const deptList = ref<OptionType[]>([]); // 部门列表，初始化为空数组而非undefined
 const deptTreeRef = ref(); // 部门树
-const deptName = ref(); // 部门名称
+const deptName = ref(""); // 部门名称，初始化为空字符串
 
-const emits = defineEmits(["node-click"]);
+const emits = defineEmits(["update:modelValue", "node-click"]);
 
 const deptId = useVModel(props, "modelValue", emits);
 
-watchEffect(
-  () => {
-    deptTreeRef.value.filter(deptName.value);
-  },
-  {
-    flush: "post", // watchEffect会在DOM挂载或者更新之前就会触发，此属性控制在DOM元素更新后运行
+// 只有当deptTreeRef和deptName都有值时才过滤
+watch(deptName, (newVal) => {
+  if (deptTreeRef.value) {
+    deptTreeRef.value.filter(newVal);
   }
-);
+});
 
 /**
  * 部门筛选
@@ -62,9 +55,19 @@ function handleNodeClick(data: { [key: string]: any }) {
   emits("node-click");
 }
 
-onBeforeMount(() => {
-  DeptAPI.getOptions().then((data) => {
-    deptList.value = data;
-  });
+// 改用onMounted并添加错误处理
+onMounted(() => {
+  loadDeptTree();
 });
+
+// 提取加载部门树的方法
+async function loadDeptTree() {
+  try {
+    const data = await DeptAPI.getOptions();
+    deptList.value = data || [];
+  } catch (error) {
+    console.error("加载部门树失败:", error);
+    deptList.value = [];
+  }
+}
 </script>
