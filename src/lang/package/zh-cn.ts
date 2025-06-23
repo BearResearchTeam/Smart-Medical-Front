@@ -17,6 +17,7 @@ export default {
     capsLock: "大写锁定已打开",
     rememberMe: "记住我",
     forgetPassword: "忘记密码？",
+    loginSuccess: "登录成功",
     message: {
       username: {
         required: "请输入用户名",

@@ -11,37 +11,25 @@ const DeptAPI = {
    */
   getList(queryParams?: DeptQuery) {
     return request<any,DeptForm>({
-      url: `${DEPT_BASE_URL}`,
+      url: `${"/api/app/doctor-department/doctor-department-list"}`,
       method: "get",
       params: queryParams,
     });
   },
 
-  /** 获取科室下拉列表 */
-  // getOptions() {
-  //   // return request<any, OptionType[]>({
-  //   //   url: `${DEPT_BASE_URL}/options`,
-  //   //   method: "get",
-  //   // });
-  //   return Promise.resolve({
-  //     code: "200",
-  //     data: [
-  //       {
-  //         value: "1",
-  //         label: "技术部",
-  //       },
-  //       {
-  //         value: "2",
-  //         label: "市场部",
-  //       },
-  //       {
-  //         value: "3",
-  //         label: "销售部",
-  //       },
-  //     ],
-  //     msg: "success",
-  //   });
-  // },
+  
+
+
+  getdeptlist(data: any) {
+    // 正常API调用
+    console.log("执行实际登录API调用", data);
+    return request<any>({
+      url: "/api/app/doctor-department/doctor-department-list",
+      method: "get",
+      params:data // 将登录数据作为请求体发送
+     
+    });
+  },
 
   /**
    * 获取科室表单数据
@@ -107,37 +95,17 @@ export interface DeptQuery {
   /** 搜索关键字 */
   DepartmentName?: string;
   PageIndex: number,
-  PageSize:number
+  PageSize: number,
+   "totleCount": 0,
+  "totlePage": 0,
   /** 状态 */
   //status?: number;
 }
 
-/** 科室类型 */
-// export interface DeptVO {
-//   /** 子部门 */
-//   children?: DeptVO[];
-//   /** 创建时间 */
-//   createTime?: Date;
-//   /** 部门ID */
-//   id?: string;
-//   /** 部门名称 */
-//   name?: string;
-//   /** 部门编号 */
-//   code?: string;
-//   /** 父部门ID */
-//   parentid?: string;
-//   /** 排序 */
-//   sort?: number;
-//   /** 状态(1:启用；0:禁用) */
-//   status?: number;
-//   /** 修改时间 */
-//   updateTime?: Date;
-// }
-
 /** 科室表单类型 */
 export interface DeptForm {
   /** 部门ID(新增不填) */
-  id?: string;
+  // id?: string;
   /** 部门名称 */
  "departmentName": string,
   "departmentCategory": string,
@@ -148,3 +116,5 @@ export interface DeptForm {
   "nurseCount": number,
   "type": string
 }
+
+

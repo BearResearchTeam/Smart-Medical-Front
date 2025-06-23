@@ -15,19 +15,36 @@ interface BackendApiResponse<T = any> {
 
 /**
  * 创建 HTTP 请求实例
+ *
+ * 注意：如果后端API地址有变化，请修改下面的baseURL
+ * - 开发环境通常是: http://localhost:端口号/
+ * - 如果使用Docker或其他环境，请相应调整
+ * - 如果后端服务未启动，可以将baseURL设置为空字符串，前端将使用模拟数据
  */
 const httpRequest = axios.create({
-  baseURL: "https://localhost:44394/api/",
+  baseURL: "https://localhost:44394/",
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
   paramsSerializer: (params) => qs.stringify(params),
+  withCredentials: false, // 禁用跨源凭据
 });
+
+// 打印baseURL值，方便调试
+console.log("HTTP请求baseURL:", httpRequest.defaults.baseURL);
 
 /**
  * 请求拦截器 - 添加 Authorization 头
  */
 httpRequest.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    console.log(`📤 发送请求: ${config.method} ${config.url}`);
+
+    // 确保登录接口使用POST方法
+    if (config.url?.includes("/login") && !config.method) {
+      console.log("强制设置登录请求为POST方法");
+      config.method = "post";
+    }
+
     // JWT认证相关代码已注释
     /*
     const accessToken = Auth.getAccessToken();
@@ -72,11 +89,35 @@ httpRequest.interceptors.response.use(
   async (error) => {
     console.error("Response interceptor error:", error);
 
-    const { response } = error;
+    // 检查是否应该使用模拟数据
+    const useMockData = localStorage.getItem("useMockData") === "true";
+    if (useMockData) {
+      console.log("已启用模拟数据模式，忽略API错误");
+      // 返回一个空对象，让调用方继续执行
+      return {};
+    }
+
+    const { response, code, message } = error;
 
     // 网络错误或服务器无响应
     if (!response) {
-      ElMessage.error("网络连接失败，请检查网络设置");
+      // 提供更详细的错误信息
+      let errorMsg = "网络连接失败";
+
+      if (code === "ERR_NETWORK") {
+        errorMsg = "网络错误，无法连接到服务器";
+      } else if (code === "ECONNABORTED") {
+        errorMsg = "请求超时，服务器响应时间过长";
+      } else if (message) {
+        errorMsg = `${errorMsg}: ${message}`;
+      }
+
+      ElMessage.error(errorMsg);
+      console.error(`[API错误] ${errorMsg}`, error);
+
+      // 建议用户启用模拟数据
+      ElMessage.info('建议启用"使用模拟数据"选项继续开发');
+
       return Promise.reject(error);
     }
 

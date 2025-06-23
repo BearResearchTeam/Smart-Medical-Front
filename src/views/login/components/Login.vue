@@ -57,6 +57,22 @@
         </el-link>
       </div>
 
+      <!-- 开发模式下显示模拟数据开关 -->
+      <div class="flex-x-between w-full mt-2">
+        <el-checkbox v-model="useMockData" @change="handleMockDataChange">
+          使用模拟数据
+        </el-checkbox>
+        <el-text type="info" size="small">后端未启动时使用</el-text>
+      </div>
+
+      <!-- 添加后端连接测试按钮 -->
+      <div v-if="showDiagnosticTools" class="flex-x-between w-full mt-2">
+        <el-button size="small" type="info" @click="testBackendConnection">
+          测试后端连接
+        </el-button>
+        <el-text v-if="connectionStatus" type="info" size="small">{{ connectionStatus }}</el-text>
+      </div>
+
       <!-- 登录按钮 -->
       <el-form-item>
         <el-button :loading="loading" type="primary" class="w-full" @click="handleLoginSubmit">
@@ -98,18 +114,20 @@
 </template>
 <script setup lang="ts">
 import type { FormInstance } from "element-plus";
-import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { type LoginFormData } from "@/api/myuser.api";
-import router from "@/router";
-import { useUserStore } from "@/store";
 import CommonWrapper from "@/components/CommonWrapper/index.vue";
 import { Auth } from "@/utils/auth";
 import { ElMessage } from "element-plus";
+import { ApiDetector } from "@/utils/apiDetector";
+import { useUserStore } from "@/store/modules/user.store";
+import { useRoute, useRouter } from "vue-router";
 
 const { t } = useI18n();
-const userStore = useUserStore();
+
+// 获取路由实例
 const route = useRoute();
+const router = useRouter();
 
 // 注释获取验证码的调用
 // onMounted(() => getCaptcha());
@@ -122,6 +140,25 @@ const isCapsLock = ref(false);
 // const captchaBase64 = ref();
 // 记住我
 const rememberMe = Auth.getRememberMe();
+
+// 是否使用模拟数据（开发模式）
+const useMockData = ref(localStorage.getItem("useMockData") === "true");
+// 显示诊断工具（开发环境）
+const showDiagnosticTools = ref(import.meta.env.DEV);
+// 连接状态信息
+const connectionStatus = ref('');
+
+// 测试后端连接
+async function testBackendConnection() {
+  try {
+    connectionStatus.value = '正在测试连接...';
+    const baseUrl = 'https://localhost:44394/';
+    const result = await ApiDetector.testConnection(baseUrl);
+    connectionStatus.value = result;
+  } catch (error: any) {
+    connectionStatus.value = `测试失败: ${error.message || '未知错误'}`;
+  }
+}
 
 const loginFormData = ref<LoginFormData>({
   username: "admin",
@@ -191,24 +228,25 @@ async function handleLoginSubmit() {
 
     loading.value = true;
 
-    // 2. 执行登录 - userStore内部使用MyUserAPI
+    // 2. 调用登录API
+    const userStore = useUserStore();
     await userStore.login(loginFormData.value);
 
-    // 3. 登录成功，显示提示信息
-    ElMessage.success(t("登录成功"));
+    // 3. 登录成功
+    ElMessage.success(t("login.loginSuccess"));
 
-    // 4. 解析目标地址，并直接跳转
-    const redirect = route.query.redirect as string;
-    router.push({ path: redirect || "/dashboard" });
-
-    // 5. 记住我功能已实现，根据用户选择决定token的存储方式:
-    // - 选中"记住我": token存储在localStorage中，浏览器关闭后仍然有效
-    // - 未选中"记住我": token存储在sessionStorage中，浏览器关闭后失效
+    // 4. 获取重定向地址或默认跳转到仪表盘
+    const redirect = route.query.redirect?.toString() || '/dashboard';
+    await router.push(redirect);
   } catch (error: any) {
-    // 6. 统一错误处理
-    // 注释刷新验证码的调用
-    // getCaptcha(); 
     console.error("登录失败:", error);
+
+    // 如果使用模拟数据模式，告知用户
+    if (localStorage.getItem("useMockData") === "true") {
+      ElMessage.warning("已切换到模拟数据模式，请使用admin/123456登录");
+    } else {
+      ElMessage.error(error.message || '登录失败，请稍后重试');
+    }
   } finally {
     loading.value = false;
   }
@@ -225,6 +263,12 @@ function checkCapsLock(event: KeyboardEvent) {
 const emit = defineEmits(["update:modelValue"]);
 function toOtherForm(type: "register" | "resetPwd") {
   emit("update:modelValue", type);
+}
+
+// 监听模拟数据模式变化
+function handleMockDataChange(val: any) {
+  localStorage.setItem("useMockData", val ? "true" : "false");
+  console.log(`模拟数据模式: ${val ? "开启" : "关闭"}`);
 }
 </script>
 
