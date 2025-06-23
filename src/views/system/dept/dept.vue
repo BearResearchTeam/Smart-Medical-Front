@@ -36,9 +36,9 @@
         </div>
       </div>
 
-      <el-table v-loading="loading" :data="deptList" default-expand-all class="data-table__content"
+      <el-table v-loading="loading" :data="deptList"  default-expand-all class="data-table__content"
         @selection-change="handleSelectionChange">
-        <!-- <el-table-column type="selection" width="55" align="center" /> -->
+        <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" label="序号" min-width="200" />
         <el-table-column prop="departmentName" label="科室名称" width="200" />
         <el-table-column prop="departmentCategory" label="科室大类" width="200" />
@@ -50,8 +50,8 @@
 
         <el-table-column prop="type" label="状态" width="100">
           <template #default="scope">
-            <el-tag v-if="scope.row.type === '启用'" type="success">启用</el-tag>
-            <el-tag v-else type="info">禁用</el-tag>
+            <el-tag v-model="scope.row.type" type="success">启用</el-tag>
+            <el-tag v-model="scope.row.type" type="info">禁用</el-tag>
           </template>
         </el-table-column>
 
@@ -144,11 +144,11 @@ const dialog = reactive({
   visible: false,
 });
 
-const deptList = ref<DeptForm[]>([]);;
+const deptList = ref<DeptForm[]>();
 const deptOptions = ref<OptionType[]>();
 const formData = reactive<DeptForm>({
   /** 部门ID(新增不填) */
-  // id: "",
+ // id: "",
   /** 部门名称 */
   "departmentName": "",
   "departmentCategory": "",
@@ -170,27 +170,21 @@ const rules = reactive({
 // 显示科室列表
 async function handleQuery() {
   loading.value = true;
+  // DeptAPI.getList(queryParams).then((data) => {
+  //   deptList.value = data;
+  //   loading.value = false;
+  // });
   const param = {
     DepartmentName: queryParams.DepartmentName,
     PageIndex: queryParams.PageIndex,
     PageSize: queryParams.PageSize,
   }
+  const res = await DeptAPI.getdeptlist(param);
+  deptList.value = res.data || [];
+  console.log("123", res.data);
+  queryParams.totleCount = res.data.totleCount;
+  queryParams.totlePage = res.data.totlePage;
 
-  interface res {
-    data: [],
-    totleCount: 0,
-    totlePage: 0,
-  }
-
-
-  const res1 = await DeptAPI.getdeptlist(param);
-  deptList.value = res1.data || [];
-  queryParams.totleCount = res1.totleCount;
-  queryParams.totlePage = res1.totlePage;
-  loading.value = false;
-  console.log("res1.data.data", res1.data);
-  console.log("res1.data", res1.data);
-  console.log("res1", res1);
 
 }
 
