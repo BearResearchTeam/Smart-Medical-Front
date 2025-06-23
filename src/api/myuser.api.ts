@@ -11,51 +11,18 @@ const MyUserAPI = {
    * @param data 登录表单数据
    */
   login(data: LoginFormData) {
-    // 检查是否应该使用模拟数据（当baseURL为空或明确指定使用模拟数据时）
-    const useMockData = !request.defaults.baseURL || localStorage.getItem("useMockData") === "true";
-
-    if (useMockData) {
-      console.log("使用模拟登录数据");
-      return new Promise<LoginResult>((resolve, reject) => {
-        setTimeout(() => {
-          // 模拟登录成功
-          if (data.username === "admin" && data.password === "123456") {
-            resolve({
-              id: "1",
-              userName: data.username,
-              userEmail: "admin@example.com",
-              userPhone: "13800138000",
-              userSex: true,
-              nickname: "管理员",
-              avatar: "",
-              roles: ["admin"],
-              perms: ["*:*:*"],
-            });
-          } else {
-            // 模拟登录失败
-            reject(new Error("用户名或密码错误"));
-          }
-        }, 500); // 模拟网络延迟
-      });
-    }
+   
 
     // 正常API调用
     console.log("执行实际登录API调用", data);
 
-    // 构造后端接口需要的请求格式
-    const loginRequestData = {
-      userName: data.username,
-      userPwd: data.password,
-      rememberMe: data.rememberMe,
-    };
+   
 
     return request<any, LoginResult>({
       url: "api/app/user/login",
       method: "post",
-      data: loginRequestData, // 将登录数据作为请求体发送
-      headers: {
-        "Content-Type": "application/json",
-      },
+      data // 将登录数据作为请求体发送
+     
     });
   },
 

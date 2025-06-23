@@ -166,7 +166,7 @@ const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600
 const formData = reactive<UserAddRequest & UserUpdateRequest & { id?: string }>({
   userName: "",
   userPwd: "", // 初始化密码字段
-  userEmail: "",
+  userEmail: "", 
   userPhone: "",
   userSex: null, // 恢复性别字段
   id: undefined,
