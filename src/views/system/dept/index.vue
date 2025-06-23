@@ -158,7 +158,7 @@ const tableData = reactive<TableDataType>({
 
 const formData = reactive<DeptForm>({
   /** 部门ID(新增不填) */
-  id: undefined,
+  id: undefined, // 确保 id 属性存在且未注释
   /** 部门名称 */
   "departmentName": "",
   "departmentCategory": "",
@@ -185,6 +185,8 @@ async function handleQuery() {
     PageIndex: queryParams.PageIndex,
     PageSize: queryParams.PageSize,
   }
+
+
 
   const res1: DeptListResponse = await DeptAPI.getdeptlist(param);
   tableData.pageData = res1.data || [];
@@ -296,7 +298,7 @@ function resetForm() {
   deptFormRef.value.resetFields();
   deptFormRef.value.clearValidate();
 
-  formData.id = undefined;
+  formData.id = undefined; // 确保 id 属性重置
 }
 
 // 关闭弹窗

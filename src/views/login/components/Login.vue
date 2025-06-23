@@ -245,7 +245,7 @@ async function handleLoginSubmit() {
     if (localStorage.getItem("useMockData") === "true") {
       ElMessage.warning("已切换到模拟数据模式，请使用admin/123456登录");
     } else {
-      ElMessage.error(error.message || '登录失败，请稍后重试');
+    ElMessage.error(error.message || '登录失败，请稍后重试');
     }
   } finally {
     loading.value = false;
