@@ -139,7 +139,7 @@ const MyUserAPI = {
       return new Promise<UserListItem>((resolve) => {
         setTimeout(() => {
           const mockUser: UserListItem = {
-            id: id,
+            id,
             userName: "mockUser" + id,
             userEmail: "mock" + id + "@example.com",
             userPhone: "1300000000" + id.slice(-1),
@@ -176,7 +176,7 @@ const MyUserAPI = {
     return request<any, any>({
       url: "api/app/user",
       method: "post",
-      data: data,
+      data,
     });
   },
 
@@ -201,7 +201,7 @@ const MyUserAPI = {
     return request<any, any>({
       url: `api/app/user/${id}`,
       method: "put",
-      data: data,
+      data,
     });
   },
 
@@ -352,7 +352,7 @@ const MyUserAPI = {
     return request<any, any>({
       url: "api/app/user",
       method: "post",
-      data: data,
+      data,
     });
   },
 };
