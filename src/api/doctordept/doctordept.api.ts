@@ -10,24 +10,20 @@ const DeptAPI = {
    * @returns 部门树形表格数据
    */
   getList(queryParams?: DeptQuery) {
-    return request<any,DeptForm>({
+    return request<DeptForm>({
       url: `${"/api/app/doctor-department/doctor-department-list"}`,
       method: "get",
       params: queryParams,
     });
   },
 
-  
-
-
-  getdeptlist(data: any) {
+  getdeptlist(data: any): Promise<DeptListResponse> {
     // 正常API调用
     console.log("执行实际登录API调用", data);
-    return request<any>({
+    return request<DeptListResponse>({
       url: "/api/app/doctor-department/doctor-department-list",
       method: "get",
-      params:data // 将登录数据作为请求体发送
-     
+      params: data, // 将登录数据作为请求体发送
     });
   },
 
@@ -37,11 +33,11 @@ const DeptAPI = {
    * @param id 部门ID
    * @returns 部门表单数据
    */
-  getFormData(queryParams?: DeptQuery) {
-    return request<any, DeptForm>({
-      url: `${DEPT_BASE_URL}`,
+  getFormData(id: string) {
+    return request<DeptForm>({
+      url: `${DEPT_BASE_URL}/${id}`,
       method: "get",
-       params: queryParams,
+      // params: queryParams,
     });
   },
 
@@ -94,10 +90,8 @@ export default DeptAPI;
 export interface DeptQuery {
   /** 搜索关键字 */
   DepartmentName?: string;
-  PageIndex: number,
-  PageSize: number,
-   "totleCount": 0,
-  "totlePage": 0,
+  PageIndex: number;
+  PageSize: number;
   /** 状态 */
   //status?: number;
 }
@@ -105,16 +99,21 @@ export interface DeptQuery {
 /** 科室表单类型 */
 export interface DeptForm {
   /** 部门ID(新增不填) */
-  // id?: string;
+  id?: string;
   /** 部门名称 */
- "departmentName": string,
-  "departmentCategory": string,
-  "address": string,
-  "directorName": string,
-  "doctorCount": number,
-  "pharmacistCount": number,
-  "nurseCount": number,
-  "type": string
+  departmentName: string;
+  departmentCategory: string;
+  address: string;
+  directorName: string;
+  doctorCount: number;
+  pharmacistCount: number;
+  nurseCount: number;
+  type: string;
 }
 
-
+/** 科室列表响应类型 */
+export interface DeptListResponse {
+  data: DeptForm[];
+  totleCount: number;
+  totlePage: number;
+}

@@ -36,7 +36,7 @@
         </div>
       </div>
 
-      <el-table v-loading="loading" :data="deptList" default-expand-all class="data-table__content"
+      <el-table v-loading="loading" :data="tableData.pageData" default-expand-all class="data-table__content"
         @selection-change="handleSelectionChange">
         <!-- <el-table-column type="selection" width="55" align="center" /> -->
         <el-table-column type="index" label="序号" min-width="200" />
@@ -124,7 +124,7 @@ defineOptions({
   inheritAttrs: false,
 });
 
-import DeptAPI, { DeptForm, DeptQuery } from "@/api/doctordept/doctordept.api";
+import DeptAPI, { DeptForm, DeptQuery, DeptListResponse } from "@/api/doctordept/doctordept.api";
 
 const queryFormRef = ref();
 const deptFormRef = ref();
@@ -134,9 +134,7 @@ const selectIds = ref<number[]>([]);
 const queryParams = reactive<DeptQuery>({
   DepartmentName: "",
   PageIndex: 1,
-  PageSize: 3,
-  "totleCount": 0,
-  "totlePage": 0,
+  PageSize: 3
 });
 
 const dialog = reactive({
@@ -144,11 +142,23 @@ const dialog = reactive({
   visible: false,
 });
 
-const deptList = ref<DeptForm[]>([]);;
-const deptOptions = ref<OptionType[]>();
+// 定义表格数据类型
+interface TableDataType {
+  pageData: DeptForm[];
+  totalCount: number;
+  totalPage: number;
+}
+
+// 将 deptList 替换为 tableData
+const tableData = reactive<TableDataType>({
+  pageData: [],
+  totalCount: 0,
+  totalPage: 0,
+});
+
 const formData = reactive<DeptForm>({
   /** 部门ID(新增不填) */
-  // id: "",
+  id: undefined,
   /** 部门名称 */
   "departmentName": "",
   "departmentCategory": "",
@@ -176,22 +186,13 @@ async function handleQuery() {
     PageSize: queryParams.PageSize,
   }
 
-  interface res {
-    data: [],
-    totleCount: 0,
-    totlePage: 0,
-  }
-
-
-  const res1 = await DeptAPI.getdeptlist(param);
-  deptList.value = res1.data || [];
-  queryParams.totleCount = res1.totleCount;
-  queryParams.totlePage = res1.totlePage;
+  const res1: DeptListResponse = await DeptAPI.getdeptlist(param);
+  tableData.pageData = res1.data || [];
+  tableData.totalCount = res1.totleCount;
+  tableData.totalPage = res1.totlePage;
   loading.value = false;
-  console.log("res1.data.data", res1.data);
-  console.log("res1.data", res1.data);
-  console.log("res1", res1);
-
+  console.log("res1.data", res1.data); // 打印部门数据数组
+  console.log("res1", res1); // 打印完整响应对象
 }
 
 // 重置查询

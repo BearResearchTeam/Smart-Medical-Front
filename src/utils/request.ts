@@ -1,4 +1,8 @@
-import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from "axios";
+import axios, {
+  type InternalAxiosRequestConfig,
+  type AxiosResponse,
+  type AxiosRequestConfig,
+} from "axios";
 import qs from "qs";
 import { useUserStoreHook } from "@/store/modules/user.store";
 import { ResultEnum } from "@/enums/api/result.enum";
@@ -21,7 +25,7 @@ interface BackendApiResponse<T = any> {
  * - 如果使用Docker或其他环境，请相应调整
  * - 如果后端服务未启动，可以将baseURL设置为空字符串，前端将使用模拟数据
  */
-const httpRequest = axios.create({
+const service = axios.create({
   baseURL: "https://localhost:44394/",
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
@@ -30,12 +34,12 @@ const httpRequest = axios.create({
 });
 
 // 打印baseURL值，方便调试
-console.log("HTTP请求baseURL:", httpRequest.defaults.baseURL);
+console.log("HTTP请求baseURL:", service.defaults.baseURL);
 
 /**
  * 请求拦截器 - 添加 Authorization 头
  */
-httpRequest.interceptors.request.use(
+service.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     console.log(`📤 发送请求: ${config.method} ${config.url}`);
 
@@ -68,7 +72,7 @@ httpRequest.interceptors.request.use(
 /**
  * 响应拦截器 - 统一处理响应和错误
  */
-httpRequest.interceptors.response.use(
+service.interceptors.response.use(
   (response: AxiosResponse<BackendApiResponse>) => {
     // 如果响应是二进制流，则直接返回（用于文件下载、Excel 导出等）
     if (response.config.responseType === "blob") {
@@ -152,7 +156,7 @@ async function refreshTokenAndRetry(config: InternalAxiosRequestConfig): Promise
       if (newToken && config.headers) {
         config.headers.Authorization = `Bearer ${newToken}`;
       }
-      httpRequest(config).then(resolve).catch(reject);
+      service(config).then(resolve).catch(reject);
     };
 
     // 将请求加入等待队列
@@ -216,4 +220,9 @@ async function redirectToLogin(message: string = "请重新登录"): Promise<voi
   }
 }
 
-export default httpRequest;
+// 定义一个通用的请求函数，返回Promise<T>而不是Promise<AxiosResponse<T>>
+const request = <T = any>(config: AxiosRequestConfig): Promise<T> => {
+  return service(config) as Promise<T>; // Assert the return type to Promise<T>
+};
+
+export default request;
