@@ -25,10 +25,138 @@ export const usePermissionStore = defineStore("permission", () => {
 
       // 直接使用 constantRoutes，因为所有静态路由已在 router/index.ts 中定义并注册
       routes.value = [...constantRoutes];
+      // 定义静态路由
+      // const staticRoutes = [
+      //   {
+      //     path: "/dashboard",
+      //     component: Layout,
+      //     redirect: "/dashboard/index",
+      //     children: [
+      //       {
+      //         path: "index",
+      //         name: "Dashboard",
+      //         component: () => import("@/views/dashboard/index.vue"),
+      //         meta: { title: "仪表盘", icon: "ep:home-filled", affix: true },
+      //       },
+      //     ],
+      //   },
+      //   {
+      //     path: "/system",
+      //     component: Layout,
+      //     redirect: "/system/user",
+      //     meta: { title: "系统管理", icon: "ep:setting" },
+      //     children: [
+      //       {
+      //         path: "user",
+      //         name: "UserManagement",
+      //         component: () => import("@/views/system/user/index.vue"),
+      //         meta: { title: "用户管理", icon: "ep:user" },
+      //       },
+      //     ],
+      //   },
+      //   {
+      //     path: "/medical",
+      //     component: Layout,
+      //     redirect: "/medical/doctor",
+      //     meta: { title: "医疗管理", icon: "ep:first-aid-kit" },
+      //     children: [
+      //       {
+      //         path: "doctor",
+      //         name: "DoctorManagement",
+      //         component: () => import("@/views/system/user/index.vue"),
+      //         meta: { title: "医生管理", icon: "ep:user" },
+      //       },
+      //       {
+      //         path: "department",
+      //         name: "DepartmentManagement",
+      //         component: () => import("@/views/system/dept/index.vue"),
+      //         meta: { title: "科室管理", icon: "ep:office-building" },
+      //       },
+      //     ],
+      //   },
+      //   {
+      //     path: "/pharmacy",
+      //     component: Layout,
+      //     redirect: "/pharmacy/medicine",
+      //     meta: { title: "药房管理", icon: "ep:medicine-box" },
+      //     children: [
+      //       {
+      //         path: "medicine",
+      //         name: "MedicineManagement",
+      //         component: () => import("@/views/system/dict/index.vue"),
+      //         meta: { title: "药品管理", icon: "ep:medicine-box" },
+      //       },
+      //       {
+      //         path: "prescription",
+      //         name: "PrescriptionManagement",
+      //         component: () => import("@/views/system/user/index.vue"),
+      //         meta: { title: "处方管理", icon: "ep:document" },
+      //       },
+      //     ],
+      //   },
+      //   {
+      //     path: "/clinic",
+      //     component: Layout,
+      //     redirect: "/clinic/outpatient",
+      //     meta: { title: "门诊管理", icon: "ep:service" },
+      //     children: [
+      //       {
+      //         path: "outpatient",
+      //         name: "OutpatientManagement",
+      //         component: () => import("@/views/system/user/index.vue"),
+      //         meta: { title: "门诊管理", icon: "ep:service" },
+      //       },
+      //     ],
+      //   },
+      //   {
+      //     path: "/dict",
+      //     component: Layout,
+      //     redirect: "/dict/outpatient",
+      //     meta: { title: "数据字典管理", icon: "ep:service" },
+      //     children: [
+      //       {
+      //         path: "dictionarydata",
+      //         name: "dictionarydataManagement",
+      //         component: () => import("@/views/system/dict/index.vue"),
+      //         meta: { title: "字典管理", icon: "ep:service" },
+      //       },
+      //       {
+      //         path: "/system/dict-item",
+      //         name: "dictionarytypeManagement",
+      //         component: () => import("@/views/system/dict/dict-item.vue"),
+      //         meta: { title: "字典项管理", icon: "ep:service" },
+      //       },
+      //       {
+      //         path: "apifox",
+      //         name: "apifox",
+      //         component: () => import("@/views/demo/api/apifox.vue"),
+      //         meta: { title: "code管理", icon: "ep:service" },
+      //       },
+      //     ],
+      //   },
+      //   {
+      //     path: "/404",
+      //     component: () => import("@/views/error/404.vue"),
+      //     meta: { hidden: true },
+      //   },
+      //   {
+      //     path: "/:pathMatch(.*)*",
+      //     redirect: "/404",
+      //     meta: { hidden: true },
+      //   },
+      // ];
+
+      // // 注册路由
+      // staticRoutes.forEach((route) => {
+      //   router.addRoute(route);
+      // });
+      //...staticRoutes
+      //// 直接使用 constantRoutes，因为所有静态路由已在 router/index.ts 中定义并注册
+      routes.value = [...constantRoutes];
       routesLoaded.value = true;
 
       console.log("✅ 静态菜单生成完成");
-      resolve(routes.value);
+       resolve(routes.value);
     });
   }
 

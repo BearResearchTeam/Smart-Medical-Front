@@ -1,21 +1,14 @@
 import request from "@/utils/request";
 
-const DEPT_BASE_URL = "/api/app/doctor-department/doctor-department-list";
+const DEPT_BASE_URL = "/api/app/doctor-department/";
 
 const DeptAPI = {
   /**
    * 获取科室列表
    *
    * @param queryParams 查询参数（可选）
-   * @returns 部门树形表格数据
+   * @returns 科室列表响应
    */
-  getList(queryParams?: DeptQuery) {
-    return request<DeptForm>({
-      url: `${"/api/app/doctor-department/doctor-department-list"}`,
-      method: "get",
-      params: queryParams,
-    });
-  },
 
   getdeptlist(data: any): Promise<DeptListResponse> {
     // 正常API调用
@@ -23,7 +16,7 @@ const DeptAPI = {
     return request<DeptListResponse>({
       url: "/api/app/doctor-department/doctor-department-list",
       method: "get",
-      params: data, // 将登录数据作为请求体发送
+      params: data, // 将查询参数作为请求体发送
     });
   },
 
@@ -49,7 +42,7 @@ const DeptAPI = {
    */
   create(data: DeptForm) {
     return request({
-      url: `${DEPT_BASE_URL}`,
+      url: `/api/app/doctor-department/doctor-department`,
       method: "post",
       data,
     });
@@ -57,14 +50,14 @@ const DeptAPI = {
 
   /**
    * 修改科室
-   *
+   * /api/app/doctor-department/{id}/doctor-department
    * @param id 科室ID
    * @param data 科室表单数据
    * @returns 请求结果
    */
   update(id: string, data: DeptForm) {
     return request({
-      url: `${DEPT_BASE_URL}/${id}`,
+      url: `/api/app/doctor-department/${id}/doctor-department`,
       method: "put",
       data,
     });
@@ -72,16 +65,20 @@ const DeptAPI = {
 
   /**
    * 删除科室
-   *
+   * /api/app/doctor-department/delete-doctor-department
    * @param ids 科室ID，多个以英文逗号(,)分隔
    * @returns 请求结果
    */
-  deleteByIds(ids: string) {
+  deleteByIds(idsString: string) {
+    console.log("DeptAPI initialized",idsString)
     return request({
-      url: `${DEPT_BASE_URL}/${ids}`,
-      method: "delete",
+      url: `/api/app/doctor-department/delete-doctor-department`,
+      method: "put",
+      params:{ idsString: idsString }
     });
+    
   },
+  
 };
 
 export default DeptAPI;

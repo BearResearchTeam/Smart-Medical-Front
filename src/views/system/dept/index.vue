@@ -4,10 +4,10 @@
     <div class="search-container">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true">
         <el-form-item label="关键字" prop="DepartmentName">
-          <el-input v-model="queryParams.DepartmentName" placeholder="部门名称" @keyup.enter="handleQuery" />
+          <el-input v-model="queryParams.DepartmentName" placeholder="科室名称" @keyup.enter="handleQuery" />
         </el-form-item>
 
-        <!-- <el-form-item label="部门状态" prop="status">
+        <!-- <el-form-item label="科室状态" prop="status">
           <el-select v-model="queryParams." placeholder="全部" clearable style="width: 100px">
             <el-option :value="1" label="正常" />
             <el-option :value="0" label="禁用" />
@@ -26,11 +26,10 @@
     <el-card shadow="hover" class="data-table">
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--actions">
-          <el-button v-hasPerm="['sys:dept:add']" type="success" icon="plus" @click="handleOpenDialog()">
+          <el-button type="success" icon="plus" @click="handleOpenDialog(1)">
             新增
           </el-button>
-          <el-button v-hasPerm="['sys:dept:delete']" type="danger" :disabled="selectIds.length === 0" icon="delete"
-            @click="handleDelete()">
+          <el-button type="danger" :disabled="selectIds.length === 0" icon="delete" @click="handleDelete()">
             删除
           </el-button>
         </div>
@@ -38,19 +37,19 @@
 
       <el-table v-loading="loading" :data="tableData.pageData" default-expand-all class="data-table__content"
         @selection-change="handleSelectionChange">
-        <!-- <el-table-column type="selection" width="55" align="center" /> -->
-        <el-table-column type="index" label="序号" min-width="200" />
-        <el-table-column prop="departmentName" label="科室名称" width="200" />
-        <el-table-column prop="departmentCategory" label="科室大类" width="200" />
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column type="index" label="序号" width="130" />
+        <el-table-column prop="departmentName" label="科室名称" width="130" />
+        <el-table-column prop="departmentCategory" label="科室大类" width="130" />
         <el-table-column prop="address" label="地址" width="200" />
-        <el-table-column prop="directorName" label="负责人名称" width="200" />
-        <el-table-column prop="doctorCount" label="医师人数" width="200" />
-        <el-table-column prop="pharmacistCount" label="药师人数" width="200" />
-        <el-table-column prop="nurseCount" label="护士人数" width="200" />
+        <el-table-column prop="directorName" label="负责人名称" width="130" />
+        <el-table-column prop="doctorCount" label="医师人数" width="130" />
+        <el-table-column prop="pharmacistCount" label="药师人数" width="130" />
+        <el-table-column prop="nurseCount" label="护士人数" width="130" />
 
         <el-table-column prop="type" label="状态" width="100">
           <template #default="scope">
-            <el-tag v-if="scope.row.type === '启用'" type="success">启用</el-tag>
+            <el-tag v-if="scope.row.type === '正常'" type="success">正常</el-tag>
             <el-tag v-else type="info">禁用</el-tag>
           </template>
         </el-table-column>
@@ -58,21 +57,18 @@
 
         <el-table-column label="操作" fixed="right" align="left" width="200">
           <template #default="scope">
-            <el-button v-hasPerm="['sys:dept:add']" type="primary" link size="small" icon="plus"
-              @click.stop="handleOpenDialog(scope.row.id)">
-              新增
-            </el-button>
-            <el-button v-hasPerm="['sys:dept:edit']" type="primary" link size="small" icon="edit"
-              @click.stop="handleOpenDialog(scope.row.id)">
+            <el-button type="primary" link size="small" icon="edit" @click.stop="handleOpenDialog(scope.row)">
               编辑
             </el-button>
-            <el-button v-hasPerm="['sys:dept:delete']" type="danger" link size="small" icon="delete"
-              @click.stop="handleDelete(scope.row.id)">
+            <el-button type="danger" link size="small" icon="delete" @click.stop="handleDelete(scope.row.id)">
               删除
             </el-button>
           </template>
         </el-table-column>
       </el-table>
+
+      <pagination v-if="tableData.totalCount > 0" v-model:total="tableData.totalCount"
+        v-model:page="queryParams.PageIndex" v-model:limit="queryParams.PageSize" @pagination="handleQuery" />
     </el-card>
 
     <el-dialog v-model="dialog.visible" :title="dialog.title" width="600px" @closed="handleCloseDialog">
@@ -85,20 +81,22 @@
           <el-input v-model="formData.departmentCategory" placeholder="请输入科室大类" />
         </el-form-item>
         <el-form-item label="科室地址" prop="address">
-          <el-input-number v-model="formData.address" controls-position="right" style="width: 100px" :min="0" />
+          <el-input v-model="formData.address" placeholder="请输入科室地址" />
+
         </el-form-item>
 
-        <el-form-item label="科室负责人姓名" prop="departmentCategory">
-          <el-input v-model="formData.departmentCategory" placeholder="请输入科室负责人姓名" />
+        <el-form-item label="科室负责人姓名" prop="directorName">
+          <el-input v-model="formData.directorName" placeholder="请输入科室负责人姓名" />
         </el-form-item>
-        <el-form-item label="医师人数" prop="departmentCategory">
-          <el-input v-model="formData.departmentCategory" placeholder="请输入医师人数" />
+        <el-form-item label="医师人数" prop="doctorCount">
+          <!-- <el-input v-model="formData.doctorCount" placeholder="请输入医师人数" /> -->
+          <el-input-number v-model="formData.doctorCount" controls-position="right" style="width: 100px" :min="0" />
         </el-form-item>
-        <el-form-item label="药师人数" prop="departmentCategory">
-          <el-input v-model="formData.departmentCategory" placeholder="请输入药师人数" />
+        <el-form-item label="药师人数" prop="pharmacistCount">
+          <el-input-number v-model="formData.pharmacistCount" controls-position="right" style="width: 100px" :min="0" />
         </el-form-item>
-        <el-form-item label="护士人数" prop="departmentCategory">
-          <el-input v-model="formData.departmentCategory" placeholder="请输入护士人数" />
+        <el-form-item label="护士人数" prop="nurseCount">
+          <el-input-number v-model="formData.nurseCount" controls-position="right" style="width: 100px" :min="0" />
         </el-form-item>
         <el-form-item label="科室类型">
           <el-radio-group v-model="formData.type">
@@ -134,7 +132,7 @@ const selectIds = ref<number[]>([]);
 const queryParams = reactive<DeptQuery>({
   DepartmentName: "",
   PageIndex: 1,
-  PageSize: 3
+  PageSize: 2
 });
 
 const dialog = reactive({
@@ -185,16 +183,13 @@ async function handleQuery() {
     PageIndex: queryParams.PageIndex,
     PageSize: queryParams.PageSize,
   }
-
-
-
   const res1: DeptListResponse = await DeptAPI.getdeptlist(param);
   tableData.pageData = res1.data || [];
   tableData.totalCount = res1.totleCount;
   tableData.totalPage = res1.totlePage;
   loading.value = false;
-  console.log("res1.data", res1.data); // 打印部门数据数组
-  console.log("res1", res1); // 打印完整响应对象
+  console.log("打印部门数据数组", res1.data); // 打印部门数据数组
+  console.log("打印完整响应对象", res1); // 打印完整响应对象
 }
 
 // 重置查询
@@ -209,42 +204,35 @@ function handleSelectionChange(selection: any) {
 }
 
 /**
- * 打开部门弹窗
- *
- * @param parentId 父部门ID
- * @param deptId 部门ID
+ * 打开科室弹窗
+ * @param deptId 科室ID
  */
-async function handleOpenDialog(deptId?: string) {
-  // 加载部门下拉数据
-  // const data = await DeptAPI.getOptions();
-  // deptOptions.value = [
-  //   {
-  //     value: "0",
-  //     label: "顶级部门",
-  //     children: data,
-  //   },
-  // ];
+async function handleOpenDialog(dept?: any) {
 
+  console.log("打开科室弹窗，deptId:", dept.id); // 打印传入的 deptId
   dialog.visible = true;
-  if (deptId) {
-    dialog.title = "修改部门";
-    DeptAPI.getFormData(deptId).then((data) => {
-      Object.assign(formData, data);
-    });
+  if (dept.id) {
+    dialog.title = "修改科室";
+    formData.type = dept.type;
+    Object.assign(formData, dept); // 使用 Object.assign 合并对象
+    // DeptAPI.getFormData(deptId).then((data) => {
+    //   Object.assign(formData, data);
+    // });
   } else {
-    dialog.title = "新增部门";
+    dialog.title = "新增科室";
     //formData.parentId = parentId || "0";
   }
 }
 
-// 提交部门表单
-function handleSubmit() {
-  deptFormRef.value.validate((valid: any) => {
+// 提交科室表单
+async function handleSubmit() {
+  deptFormRef.value.validate(async (valid: any) => {
     if (valid) {
       loading.value = true;
       const deptId = formData.id;
+      console.log("deptId", deptId); // 打印表单数据
       if (deptId) {
-        DeptAPI.update(deptId, formData)
+        await DeptAPI.update(deptId, formData)
           .then(() => {
             ElMessage.success("修改成功");
             handleCloseDialog();
@@ -252,7 +240,7 @@ function handleSubmit() {
           })
           .finally(() => (loading.value = false));
       } else {
-        DeptAPI.create(formData)
+        await DeptAPI.create(formData)
           .then(() => {
             ElMessage.success("新增成功");
             handleCloseDialog();
@@ -264,9 +252,9 @@ function handleSubmit() {
   });
 }
 
-// 删除部门
+// 删除科室
 function handleDelete(deptId?: number) {
-  const deptIds = [deptId || selectIds.value].join(",");
+  const deptIds = [deptId || selectIds.value].join(",").toString();
 
   if (!deptIds) {
     ElMessage.warning("请勾选删除项");
@@ -279,6 +267,7 @@ function handleDelete(deptId?: number) {
     type: "warning",
   }).then(
     () => {
+      console.log("deptIds:", deptIds); // 打印要删除科室ID
       loading.value = true;
       DeptAPI.deleteByIds(deptIds)
         .then(() => {

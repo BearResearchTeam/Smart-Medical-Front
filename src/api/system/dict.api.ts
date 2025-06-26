@@ -1,6 +1,6 @@
 import request from "@/utils/request";
 
-const DICT_BASE_URL = "/api/v1/dicts";
+const DICT_BASE_URL = "/api/app/dictionary-type/";
 
 const DictAPI = {
   //---------------------------------------------------
@@ -12,14 +12,24 @@ const DictAPI = {
    *
    * @param queryParams 查询参数
    * @returns 字典分页结果
-   */
-  getPage(queryParams: DictPageQuery) {
-    return request<any, PageResult<DictPageVO[]>>({
-      url: `${DICT_BASE_URL}/page`,
+  */
+    getPage(data: any): Promise<DictListResponse> {
+    // 正常API调用
+    console.log("执行实际登录API调用", data);
+    return request<DictListResponse>({
+      url: `/api/app/dictionary-data/dictionary-data-list`,
       method: "get",
-      params: queryParams,
+      params: data, // 将登录数据作为请求体发送
     });
   },
+  // getPage(queryParams: DictPageQuery) {
+  //   // 发送GET请求获取字典分页数据
+  //   return request<PageResult<DictPageVO[]>>({
+  //     url: `/api/app/dictionary-data/dictionary-data-list`,
+  //     method: "get",
+  //     params: queryParams,
+  //   });
+  // },
 
   /**
    * 字典列表
@@ -53,7 +63,7 @@ const DictAPI = {
    */
   create(data: DictForm) {
     return request({
-      url: `${DICT_BASE_URL}`,
+      url: `/api/app/dictionary-data/dictionary-data-l`,
       method: "post",
       data,
     });
@@ -67,7 +77,7 @@ const DictAPI = {
    */
   update(id: string, data: DictForm) {
     return request({
-      url: `${DICT_BASE_URL}/${id}`,
+      url: `/api/app/dictionary-data/${id}/dictionary-data-l`,
       method: "put",
       data,
     });
@@ -78,10 +88,10 @@ const DictAPI = {
    *
    * @param ids 字典ID，多个以英文逗号(,)分隔
    */
-  deleteByIds(ids: string) {
+  deleteByIds(id: string) {
     return request({
-      url: `${DICT_BASE_URL}/${ids}`,
-      method: "delete",
+      url: `/api/app/dictionary-data/${id}/delete-dictionary-list`,
+      method: "put",
     });
   },
 
@@ -94,9 +104,9 @@ const DictAPI = {
    * @param queryParams 查询参数
    * @returns 字典分页结果
    */
-  getDictItemPage(dictCode: string, queryParams: DictItemPageQuery) {
-    return request<any, PageResult<DictItemPageVO[]>>({
-      url: `${DICT_BASE_URL}/${dictCode}/items/page`,
+  getDictItemPage(queryParams: DictItemPageQuery) {
+    return request<PageResult<DictItemPageVO[]>>({
+      url: `/api/app/dictionary-type/dictionary-type-list`,
       method: "get",
       params: queryParams,
     });
@@ -106,7 +116,7 @@ const DictAPI = {
    * 获取字典项列表
    */
   getDictItems(dictCode: string) {
-    return request<any, DictItemOption[]>({
+    return request< DictItemOption[]>({
       url: `${DICT_BASE_URL}/${dictCode}/items`,
       method: "get",
     });
@@ -115,9 +125,9 @@ const DictAPI = {
   /**
    * 新增字典项
    */
-  createDictItem(dictCode: string, data: DictItemForm) {
+  createDictItem( data: DictItemForm) {
     return request({
-      url: `${DICT_BASE_URL}/${dictCode}/items`,
+      url: `/api/app/dictionary-type/dictionary-type-l`,
       method: "post",
       data,
     });
@@ -130,7 +140,7 @@ const DictAPI = {
    * @returns 字典项表单数据
    */
   getDictItemFormData(dictCode: string, id: string) {
-    return request<any, DictItemForm>({
+    return request<DictItemForm>({
       url: `${DICT_BASE_URL}/${dictCode}/items/${id}/form`,
       method: "get",
     });
@@ -139,9 +149,9 @@ const DictAPI = {
   /**
    * 修改字典项
    */
-  updateDictItem(dictCode: string, id: string, data: DictItemForm) {
+  updateDictItem(id: string, data: DictItemForm) {
     return request({
-      url: `${DICT_BASE_URL}/${dictCode}/items/${id}`,
+      url: `/api/app/dictionary-type/${id}/dictionary-type-l`,
       method: "put",
       data,
     });
@@ -150,10 +160,11 @@ const DictAPI = {
   /**
    * 删除字典项
    */
-  deleteDictItems(dictCode: string, ids: string) {
+  deleteDictItems(ids: string) {
     return request({
-      url: `${DICT_BASE_URL}/${dictCode}/items/${ids}`,
-      method: "delete",
+      url: `/api/app/dictionary-type/delete-dictionary-type`,
+      method: "put",
+      params: { ids: ids,},
     });
   },
 };
@@ -162,17 +173,19 @@ export default DictAPI;
 
 /**
  * 字典查询参数
+ * extends PageQuery
  */
 export interface DictPageQuery extends PageQuery {
   /**
    * 关键字(字典名称/编码)
    */
-  keywords?: string;
+  dictionaryDataName?: string;
 
   /**
    * 字典状态（1:启用，0:禁用）
    */
-  status?: number;
+  dictionaryDataState?: number;
+
 }
 
 /**
@@ -186,15 +199,15 @@ export interface DictPageVO {
   /**
    * 字典名称
    */
-  name: string;
+  dictionaryDataName: string;
   /**
    * 字典编码
    */
-  dictCode: string;
+  dictionaryDataType: string;
   /**
    * 字典状态（1:启用，0:禁用）
    */
-  status: number;
+  dictionaryDataState: number;
 }
 
 /**
@@ -204,23 +217,23 @@ export interface DictForm {
   /**
    * 字典ID
    */
-  id?: string;
+  id?: undefined | string;
   /**
    * 字典名称
    */
-  name?: string;
+  dictionaryDataName?: string;
   /**
    * 字典编码
    */
-  dictCode?: string;
+  dictionaryDataType?: string;
   /**
    * 字典状态（1-启用，0-禁用）
    */
-  status?: number;
+  dictionaryDataState?: number;
   /**
    * 备注
    */
-  remark?: string;
+  dictionaryDataDesc?: string;
 }
 
 /**
@@ -228,10 +241,10 @@ export interface DictForm {
  */
 export interface DictItemPageQuery extends PageQuery {
   /** 关键字(字典数据值/标签) */
-  keywords?: string;
+  DictionaryTypeName?: string;
 
   /** 字典编码 */
-  dictCode?: string;
+  datetype: string;
 }
 
 /**
@@ -241,27 +254,27 @@ export interface DictItemPageVO {
   /**
    * 字典ID
    */
-  id: string;
+  id: undefined|string;
   /**
    * 字典编码
    */
-  dictCode: string;
+  dictionaryLabel: string;
   /**
    * 字典数据值
    */
-  value: string;
+  dictionaryValue: string;
   /**
    * 字典数据标签
    */
-  label: string;
+  dictionaryDataType: string;
   /**
    * 状态（1:启用，0:禁用)
    */
-  status: number;
+  dictionaryTypeState: number;
   /**
    * 字典排序
    */
-  sort?: number;
+  dictionarySort?: number;
 }
 
 /**
@@ -271,32 +284,33 @@ export interface DictItemForm {
   /**
    * 字典ID
    */
-  id?: string;
+  id?: undefined|string;
   /**
    * 字典编码
    */
-  dictCode?: string;
+  dictionaryLabel: string;
   /**
    * 字典数据值
    */
-  value?: string;
+  dictionaryValue?: string;
   /**
    * 字典数据标签
    */
-  label?: string;
+  dictionaryDataType?: string;
   /**
    * 状态（1:启用，0:禁用)
    */
-  status?: number;
+  dictionaryTypeState?: number;
   /**
    * 字典排序
    */
-  sort?: number;
+  dictionarySort?: number;
 
   /**
    * 标签类型
    */
-  tagType?: "success" | "warning" | "info" | "primary" | "danger" | "";
+  dictionaryTypeDesc?: "success" | "warning" | "info" | "primary" | "danger" | "";
+ // tagType?: "success" | "warning" | "info" | "primary" | "danger" | "";
 }
 
 /**
@@ -307,4 +321,17 @@ export interface DictItemOption {
   label: string;
   tagType?: "" | "success" | "info" | "warning" | "danger";
   [key: string]: any;
+}
+
+/** 字典列表响应类型 */
+export interface DictListResponse {
+  data: DictPageVO[];
+  totleCount: number;
+  totlePage: number;
+}
+/** 字典项列表响应类型 */
+export interface DictitemListResponse {
+  data: DictItemPageVO[];
+  totleCount: number;
+  totlePage: number;
 }
