@@ -25,84 +25,123 @@ export const constantRoutes: RouteRecordRaw[] = [
 
   {
     path: "/",
-    component: Layout,
     redirect: "/dashboard",
+  },
+  {
+    path: "/dashboard",
+    component: Layout,
+    redirect: "/dashboard/index",
     children: [
       {
-        path: "dashboard",
-        component: () => import("@/views/dashboard/index.vue"),
+        path: "index",
         name: "Dashboard",
-        meta: {
-          title: "仪表盘",
-          icon: "homepage",
-          affix: true,
-          keepAlive: true,
-        },
-      },
-      {
-        path: "401",
-        component: () => import("@/views/error/401.vue"),
-        meta: { hidden: true },
-      },
-      {
-        path: "404",
-        component: () => import("@/views/error/404.vue"),
-        meta: { hidden: true },
+        component: () => import("@/views/dashboard/index.vue"),
+        meta: { title: "仪表盘", icon: "chart", affix: true },
       },
     ],
   },
-
-  // 临时测试路由 - 用于排查空白页面问题
   {
-    path: "/test",
+    path: "/system",
+    component: Layout,
+    redirect: "/system/user",
+    meta: { title: "系统管理", icon: "setting" },
+    children: [
+      {
+        path: "user",
+        name: "User",
+        component: () => import("@/views/system/user/index.vue"),
+        meta: { title: "用户管理", icon: "user", activeMenu: "/system" },
+      },
+      {
+        path: "role",
+        name: "Role",
+        component: () => import("@/views/system/role/index.vue"),
+        meta: { title: "角色管理", icon: "role", activeMenu: "/system" },
+      },
+      {
+        path: "menu",
+        name: "Menu",
+        component: () => import("@/views/system/menu/index.vue"),
+        meta: { title: "权限管理", icon: "menu", activeMenu: "/system" },
+      },
+    ],
+  },
+  {
+    path: "/medical",
+    component: Layout,
+    redirect: "/medical/doctor",
+    meta: { title: "医疗管理", icon: "first-aid-kit" },
+    children: [
+      {
+        path: "doctor",
+        name: "DoctorManagement",
+        component: () => import("@/views/system/user/index.vue"), // 请替换为实际的医生管理页面
+        meta: { title: "医生管理", icon: "user" },
+      },
+      {
+        path: "department",
+        name: "DepartmentManagement",
+        component: () => import("@/views/system/dept/index.vue"), // 请替换为实际的科室管理页面
+        meta: { title: "科室管理", icon: "office-building" },
+      },
+      {
+        path: "online-appointment",
+        name: "OnlineAppointment",
+        component: () => import("@/views/medical/online-appointment/index.vue"), // 新增的线上预约页面
+        meta: { title: "线上预约", icon: "calendar" }, // 假设使用calendar图标，你可以根据需要更改
+      },
+    ],
+  },
+  {
+    path: "/pharmacy",
+    component: Layout,
+    redirect: "/pharmacy/medicine",
+    meta: { title: "药房管理", icon: "medicine-box" },
+    children: [
+      {
+        path: "medicine",
+        name: "MedicineManagement",
+        component: () => import("@/views/system/dict/index.vue"), // 请替换为实际的药品管理页面
+        meta: { title: "药品管理", icon: "medicine-box" },
+      },
+      {
+        path: "prescription",
+        name: "PrescriptionManagement",
+        component: () => import("@/views/system/user/index.vue"), // 请替换为实际的处方管理页面
+        meta: { title: "处方管理", icon: "document" },
+      },
+    ],
+  },
+  {
+    path: "/clinic",
+    component: Layout,
+    redirect: "/clinic/outpatient",
+    meta: { title: "门诊管理", icon: "service" },
+    children: [
+      {
+        path: "outpatient",
+        name: "OutpatientManagement",
+        component: () => import("@/views/system/user/index.vue"), // 请替换为实际的门诊管理页面
+        meta: { title: "门诊管理", icon: "service" },
+      },
+    ],
+  },
+  // 401 and 404 routes (now general, not under '/')
+  {
+    path: "/401",
+    component: () => import("@/views/error/401.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/404",
     component: () => import("@/views/error/404.vue"),
     meta: { hidden: true },
   },
-
-  // 以下路由将从 permission.store.ts 中统一管理，以实现硬编码菜单
-  /*
   {
-    path: "/",
-    name: "/",
-    component: Layout,
-    redirect: "/dashboard",
-    children: [
-      {
-        path: "dashboard",
-        component: () => import("@/views/dashboard/index.vue"),
-        name: "Dashboard",
-        meta: {
-          title: "dashboard",
-          icon: "homepage",
-          affix: true,
-          keepAlive: true,
-        },
-      },
-      {
-        path: "401",
-        component: () => import("@/views/error/401.vue"),
-        meta: { hidden: true },
-      },
-      {
-        path: "404",
-        component: () => import("@/views/error/404.vue"),
-        meta: { hidden: true },
-      },
-      {
-        path: "profile",
-        name: "Profile",
-        component: () => import("@/views/profile/index.vue"),
-        meta: { title: "个人中心", icon: "user", hidden: true },
-      },
-      {
-        path: "my-notice",
-        name: "MyNotice",
-        component: () => import("@/views/system/notice/components/MyNotice.vue"),
-        meta: { title: "我的通知", icon: "user", hidden: true },
-      },
-    ],
+    path: "/:pathMatch(.*)*",
+    redirect: "/404",
+    meta: { hidden: true },
   },
-  */
 ];
 
 /**
