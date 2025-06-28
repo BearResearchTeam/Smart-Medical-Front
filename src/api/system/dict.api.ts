@@ -241,7 +241,7 @@ export interface DictForm {
  */
 export interface DictItemPageQuery extends PageQuery {
   /** 关键字(字典数据值/标签) */
-  DictionaryTypeName?: string;
+  DictionaryLabel?: string;
 
   /** 字典编码 */
   datetype: string;

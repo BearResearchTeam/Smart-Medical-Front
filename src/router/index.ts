@@ -81,7 +81,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       {
         path: "department",
         name: "DepartmentManagement",
-        component: () => import("@/views/system/dept/index.vue"), // 请替换为实际的科室管理页面
+        component: () => import("@/views/system/dept/index.vue"), 
         meta: { title: "科室管理", icon: "office-building" },
       },
       {
@@ -126,6 +126,41 @@ export const constantRoutes: RouteRecordRaw[] = [
       },
     ],
   },
+  {
+    path: "/dict",
+    component: Layout,
+    redirect: "/dict/dictdata",
+    meta: { title: "数据字典管理", icon: "service" },
+    children: [
+      {
+        path: "dictdata",
+        name: "dictdata",
+        component: () => import("@/views/system/dict/index.vue"), 
+        meta: { title: "字典管理", icon: "service" },
+      },
+       {
+        path: "/system/dict-item",
+        name: "dict-item",
+        component: () => import("@/views/system/dict/dict-item.vue"), 
+        meta: { title: "字典项管理", icon: "service" },
+      },
+    ],
+  },
+ {
+    path: "/menu",
+    component: Layout,
+    redirect: "/menu/menuitem",
+    meta: { title: "菜单管理", icon: "service" },
+    children: [
+      {
+        path: "menuitem",
+        name: "menuitem",
+        component: () => import("@/views/system/menu/index.vue"), // 请替换为实际的门诊管理页面
+        meta: { title: "菜单管理", icon: "service" },
+      },
+    ],
+  },
+
   // 401 and 404 routes (now general, not under '/')
   {
     path: "/401",

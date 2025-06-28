@@ -5,10 +5,9 @@
     <div class="search-container">
       <!-- 查询表单 -->
       <el-form ref="queryFormRef" :model="queryParams" :inline="true">
-        <el-form-item label="关键字" prop="keywords">
+        <el-form-item label="关键字" prop="DictionaryLabel">
           <!-- 关键字输入框，回车可触发查询 -->
-          <el-input v-model="queryParams.DictionaryTypeName" placeholder="字典标签/字典值" clearable
-            @keyup.enter="handleQuery" />
+          <el-input v-model="queryParams.DictionaryLabel" placeholder="字典标签/字典值" clearable @keyup.enter="handleQuery" />
         </el-form-item>
         <!-- 搜索和重置按钮 -->
         <el-form-item class="search-buttons">
@@ -146,7 +145,7 @@ const total = ref(0);
 const queryParams = reactive<DictItemPageQuery>({
   pageIndex: 1,
   pageSize: 2,
-  DictionaryTypeName: "",
+  DictionaryLabel: "",
   datetype: dictCode.value || "",
 });
 interface tableDatas {
