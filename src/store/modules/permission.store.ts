@@ -23,15 +23,6 @@ export const usePermissionStore = defineStore("permission", () => {
     return new Promise<RouteRecordRaw[]>((resolve) => {
       console.log("🔧 生成静态菜单...");
 
-     function convertToRoute(menu: MenuTree): RouteRecordRaw {
-  return {
-    path: menu.pagePath,
-    name: menu.permissionCode,
-    component: menu.pagePath === 'Layout' ? Layout : () => import(`@/views${menu.pagePath}.vue`),
-    meta: { title: menu.permissionName, icon: menu.icon },
-    children: menu.children?.map(convertToRoute) || []
-  }
-}
      
       //// 直接使用 constantRoutes，因为所有静态路由已在 router/index.ts 中定义并注册
       routes.value = [...constantRoutes];

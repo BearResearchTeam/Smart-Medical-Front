@@ -13,9 +13,10 @@ const MenuAPI = {
   getRoutes() {
    
 
-    return request< RouteVO[]>({
-      url: `${MENU_BASE_URL}/routes`,
+    return request< MenuTree[]>({
+      url: `https://localhost:44394/api/app/permission/menu-permission-tree-list`,
       method: "get",
+      params: { parentId: null } // 获取顶级菜单
     });
   },
 
