@@ -11,15 +11,20 @@ const MenuAPI = {
    * @returns 路由列表
    */
   getRoutes() {
-   
-
     return request< MenuTree[]>({
-      url: `https://localhost:44394/api/app/permission/menu-permission-tree-list`,
+      url: `/api/app/permission/menu-permission-tree-list`,
       method: "get",
       params: { parentId: null } // 获取顶级菜单
     });
   },
 
+getMenuTree(parentId: string | null = null) {
+  return request<MenuTree[]>({
+    url: `/api/app/permission/menu-permission-tree-list`,
+    method: "get",
+    params: { parentId }
+  });
+},
   /**
    * 获取菜单树形列表
    *
