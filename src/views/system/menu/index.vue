@@ -53,7 +53,7 @@
             </el-table-column>
             <el-table-column label="排序" prop="sort" width="80" align="center" />
             <el-table-column label="路由路径" prop="routePath" min-width="120" />
-            <el-table-column label="组件路径" prop="component" min-width="150" />
+            <!-- <el-table-column label="组件路径" prop="component" min-width="150" /> -->
             <el-table-column label="权限标识" prop="perm" min-width="150" />
             <el-table-column label="可见" width="80" align="center">
               <template #default="{ row }">

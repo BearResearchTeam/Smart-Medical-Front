@@ -106,14 +106,14 @@ getMenuTree(parentId: string | null = null) {
     });
   },
 
-  getMenuTree(parentId: string) {
+  // getMenuTree(parentId: string) {
 
-    return request({
-      url: `/api/app/permission/menu-permission-tree-list`,
-      method: "get",
-      params: { parentId }
-    })
-  },
+  //   return request({
+  //     url: `/api/app/permission/menu-permission-tree-list`,
+  //     method: "get",
+  //     params: { parentId }
+  //   })
+  // },
 };
 
 export default MenuAPI;
