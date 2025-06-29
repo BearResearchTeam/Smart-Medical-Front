@@ -152,7 +152,7 @@ const connectionStatus = ref('');
 async function testBackendConnection() {
   try {
     connectionStatus.value = '正在测试连接...';
-    const baseUrl = 'https://localhost:44394/';
+    const baseUrl = 'https://localhost:44394/index.html'; // 替换为实际的后端地址
     const result = await ApiDetector.testConnection(baseUrl);
     connectionStatus.value = result;
   } catch (error: any) {
@@ -245,7 +245,7 @@ async function handleLoginSubmit() {
     if (localStorage.getItem("useMockData") === "true") {
       ElMessage.warning("已切换到模拟数据模式，请使用admin/123456登录");
     } else {
-    ElMessage.error(error.message || '登录失败，请稍后重试');
+      ElMessage.error(error.message || '登录失败，请稍后重试');
     }
   } finally {
     loading.value = false;
