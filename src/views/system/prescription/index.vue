@@ -1,4 +1,5 @@
 <template>
+  <!-- 处方管理 -->
   <div class="app-container">
     <!-- 搜索区域 -->
     <div class="search-container">
@@ -106,6 +107,7 @@
           <el-button @click="handleCloseDialog">取 消</el-button>
         </div>
       </template>
+      
     </el-dialog>
   </div>
 </template>
@@ -159,18 +161,14 @@ const formData = reactive<DeptForm>({
   "doctorCount": 0,
   "pharmacistCount": 0,
   "nurseCount": 0,
-  "type": "正常"
+  "type": "启用"
 });
 
 const rules = reactive({
-  departmentName: [{ required: true, message: "科室名称不能为空", trigger: "change" }],
-  departmentCategory: [{ required: true, message: "科室大类不能为空", trigger: "blur" }],
-  address: [{ required: true, message: "地址不能为空", trigger: "blur" }],
-  directorName: [{ required: true, message: "负责人名称不能为空", trigger: "blur" }],
-  doctorCount: [{ required: true, message: "医师人数不能为空", trigger: "change" }],
-  pharmacistCount: [{ required: true, message: "药师人数不能为空", trigger: "change" }],
-  nurseCount: [{ required: true, message: "护士人数不能为空", trigger: "change" }],
-  type: [{ required: true, message: "状态不能为空", trigger: "change" }],
+  parentId: [{ required: true, message: "上级部门不能为空", trigger: "change" }],
+  name: [{ required: true, message: "部门名称不能为空", trigger: "blur" }],
+  code: [{ required: true, message: "部门编号不能为空", trigger: "blur" }],
+  sort: [{ required: true, message: "显示排序不能为空", trigger: "blur" }],
 });
 
 // 显示科室列表
@@ -213,9 +211,6 @@ async function handleOpenDialog(dept?: any) {
     dialog.title = "修改科室";
     formData.type = dept.type;
     Object.assign(formData, dept); // 使用 Object.assign 合并对象
-    // DeptAPI.getFormData(deptId).then((data) => {
-    //   Object.assign(formData, data);
-    // });
   } else {
     dialog.title = "新增科室";
     //formData.parentId = parentId || "0";

@@ -11,20 +11,20 @@ const MenuAPI = {
    * @returns 路由列表
    */
   getRoutes() {
-    return request< MenuTree[]>({
+    return request<MenuTree[]>({
       url: `/api/app/permission/menu-permission-tree-list`,
       method: "get",
       params: { parentId: null } // 获取顶级菜单
     });
   },
 
-getMenuTree(parentId: string | null = null) {
-  return request<MenuTree[]>({
-    url: `/api/app/permission/menu-permission-tree-list`,
-    method: "get",
-    params: { parentId }
-  });
-},
+  getMenuTree(parentId: string | null = null) {
+    return request<MenuTree[]>({
+      url: `/api/app/permission/menu-permission-tree-list`,
+      method: "get",
+      params: { parentId }
+    });
+  },
   /**
    * 获取菜单树形列表
    *
@@ -32,8 +32,8 @@ getMenuTree(parentId: string | null = null) {
    * @returns 菜单树形列表
    */
   getList(queryParams: MenuQuery) {
-    return request<MenuVO[]>({
-      url: `${MENU_BASE_URL}`,
+    return request<tables>({
+      url: `/api/app/permission`,
       method: "get",
       params: queryParams,
     });
@@ -45,7 +45,7 @@ getMenuTree(parentId: string | null = null) {
    * @returns 菜单下拉数据源
    */
   getOptions(onlyParent?: boolean) {
-    return request< OptionType[]>({
+    return request<OptionType[]>({
       url: `${MENU_BASE_URL}/options`,
       method: "get",
       params: { onlyParent },
@@ -72,7 +72,7 @@ getMenuTree(parentId: string | null = null) {
    */
   create(data: MenuForm) {
     return request({
-      url: `${MENU_BASE_URL}`,
+      url: `/api/app/permission`,
       method: "post",
       data,
     });
@@ -87,7 +87,7 @@ getMenuTree(parentId: string | null = null) {
    */
   update(id: string, data: MenuForm) {
     return request({
-      url: `${MENU_BASE_URL}/${id}`,
+      url: `/api/app/permission/${id}`,
       method: "put",
       data,
     });
@@ -101,7 +101,7 @@ getMenuTree(parentId: string | null = null) {
    */
   deleteById(id: string) {
     return request({
-      url: `${MENU_BASE_URL}/${id}`,
+      url: `/api/app/permission/${id}`,
       method: "delete",
     });
   },
@@ -123,37 +123,26 @@ import type { MenuTypeEnum } from "@/enums/system/menu.enum";
 /** 菜单查询参数 */
 export interface MenuQuery {
   /** 搜索关键字 */
-  keywords?: string;
+  PermissionName?: string;
+  /** 排序 */
+  Sorting: string;
+  /** 页码 */
+  SkipCount: number;
+  /** 每页数量 */
+  MaxResultCount: number;
 }
 
 /** 菜单视图对象 */
 export interface MenuVO {
+  "id": string,
+  "permissionName": string,
+  "permissionCode": string,
+  "type": 0,
+  "pagePath": string,
+  "parentId": string | null,
+  "icon": string
   /** 子菜单 */
   children?: MenuVO[];
-  /** 组件路径 */
-  component?: string;
-  /** ICON */
-  icon?: string;
-  /** 菜单ID */
-  id?: string;
-  /** 菜单名称 */
-  name?: string;
-  /** 父菜单ID */
-  parentId?: string;
-  /** 按钮权限标识 */
-  perm?: string;
-  /** 跳转路径 */
-  redirect?: string;
-  /** 路由名称 */
-  routeName?: string;
-  /** 路由相对路径 */
-  routePath?: string;
-  /** 菜单排序(数字越小排名越靠前) */
-  sort?: number;
-  /** 菜单 */
-  type?: MenuTypeEnum;
-  /** 菜单是否可见(1:显示;0:隐藏) */
-  visible?: number;
 }
 
 /** 菜单表单对象 */
@@ -163,31 +152,11 @@ export interface MenuForm {
   /** 父菜单ID */
   parentId?: string;
   /** 菜单名称 */
-  name?: string;
-  /** 菜单是否可见(1-是 0-否) */
-  visible: number;
-  /** ICON */
-  icon?: string;
-  /** 排序 */
-  sort?: number;
-  /** 路由名称 */
-  routeName?: string;
-  /** 路由路径 */
-  routePath?: string;
-  /** 组件路径 */
-  component?: string;
-  /** 跳转路由路径 */
-  redirect?: string;
-  /** 菜单 */
-  type?: MenuTypeEnum;
-  /** 权限标识 */
-  perm?: string;
-  /** 【菜单】是否开启页面缓存 */
-  keepAlive?: number;
-  /** 【目录】只有一个子路由是否始终显示 */
-  alwaysShow?: number;
-  /** 参数 */
-  params?: KeyValue[];
+  "permissionName": string,
+  "permissionCode": string,
+  "type": MenuTypeEnum,
+  "pagePath": string,
+  "icon": string
 }
 
 interface KeyValue {
@@ -196,34 +165,34 @@ interface KeyValue {
 }
 
 /** RouteVO，路由对象 */
-export interface RouteVO {
-  /** 子路由列表 */
-  children: RouteVO[];
-  /** 组件路径 */
-  component?: string;
-  /** 路由属性 */
-  meta?: Meta;
-  /** 路由名称 */
-  name?: string;
-  /** 路由路径 */
-  path?: string;
-  /** 跳转链接 */
-  redirect?: string;
-}
+// export interface RouteVO {
+//   /** 子路由列表 */
+//   children: RouteVO[];
+//   /** 组件路径 */
+//   component?: string;
+//   /** 路由属性 */
+//   meta?: Meta;
+//   /** 路由名称 */
+//   name?: string;
+//   /** 路由路径 */
+//   path?: string;
+//   /** 跳转链接 */
+//   redirect?: string;
+// }
 
-/** Meta，路由属性 */
-export interface Meta {
-  /** 【目录】只有一个子路由是否始终显示 */
-  alwaysShow?: boolean;
-  /** 是否隐藏(true-是 false-否) */
-  hidden?: boolean;
-  /** ICON */
-  icon?: string;
-  /** 【菜单】是否开启页面缓存 */
-  keepAlive?: boolean;
-  /** 路由title */
-  title?: string;
-}
+// /** Meta，路由属性 */
+// export interface Meta {
+//   /** 【目录】只有一个子路由是否始终显示 */
+//   alwaysShow?: boolean;
+//   /** 是否隐藏(true-是 false-否) */
+//   hidden?: boolean;
+//   /** ICON */
+//   icon?: string;
+//   /** 【菜单】是否开启页面缓存 */
+//   keepAlive?: boolean;
+//   /** 路由title */
+//   title?: string;
+// }
 
 export interface MenuTree {
   id: string;
@@ -232,5 +201,11 @@ export interface MenuTree {
   type: number;
   pagePath: string;
   parentId: string | null;
+  icon: string;
   children: MenuTree[];
+}
+export interface tables {
+  data: MenuVO[];
+  totleCount: number;
+  totlePage: number;
 }

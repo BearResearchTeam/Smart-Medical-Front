@@ -46,7 +46,7 @@ import { useSettingsStore, useAppStore } from "@/store";
 import { isExternal } from "@/utils/index";
 import MenuItem from "./components/MenuItem.vue";
 import variables from "@/styles/variables.module.scss";
-
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 const props = defineProps({
   data: {
     type: Array as PropType<RouteRecordRaw[]>,

@@ -195,8 +195,9 @@ const tagType: TagProps["type"][] = ["primary", "success", "info", "warning", "d
 // 表单校验规则
 const computedRules = computed(() => {
   const rules: Partial<Record<string, any>> = {
-    value: [{ required: true, message: "请输入字典值", trigger: "blur" }],
-    label: [{ required: true, message: "请输入字典标签", trigger: "blur" }],
+    dictionaryLabel: [{ required: true, message: "请输入字典项标签", trigger: "blur" }],
+    dictionaryValue: [{ required: true, message: "请输入字典项值", trigger: "blur" }],
+    dictionaryTypeDesc: [{ required: true, message: "请选择标签类型", trigger: "change" }],
   };
   return rules;
 });

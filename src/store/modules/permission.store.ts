@@ -1,7 +1,10 @@
 import type { RouteRecordRaw } from "vue-router";
 import { constantRoutes } from "@/router";
 import { store } from "@/store";
-// import router from "@/router"; // 不再需要直接操作 router 实例，所以注释掉
+import type { MenuTree } from "@/api/system/menu.api";
+import MenuAPI from "@/api/system/menu.api";
+ import router from "@/router"; // 不再需要直接操作 router 实例，所以注释掉
+import { log } from "console";
 
 // import MenuAPI, { type RouteVO } from "@/api/system/menu.api"; // 注释掉动态菜单API的导入
 const modules = import.meta.glob("../../views/**/**.vue");
@@ -15,20 +18,53 @@ export const usePermissionStore = defineStore("permission", () => {
   const sideMenuRoutes = ref<RouteRecordRaw[]>([]);
   // 路由是否加载完成
   const routesLoaded = ref(false);
-
+  function menuTreeToRoutes(menuList: MenuTree[]): RouteRecordRaw[] {
+ 
+  console.log("DEBUG: menuTreeToRoutes called with menuList:", menuList);
+  return menuList.map(menu => {
+    const route: RouteRecordRaw = {
+      path: menu.pagePath,
+      name: menu.permissionCode,
+      component: menu.pagePath === "Layout" ? Layout : modules[`../../views${menu.pagePath}.vue`] || modules["../../views/error-page/404.vue"],
+      meta: {
+        title: menu.permissionName,
+        icon: menu.icon,
+        alwaysShow: menu.children && menu.children.length > 0, // 只有有子菜单才设置 alwaysShow
+      },
+      children: menu.children && menu.children.length > 0 ? menuTreeToRoutes(menu.children) : [],
+    };
+    return route;
+  });
+  }
+  
   /**
    * 生成静态路由数据并注册到全局路由
    */
   function generateRoutes() {
-    return new Promise<RouteRecordRaw[]>((resolve) => {
-      console.log("🔧 生成静态菜单...");
+    return new Promise<RouteRecordRaw[]>(async (resolve) => {
+      console.log('所有路由：', router.getRoutes());
+// 1. 获取后端菜单树
+    const res = await MenuAPI.getMenuTree(null);
+    const menuTree: MenuTree[] = res|| null;
 
+    // 2. 转换为前端路由格式
+    const dynamicRoutes = menuTreeToRoutes(menuTree);
+
+    // 3. 注册到 vue-router
+    dynamicRoutes.forEach(route => {
+      if (!router.hasRoute(route.name as string)) {
+        router.addRoute(route);
+      }
+    });
+
+    // 4. 存入 store ...constantRoutes
+    routes.value = [ ...dynamicRoutes];
      
       //// 直接使用 constantRoutes，因为所有静态路由已在 router/index.ts 中定义并注册
-      routes.value = [...constantRoutes];
+     // routes.value = [...constantRoutes];
       routesLoaded.value = true;
 
-      console.log("✅ 静态菜单生成完成");
+      console.log("✅ 动态菜单生成完成11",res);
        resolve(routes.value);
     });
   }
@@ -79,7 +115,7 @@ export const usePermissionStore = defineStore("permission", () => {
  * @param rawRoutes 后端返回的原始路由数据
  * @returns 解析后的路由集合
  */
-// const parseDynamicRoutes = (rawRoutes: RouteVO[]): RouteRecordRaw[] => {
+// const parseDynamicRoutes = (rawRoutes: MenuTree[]): RouteRecordRaw[] => {
 //   const parsedRoutes: RouteRecordRaw[] = [];
 
 //   rawRoutes.forEach((route) => {

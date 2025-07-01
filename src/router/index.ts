@@ -25,18 +25,19 @@ export const constantRoutes: RouteRecordRaw[] = [
 
   {
     path: "/",
-    redirect: "/dashboard",
+    redirect: "/login",
   },
   {
     path: "/dashboard",
     component: Layout,
     redirect: "/dashboard/index",
+    meta: { title: "仪表盘管理", icon: "CollectionTag" },
     children: [
       {
         path: "index",
         name: "Dashboard",
         component: () => import("@/views/dashboard/index.vue"),
-        meta: { title: "仪表盘", icon: "chart", affix: true },
+        meta: { title: "仪表盘", icon: "Aim" },
       },
     ],
   },
@@ -44,7 +45,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/system",
     component: Layout,
     redirect: "/system/user",
-    meta: { title: "系统管理", icon: "setting" },
+    meta: { title: "系统管理", icon: "CollectionTag" },
     children: [
       {
         path: "user",
@@ -56,13 +57,13 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: "role",
         name: "Role",
         component: () => import("@/views/system/role/index.vue"),
-        meta: { title: "角色管理", icon: "role", activeMenu: "/system" },
+        meta: { title: "角色管理", icon: "Present", activeMenu: "/system" },
       },
       {
         path: "menu",
         name: "Menu",
         component: () => import("@/views/system/menu/index.vue"),
-        meta: { title: "权限管理", icon: "menu", activeMenu: "/system" },
+        meta: { title: "权限管理", icon: "calendar", activeMenu: "/system" },
       },
     ],
   },
@@ -70,19 +71,25 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/medical",
     component: Layout,
     redirect: "/medical/doctor",
-    meta: { title: "医疗管理", icon: "first-aid-kit" },
+    meta: { title: "医疗管理", icon: "Edit" },
     children: [
       {
         path: "doctor",
         name: "DoctorManagement",
-        component: () => import("@/views/system/user/index.vue"), // 请替换为实际的医生管理页面
-        meta: { title: "医生管理", icon: "user" },
+        component: () => import("@/views/system/doctor/index.vue"), // 请替换为实际的医生管理页面
+        meta: { title: "医生管理", icon: "Avatar" },
       },
       {
         path: "department",
-        name: "DepartmentManagement",
-        component: () => import("@/views/system/dept/index.vue"), 
-        meta: { title: "科室管理", icon: "office-building" },
+        name: "department",
+        component: () => import("@/views/system/dept/index.vue"),
+        meta: { title: "科室管理", icon: "HomeFilled" },
+      },
+      {
+        path: "patient",
+        name: "patient",
+        component: () => import("@/views/medical/patient/index.vue"),
+        meta: { title: "患者管理", icon: "Headset" },
       },
       {
         path: "online-appointment",
@@ -96,19 +103,19 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/pharmacy",
     component: Layout,
     redirect: "/pharmacy/medicine",
-    meta: { title: "药房管理", icon: "medicine-box" },
+    meta: { title: "药房管理", icon: "TakeawayBox" },
     children: [
       {
         path: "medicine",
         name: "MedicineManagement",
-        component: () => import("@/views/system/dict/index.vue"), // 请替换为实际的药品管理页面
-        meta: { title: "药品管理", icon: "medicine-box" },
+        component: () => import("@/views/system/drug/index.vue"), // 请替换为实际的药品管理页面
+        meta: { title: "药品管理", icon: "Eleme" },
       },
       {
         path: "prescription",
         name: "PrescriptionManagement",
-        component: () => import("@/views/system/user/index.vue"), // 请替换为实际的处方管理页面
-        meta: { title: "处方管理", icon: "document" },
+        component: () => import("@/views/system/prescription/index.vue"), // 请替换为实际的处方管理页面
+        meta: { title: "处方管理", icon: "Tickets" },
       },
     ],
   },
@@ -116,12 +123,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/clinic",
     component: Layout,
     redirect: "/clinic/outpatient",
-    meta: { title: "门诊管理", icon: "service" },
+    meta: { title: "门诊管理", icon: "DocumentAdd" },
     children: [
       {
         path: "outpatient",
         name: "OutpatientManagement",
-        component: () => import("@/views/system/user/index.vue"), // 请替换为实际的门诊管理页面
+        component: () => import("@/views/system/Outpatient/index.vue"), // 请替换为实际的门诊管理页面
         meta: { title: "门诊管理", icon: "service" },
       },
     ],
@@ -130,36 +137,36 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/dict",
     component: Layout,
     redirect: "/dict/dictdata",
-    meta: { title: "数据字典管理", icon: "service" },
+    meta: { title: "数据字典管理", icon: "Grid" },
     children: [
       {
         path: "dictdata",
         name: "dictdata",
-        component: () => import("@/views/system/dict/index.vue"), 
-        meta: { title: "字典管理", icon: "service" },
+        component: () => import("@/views/system/dict/index.vue"),
+        meta: { title: "字典管理", icon: "List" },
       },
-       {
+      {
         path: "/system/dict-item",
         name: "dict-item",
-        component: () => import("@/views/system/dict/dict-item.vue"), 
-        meta: { title: "字典项管理", icon: "service" },
+        component: () => import("@/views/system/dict/dict-item.vue"),
+        meta: { title: "字典项管理", icon: "Folder" },
       },
     ],
   },
- {
-    path: "/menu",
-    component: Layout,
-    redirect: "/menu/menuitem",
-    meta: { title: "菜单管理", icon: "service" },
-    children: [
-      {
-        path: "menuitem",
-        name: "menuitem",
-        component: () => import("@/views/system/menu/index.vue"), // 请替换为实际的门诊管理页面
-        meta: { title: "菜单管理", icon: "service" },
-      },
-    ],
-  },
+  //  {
+  //     path: "/menu",
+  //     component: Layout,
+  //     redirect: "/menu/menuitem",
+  //     meta: { title: "菜单管理", icon: "service" },
+  //     children: [
+  //       {
+  //         path: "menuitem",
+  //         name: "menuitem",
+  //         component: () => import("@/views/system/menu/index.vue"), 
+  //         meta: { title: "菜单管理", icon: "Management" },
+  //       },
+  //     ],
+  //   },
 
   // 401 and 404 routes (now general, not under '/')
   {
