@@ -1,6 +1,6 @@
 import { store } from "@/store";
 import { Auth } from "@/utils/auth";
-import type { LoginFormData } from "@/api/myuser.api";
+import type { LoginFromDataLMZ } from "@/api/myuser.api";
 import { usePermissionStore } from "./permission.store";
 import { Storage } from "@/utils/storage";
 import { AUTH_KEYS } from "@/constants";
@@ -18,7 +18,7 @@ export const useUserStore = defineStore("user", () => {
   });
 
   // 登录
-  async function login(loginData: LoginFormData) {
+  async function login(loginData: LoginFromDataLMZ) {
     try {
       // 检查是否使用模拟数据
       const useMockData = localStorage.getItem("useMockData") === "true";
@@ -43,8 +43,14 @@ export const useUserStore = defineStore("user", () => {
       }
 
       // 调用API进行登录
-      console.log("调用真实API登录");
+      //console.log("调用真实API登录");
       const result = await MyUserAPI.login(loginData);
+      //console.log(result);
+
+      console.log(result);
+
+      //将返回的用户信息存入localStorage
+      localStorage.setItem("userInfo", JSON.stringify(result));
 
       // 保存记住我选项
       Storage.set(AUTH_KEYS.REMEMBER_ME, loginData.rememberMe);

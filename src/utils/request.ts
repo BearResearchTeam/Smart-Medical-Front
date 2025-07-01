@@ -2,7 +2,6 @@ import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from "axio
 import qs from "qs";
 import { useUserStoreHook } from "@/store/modules/user.store";
 import { ResultEnum } from "@/enums/api/result.enum";
-import { Auth } from "@/utils/auth";
 import router from "@/router";
 
 // 定义后端响应的基本结构
@@ -32,37 +31,37 @@ const httpRequest = axios.create({
 // 打印baseURL值，方便调试
 console.log("HTTP请求baseURL:", httpRequest.defaults.baseURL);
 
+
+
+
+
 /**
  * 请求拦截器 - 添加 Authorization 头
  */
 httpRequest.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    console.log(`📤 发送请求: ${config.method} ${config.url}`);
+    console.log(`📤 发送请求: ${config.method?.toUpperCase()} ${config.url}`);
 
-    // 确保登录接口使用POST方法
     if (config.url?.includes("/login") && !config.method) {
-      console.log("强制设置登录请求为POST方法");
       config.method = "post";
     }
 
-    // JWT认证相关代码已注释
-    /*
-    const accessToken = Auth.getAccessToken();
+    // 从 localStorage 获取 token
+    try {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+      const accessToken = userInfo.accessToken;
 
-    // 如果 Authorization 设置为 no-auth，则不携带 Token
-    if (config.headers.Authorization !== "no-auth" && accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    } else {
-      delete config.headers.Authorization;
+      if (accessToken && config.headers?.Authorization !== "no-auth") {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+        console.log("✅ 已添加 accessToken 到请求头");
+      }
+    } catch (e) {
+      console.warn("⚠️ 解析 userInfo 出错", e);
     }
-    */
 
     return config;
   },
-  (error) => {
-    console.error("Request interceptor error:", error);
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 /**
@@ -70,38 +69,37 @@ httpRequest.interceptors.request.use(
  */
 httpRequest.interceptors.response.use(
   (response: AxiosResponse<BackendApiResponse>) => {
-    // 如果响应是二进制流，则直接返回（用于文件下载、Excel 导出等）
+    // 二进制流（如 Excel）直接返回
     if (response.config.responseType === "blob") {
       return response;
     }
-
+    //解构
     const { isSuc, data, msg, code } = response.data;
 
-    // 请求成功：检查 isSuc 和 code
     if (isSuc === true && code.toString() === ResultEnum.SUCCESS) {
       return data;
     }
 
-    // 业务错误
     ElMessage.error(msg || "系统出错");
     return Promise.reject(new Error(msg || "Business Error"));
   },
-  async (error) => {
-    console.error("Response interceptor error:", error);
 
-    // 检查是否应该使用模拟数据
+  async (error) => {
+    console.error("❌ 响应拦截器捕获错误:", error);
+
     const useMockData = localStorage.getItem("useMockData") === "true";
+    const { response, code, message, config } = error;
+    // 保存原始请求配置
+    // 原来的请求
+    const originalRequest = config;
+    // ✅ 模拟数据模式 - 忽略错误
     if (useMockData) {
-      console.log("已启用模拟数据模式，忽略API错误");
-      // 返回一个空对象，让调用方继续执行
+      console.warn("🚧 模拟数据模式开启，跳过 API 错误处理");
       return {};
     }
 
-    const { response, code, message } = error;
-
-    // 网络错误或服务器无响应
+    // ✅ 网络错误处理
     if (!response) {
-      // 提供更详细的错误信息
       let errorMsg = "网络连接失败";
 
       if (code === "ERR_NETWORK") {
@@ -113,21 +111,53 @@ httpRequest.interceptors.response.use(
       }
 
       ElMessage.error(errorMsg);
-      console.error(`[API错误] ${errorMsg}`, error);
-
-      // 建议用户启用模拟数据
-      ElMessage.info('建议启用"使用模拟数据"选项继续开发');
-
+      ElMessage.info("建议启用【模拟数据】模式继续开发");
       return Promise.reject(error);
     }
 
-    // 使用后端返回的msg作为错误信息
-    const { msg } = response.data as BackendApiResponse; // 确保这里使用新的BackendApiResponse类型
+    // ✅ 401 未授权 - 尝试刷新 Token
+    if (response.status === 401 || code === "ERR_BAD_REQUEST") {
+      console.warn("⛔ 未授权或Token失效，尝试刷新...");
 
+      try {
+        const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+        const refreshToken = userInfo.refreshToken;
+
+        if (refreshToken) {
+          // 刷新 Token
+          const refreshRes = await axios.post(httpRequest.defaults.baseURL + "refresh", {
+            refreshToken,
+          });
+          // 刷新成功
+          const newTokenInfo = refreshRes.data;
+          localStorage.setItem("userInfo", JSON.stringify(newTokenInfo));
+
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${newTokenInfo.accessToken}`;
+          }
+          // 返回重试后的请求结果
+          return httpRequest(originalRequest);
+        } else {
+          throw new Error("无有效 refreshToken");
+        }
+      } catch (refreshErr) {
+        console.error("🔁 刷新 token 失败:", refreshErr);
+        ElMessage.warning("登录状态已过期，请重新登录");
+        // 你也可以在这里跳转到登录页
+        window.location.href = "/login";
+        return Promise.reject(new Error("未授权，需重新登录"));
+      }
+    }
+
+    // ✅ 其他 API 错误
+    const { msg } = response.data as BackendApiResponse;
     ElMessage.error(msg || "请求失败");
     return Promise.reject(new Error(msg || "Request Error"));
   }
 );
+
+
+
 
 /**
  * 重试请求的回调函数类型

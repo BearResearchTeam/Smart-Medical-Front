@@ -115,13 +115,13 @@
 <script setup lang="ts">
 import type { FormInstance } from "element-plus";
 import { useI18n } from "vue-i18n";
-import { type LoginFormData } from "@/api/myuser.api";
+import { type LoginFormData, type LoginFromDataLMZ } from "@/api/myuser.api";
 import CommonWrapper from "@/components/CommonWrapper/index.vue";
 import { Auth } from "@/utils/auth";
 import { ElMessage } from "element-plus";
 import { ApiDetector } from "@/utils/apiDetector";
 import { useUserStore } from "@/store/modules/user.store";
-import { useRoute, useRouter } from "vue-router";
+//import { useRoute, useRouter } from "vue-router";
 
 const { t } = useI18n();
 
@@ -159,7 +159,21 @@ async function testBackendConnection() {
     connectionStatus.value = `测试失败: ${error.message || '未知错误'}`;
   }
 }
-
+const LoginFormDataLmz = ref<LoginFromDataLMZ>({
+  username: "admin",
+  password: "123456",
+  captchaKey: "", // 保留字段但不使用
+  captchaCode: "", // 保留字段但不使用
+  rememberMe,
+  userEmail: "",
+  userPhone: "",
+  userSex: true,
+  accessToken: "",
+  accessTokenExpires: "",
+  userNumber: "",
+  refreshToken: "",
+  refreshTokenExpires: "",
+});
 const loginFormData = ref<LoginFormData>({
   username: "admin",
   password: "123456",
@@ -230,7 +244,7 @@ async function handleLoginSubmit() {
 
     // 2. 调用登录API
     const userStore = useUserStore();
-    await userStore.login(loginFormData.value);
+    await userStore.login(LoginFormDataLmz.value);
 
     // 3. 登录成功
     ElMessage.success(t("login.loginSuccess"));

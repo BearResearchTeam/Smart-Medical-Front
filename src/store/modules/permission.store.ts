@@ -93,15 +93,15 @@ export const usePermissionStore = defineStore("permission", () => {
           ],
         },
         {
-          path: "/clinic",
+          path: "/patient",
           component: Layout,
-          redirect: "/clinic/outpatient",
+          redirect: "/patient/index",
           meta: { title: "门诊管理", icon: "ep:service" },
           children: [
             {
-              path: "outpatient",
+              path: "index",
               name: "OutpatientManagement",
-              component: () => import("@/views/system/user/index.vue"),
+              component: () => import("@/views/system/patient/index.vue"),
               meta: { title: "门诊管理", icon: "ep:service" },
             },
           ],
