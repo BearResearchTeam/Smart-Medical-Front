@@ -101,7 +101,8 @@ export const constantRoutes: RouteRecordRaw[] = [
       {
         path: "medicine",
         name: "MedicineManagement",
-        component: () => import("@/views/system/dict/index.vue"), // 请替换为实际的药品管理页面
+        // 确保这里的路径是正确的
+        component: () => import("@/views/pharmacy/medicine.vue"), 
         meta: { title: "药品管理", icon: "medicine-box" },
       },
       {
