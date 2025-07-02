@@ -30,23 +30,23 @@
       <!-- 邮箱 -->
       <el-form-item prop="userEmail">
         <el-input v-model.trim="model.userEmail" placeholder="邮箱">
-          <template #prefix>
+            <template #prefix>
             <el-icon>
               <Message />
             </el-icon>
-          </template>
-        </el-input>
-      </el-form-item>
+            </template>
+          </el-input>
+        </el-form-item>
 
       <!-- 手机号码 -->
       <el-form-item prop="userPhone">
         <el-input v-model.trim="model.userPhone" placeholder="手机号码">
-          <template #prefix>
+            <template #prefix>
             <el-icon>
               <Iphone />
             </el-icon>
-          </template>
-        </el-input>
+            </template>
+          </el-input>
       </el-form-item>
 
       <!-- 性别 -->
@@ -107,7 +107,7 @@ const displayUserSex = computed({
       model.value.userSex = null;
     } else {
       model.value.userSex = value;
-    }
+}
   },
 });
 

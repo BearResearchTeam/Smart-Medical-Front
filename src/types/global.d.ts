@@ -12,7 +12,7 @@ declare global {
    * 分页查询参数
    */
   interface PageQuery {
-    pageNum: number;
+    pageIndex: number;
     pageSize: number;
   }
 
@@ -21,9 +21,10 @@ declare global {
    */
   interface PageResult<T> {
     /** 数据列表 */
-    list: T;
+    data: [];
     /** 总数 */
-    total: number;
+    totleCount: number;
+    totlePage: number;
   }
 
   /**

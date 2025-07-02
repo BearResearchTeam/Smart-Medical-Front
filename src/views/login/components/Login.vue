@@ -16,8 +16,8 @@
 
       <!-- 密码 -->
       <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
-        <el-form-item prop="password">
-          <el-input v-model.trim="loginFormData.password" :placeholder="t('login.password')" type="password"
+        <el-form-item prop="userPwd">
+          <el-input v-model.trim="loginFormData.userPwd" :placeholder="t('login.password')" type="password"
             show-password @keyup="checkCapsLock" @keyup.enter="handleLoginSubmit">
             <template #prefix>
               <el-icon>
@@ -176,7 +176,7 @@ const LoginFormDataLmz = ref<LoginFromDataLMZ>({
 });
 const loginFormData = ref<LoginFormData>({
   username: "admin",
-  password: "123456",
+  userPwd: "123456",
   captchaKey: "", // 保留字段但不使用
   captchaCode: "", // 保留字段但不使用
   rememberMe,
@@ -191,7 +191,7 @@ const loginRules = computed(() => {
         message: t("login.message.username.required"),
       },
     ],
-    password: [
+    userPwd: [
       {
         required: true,
         trigger: "blur",
@@ -259,18 +259,20 @@ async function handleLoginSubmit() {
     if (localStorage.getItem("useMockData") === "true") {
       ElMessage.warning("已切换到模拟数据模式，请使用admin/123456登录");
     } else {
-      ElMessage.error(error.message || '登录失败，请稍后重试');
+    ElMessage.error(error.message || '登录失败，请稍后重试');
     }
   } finally {
     loading.value = false;
   }
 }
 
-// 检查输入大小写
+// 检查大写锁定
 function checkCapsLock(event: KeyboardEvent) {
-  // 防止浏览器密码自动填充时报错
-  if (event instanceof KeyboardEvent) {
-    isCapsLock.value = event.getModifierState("CapsLock");
+  const { key } = event;
+  if (key && key.length === 1 && /[a-zA-Z]/.test(key)) {
+    isCapsLock.value = event.getModifierState && event.getModifierState("CapsLock");
+  } else {
+    isCapsLock.value = false;
   }
 }
 

@@ -11,6 +11,78 @@ const MenuAPI = {
    * @returns 路由列表
    */
   getRoutes() {
+    const useMockData = true; // 强制使用模拟数据
+
+    if (useMockData) {
+      console.log("使用模拟路由数据");
+      return new Promise<RouteVO[]>((resolve) => {
+        setTimeout(() => {
+          resolve([
+            // 示例：仪表盘
+            {
+              path: "/dashboard",
+              component: "Layout", // 表示是布局组件
+              redirect: "/dashboard/analysis",
+              name: "Dashboard",
+              meta: {
+                title: "仪表盘",
+                icon: "dashboard",
+                alwaysShow: false,
+                keepAlive: true,
+              },
+              children: [
+                {
+                  path: "analysis",
+                  component: "dashboard/analysis/index",
+                  name: "Analysis",
+                  meta: { title: "分析页", icon: "chart" },
+                },
+                {
+                  path: "workbench",
+                  component: "dashboard/workbench/index",
+                  name: "Workbench",
+                  meta: { title: "工作台", icon: "monitor" },
+                },
+              ],
+            },
+            // 新增：系统管理
+            {
+              path: "/system",
+              component: "Layout", // 表示是布局组件
+              redirect: "/system/user",
+              name: "System",
+              meta: {
+                title: "系统管理",
+                icon: "setting", // 可以选择一个合适的图标
+                alwaysShow: true,
+              },
+              children: [
+                {
+                  path: "user",
+                  component: "system/user/index",
+                  name: "User",
+                  meta: { title: "用户管理", icon: "user" },
+                },
+                {
+                  path: "role",
+                  component: "system/role/index",
+                  name: "Role",
+                  meta: { title: "角色管理", icon: "role" },
+                },
+                {
+                  path: "menu",
+                  component: "system/menu/index",
+                  name: "Menu",
+                  meta: { title: "权限管理", icon: "menu" },
+                },
+              ],
+            },
+            // 可以继续添加其他顶级菜单
+          ]);
+        }, 300);
+      });
+    }
+
     return request<any, RouteVO[]>({
       url: `${MENU_BASE_URL}/routes`,
       method: "get",

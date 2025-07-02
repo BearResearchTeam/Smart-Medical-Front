@@ -65,7 +65,7 @@ const MyUserAPI = {
    */
   getUserInfo() {
     // 检查是否使用模拟数据
-    const useMockData = !request.defaults.baseURL || localStorage.getItem("useMockData") === "true";
+    const useMockData = false;
 
     if (useMockData) {
       console.log("使用模拟用户信息数据");
@@ -365,7 +365,7 @@ export interface LoginFormData {
   /** 用户名 */
   username: string;
   /** 密码 */
-  password: string;
+  userPwd: string;
   /** 验证码缓存key */
   captchaKey: string;
   /** 验证码 */
