@@ -4,7 +4,7 @@
     <div class="search-container">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true">
         <el-form-item label="关键字" prop="DepartmentName">
-          <el-input v-model="queryParams.DepartmentName" placeholder="科室名称" @keyup.enter="handleQuery" />
+          <el-input v-model="queryParams.EmployeeName" placeholder="科室名称" @keyup.enter="handleQuery" />
         </el-form-item>
 
 
@@ -20,7 +20,7 @@
     <el-card shadow="hover" class="data-table">
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--actions">
-          <el-button type="success" icon="plus" @click="handleOpenDialog(1)">
+          <el-button type="success" icon="plus" @click="handleAddDoctor">
             新增
           </el-button>
           <el-button type="danger" :disabled="selectIds.length === 0" icon="delete" @click="handleDelete()">
@@ -29,21 +29,16 @@
         </div>
       </div>
 
-      <el-table v-loading="loading" :data="tableData.pageData" default-expand-all class="data-table__content"
+      <el-table v-loading="loading" :data="tableData.data" default-expand-all class="data-table__content"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" label="序号" width="130" />
         <el-table-column prop="departmentName" label="科室名称" width="130" />
-        <el-table-column prop="departmentCategory" label="科室大类" width="130" />
-        <el-table-column prop="address" label="地址" width="200" />
-        <el-table-column prop="directorName" label="负责人名称" width="130" />
-        <el-table-column prop="doctorCount" label="医师人数" width="130" />
-        <el-table-column prop="pharmacistCount" label="药师人数" width="130" />
-        <el-table-column prop="nurseCount" label="护士人数" width="130" />
-
-        <el-table-column prop="type" label="状态" width="100">
+        <el-table-column prop="employeeId" label="工号" width="130" />
+        <el-table-column prop="employeeName" label="医生名称" width="200" />
+        <el-table-column prop="isActive" label="状态" width="100">
           <template #default="scope">
-            <el-tag v-if="scope.row.type === '正常'" type="success">正常</el-tag>
+            <el-tag v-if="scope.row.isActive == 'true'" type="success">正常</el-tag>
             <el-tag v-else type="info">禁用</el-tag>
           </template>
         </el-table-column>
@@ -61,41 +56,37 @@
         </el-table-column>
       </el-table>
 
-      <pagination v-if="tableData.totalCount > 0" v-model:total="tableData.totalCount"
-        v-model:page="queryParams.PageIndex" v-model:limit="queryParams.PageSize" @pagination="handleQuery" />
+      <pagination v-if="tableData.totleCount > 0" v-model:total="tableData.totleCount"
+        v-model:page="queryParams.SkipCount" v-model:limit="queryParams.MaxResultCount" @pagination="handleQuery" />
     </el-card>
 
     <el-dialog v-model="dialog.visible" :title="dialog.title" width="600px" @closed="handleCloseDialog">
       <el-form ref="deptFormRef" :model="formData" :rules="rules" label-width="80px">
 
-        <el-form-item label="科室名称" prop="departmentName">
-          <el-input v-model="formData.departmentName" placeholder="请输入科室名称" />
-        </el-form-item>
-        <el-form-item label="科室大类" prop="departmentCategory">
-          <el-input v-model="formData.departmentCategory" placeholder="请输入科室大类" />
-        </el-form-item>
-        <el-form-item label="科室地址" prop="address">
-          <el-input v-model="formData.address" placeholder="请输入科室地址" />
 
+        <el-form-item label="科室名称" prop="departmentId">
+          <el-select v-model="formData.departmentId" placeholder="请选择科室" filterable>
+            <el-option v-for="item in deptOptions" :key="item.id" :label="item.departmentName" :value="item.id" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="医生单号" prop="employeeId">
+          <el-input v-model="formData.employeeId" placeholder="请输入医生单号" />
         </el-form-item>
 
-        <el-form-item label="科室负责人姓名" prop="directorName">
-          <el-input v-model="formData.directorName" placeholder="请输入科室负责人姓名" />
+        <el-form-item label="医生名称" prop="directorName">
+          <el-input v-model="formData.employeeName" placeholder="请输入医生名称" />
         </el-form-item>
-        <el-form-item label="医师人数" prop="doctorCount">
-          <!-- <el-input v-model="formData.doctorCount" placeholder="请输入医师人数" /> -->
-          <el-input-number v-model="formData.doctorCount" controls-position="right" style="width: 100px" :min="0" />
+        <el-form-item label="账号标识" prop="accountId">
+          <el-input v-model="formData.accountId" placeholder="请输入账号标识" />
         </el-form-item>
-        <el-form-item label="药师人数" prop="pharmacistCount">
-          <el-input-number v-model="formData.pharmacistCount" controls-position="right" style="width: 100px" :min="0" />
+        <el-form-item label="机构名称" prop="institutionName">
+          <el-input v-model="formData.institutionName" placeholder="请输入机构名称" />
         </el-form-item>
-        <el-form-item label="护士人数" prop="nurseCount">
-          <el-input-number v-model="formData.nurseCount" controls-position="right" style="width: 100px" :min="0" />
-        </el-form-item>
-        <el-form-item label="科室类型">
-          <el-radio-group v-model="formData.type">
-            <el-radio value="正常">正常</el-radio>
-            <el-radio value="禁用">禁用</el-radio>
+
+        <el-form-item label="医生是否请假">
+          <el-radio-group v-model="formData.isActive">
+            <el-radio :value="true">正常</el-radio>
+            <el-radio :value="false">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -112,21 +103,22 @@
 
 <script setup lang="ts">
 defineOptions({
-  name: "Dept",
+  name: "doctor",
   inheritAttrs: false,
 });
-
-import DeptAPI, { DeptForm, DeptQuery, DeptListResponse } from "@/api/doctordept/doctordept.api";
+import DeptAPI from "@/api/doctor/doctordept.api";
+import DoctorAPI, { DoctorPageVO, DoctorPageQuery, DoctorForm, DoctorListResponse } from "@/api/doctor/doctor.api";
 
 const queryFormRef = ref();
 const deptFormRef = ref();
 
 const loading = ref(false);
 const selectIds = ref<number[]>([]);
-const queryParams = reactive<DeptQuery>({
-  DepartmentName: "",
-  PageIndex: 1,
-  PageSize: 2
+const queryParams = reactive<DoctorPageQuery>({
+  EmployeeName: "",
+  Sorting: 1,
+  SkipCount: 1,
+  MaxResultCount: 3
 });
 
 const dialog = reactive({
@@ -134,32 +126,23 @@ const dialog = reactive({
   visible: false,
 });
 
-// 定义表格数据类型
-interface TableDataType {
-  pageData: DeptForm[];
-  totalCount: number;
-  totalPage: number;
-}
 
 // 将 deptList 替换为 tableData
-const tableData = reactive<TableDataType>({
-  pageData: [],
-  totalCount: 0,
-  totalPage: 0,
+const tableData = reactive<DoctorListResponse>({
+  data: [],
+  totleCount: 0,
+  totlePage: 0,
 });
 
-const formData = reactive<DeptForm>({
-  /** 部门ID(新增不填) */
-  id: undefined, // 确保 id 属性存在且未注释
-  /** 部门名称 */
-  "departmentName": "",
-  "departmentCategory": "",
-  "address": "",
-  "directorName": "",
-  "doctorCount": 0,
-  "pharmacistCount": 0,
-  "nurseCount": 0,
-  "type": "启用"
+const formData = reactive<DoctorForm>({
+  id: "",
+  departmentId: "",
+  isActive: true,
+  accountId: "",
+  employeeId: "",
+  employeeName: "",
+  institutionName: "",
+  departmentName: "",
 });
 
 const rules = reactive({
@@ -169,23 +152,33 @@ const rules = reactive({
   sort: [{ required: true, message: "显示排序不能为空", trigger: "blur" }],
 });
 
+// 1. 定义下拉数据
+const deptOptions: any = ref<{ id: string; departmentName: string }>();
+
+// 2. 获取科室列表
+async function fetchDeptOptions() {
+  const res = await DeptAPI.getdept();
+  deptOptions.value = res;
+  console.log("打印科室列表", res);
+}
+
 // 显示科室列表
 async function handleQuery() {
   loading.value = true;
   const param = {
-    DepartmentName: queryParams.DepartmentName,
-    PageIndex: queryParams.PageIndex,
-    PageSize: queryParams.PageSize,
+    EmployeeName: queryParams.EmployeeName,
+    Sorting: queryParams.Sorting,
+    SkipCount: (queryParams.SkipCount - 1) * queryParams.MaxResultCount,
+    MaxResultCount: queryParams.MaxResultCount,
   }
-  const res1: DeptListResponse = await DeptAPI.getdeptlist(param);
-  tableData.pageData = res1.data || [];
-  tableData.totalCount = res1.totleCount;
-  tableData.totalPage = res1.totlePage;
+  const res = await DoctorAPI.getdoctorPage(param);
+  console.log("打印完整响应对象", res); // 打印完整响应对象
+  tableData.data = res.data || [];
+  tableData.totleCount = res.totleCount;
+  tableData.totlePage = res.totlePage;
   loading.value = false;
-  console.log("打印部门数据数组", res1.data); // 打印部门数据数组
-  console.log("打印完整响应对象", res1); // 打印完整响应对象
+  console.log("打印部门数据数组", res.data); // 打印部门数据数组
 }
-
 // 重置查询
 function handleResetQuery() {
   queryFormRef.value.resetFields();
@@ -207,7 +200,7 @@ async function handleOpenDialog(dept?: any) {
   dialog.visible = true;
   if (dept.id) {
     dialog.title = "修改科室";
-    formData.type = dept.type;
+    //formData. = dept.type;
     Object.assign(formData, dept); // 使用 Object.assign 合并对象
     // DeptAPI.getFormData(deptId).then((data) => {
     //   Object.assign(formData, data);
@@ -223,20 +216,18 @@ async function handleSubmit() {
   deptFormRef.value.validate(async (valid: any) => {
     if (valid) {
       loading.value = true;
-      const deptId = formData.id;
-      console.log("deptId", deptId); // 打印表单数据
-      if (deptId) {
-        await DeptAPI.update(deptId, formData)
+      if (!formData.id) {
+        await DoctorAPI.createdoctor(formData)
           .then(() => {
-            ElMessage.success("修改成功");
+            ElMessage.success("新增成功");
             handleCloseDialog();
             handleQuery();
           })
           .finally(() => (loading.value = false));
       } else {
-        await DeptAPI.create(formData)
+        await DoctorAPI.updatedoctor(formData.id, formData)
           .then(() => {
-            ElMessage.success("新增成功");
+            ElMessage.success("修改成功");
             handleCloseDialog();
             handleQuery();
           })
@@ -263,7 +254,7 @@ function handleDelete(deptId?: number) {
     () => {
       console.log("deptIds:", deptIds); // 打印要删除科室ID
       loading.value = true;
-      DeptAPI.deleteByIds(deptIds)
+      DoctorAPI.deletedoctor(deptIds)
         .then(() => {
           ElMessage.success("删除成功");
           handleResetQuery();
@@ -290,7 +281,23 @@ function handleCloseDialog() {
   resetForm();
 }
 
+function handleAddDoctor() {
+  dialog.title = "新增医生";
+  dialog.visible = true;
+  Object.assign(formData, {
+    id: undefined,
+    departmentId: "",
+    isActive: true,
+    accountId: "",
+    employeeId: "",
+    employeeName: "",
+    institutionName: "",
+    departmentName: ""
+  });
+}
+
 onMounted(() => {
+  fetchDeptOptions();
   handleQuery();
 });
 

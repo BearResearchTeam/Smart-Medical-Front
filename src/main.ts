@@ -4,7 +4,8 @@ import setupPlugins from "@/plugins";
 import { ApiDetector } from "@/utils/apiDetector";
 import { usePermissionStore } from "@/store";
 import { ElMessage } from "element-plus";
-
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 // 暗黑主题样式
 import "element-plus/theme-chalk/dark/css-vars.css";
 import "vxe-table/lib/style.css";
@@ -43,16 +44,17 @@ ApiDetector.testConnection("https://localhost:44394/index.html")
     console.error("🔴 API检测失败", err);
     localStorage.setItem("useMockData", "true");
   });
-
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
 const app = createApp(App);
 // 注册插件
 app.use(setupPlugins);
-
-// // 添加全局错误处理
-// app.config.errorHandler = (err, instance, info) => {
-//   console.error("Vue应用错误:", err);
-//   console.error("错误信息:", info);
-// };
+app.use(pinia)
+// 添加全局错误处理
+app.config.errorHandler = (err, instance, info) => {
+  console.error("Vue应用错误:", err);
+  console.error("错误信息:", info);
+};
 
 // 确保应用挂载后立即加载路由
 app.mount("#app");

@@ -5,6 +5,9 @@ import { usePermissionStore } from "./permission.store";
 import { Storage } from "@/utils/storage";
 import { AUTH_KEYS } from "@/constants";
 import MyUserAPI from "@/api/myuser.api";
+import { defineStore } from 'pinia'
+import { log } from "console";
+
 
 // 用户信息的存储键
 const USER_INFO_KEY = "user_info";
@@ -37,6 +40,8 @@ export const useUserStore = defineStore("user", () => {
     Storage.set(USER_INFO_KEY, userInfo.value);
   };
 
+ 
+const permissions = ref<string[]>([]);
   // 登录
   async function login(loginData: LoginFormData) {
     try {
@@ -79,41 +84,43 @@ export const useUserStore = defineStore("user", () => {
       // 调用API进行登录
       console.log("调用真实API登录");
       const result = await MyUserAPI.login(loginData);
+      console.log("result", result);
+       
+       permissions.value = result.permissions ?? [];
+      // // 保存记住我选项
+      // Storage.set(AUTH_KEYS.REMEMBER_ME, loginData.rememberMe);
+
+      // // 设置登录状态
+      // Auth.setTokens(
+      //   result.accessToken || "mock-token",
+      //   result.refreshToken || "mock-refresh-token",
+      //   loginData.rememberMe,
+      // );
 
       // 打印登录结果，以便调试
       console.log("登录API返回结果:", result);
 
       // 更新用户信息状态
-      userInfo.value = {
-        ...userInfo.value,
-        userId: result.id,
-        username: result.userName,
-        realName: result.userName,
-        userEmail: result.userEmail,
-        userPhone: result.userPhone,
-        userSex: result.userSex === true,
-        // 保持现有的角色和权限
-        roles: userInfo.value.roles,
-        perms: userInfo.value.perms,
-      };
+      // userInfo.value = {
+      //   ...userInfo.value,
+      //   userId: result.id,
+      //   username: result.userName,
+      //   realName: result.userName,
+      //   userEmail: result.userEmail,
+      //   userPhone: result.userPhone,
+      //   userSex: result.userSex === true,
+      //   // 保持现有的角色和权限
+      //   roles: userInfo.value.roles,
+      //   perms: userInfo.value.perms,
+      // };
 
-      // 保存用户信息到本地存储
-      saveUserInfo();
+      // // 保存用户信息到本地存储
+      // saveUserInfo();
 
-      // 检查 accessToken 和 refreshToken 是否存在
-      if (!result.accessToken || !result.refreshToken) {
-        console.warn("警告: 登录响应中缺少 accessToken 或 refreshToken。请检查后端或API接口定义。");
-      }
-
-      // 保存记住我选项
-      Storage.set(AUTH_KEYS.REMEMBER_ME, loginData.rememberMe);
-
-      // 设置登录状态
-      Auth.setTokens(
-        result.accessToken || "mock-token",
-        result.refreshToken || "mock-refresh-token",
-        loginData.rememberMe
-      );
+      // // 检查 accessToken 和 refreshToken 是否存在
+      // if (!result.accessToken || !result.refreshToken) {
+      //   console.warn("警告: 登录响应中缺少 accessToken 或 refreshToken。请检查后端或API接口定义。");
+      // }
 
       return result;
     } catch (error) {
@@ -123,7 +130,10 @@ export const useUserStore = defineStore("user", () => {
       throw error;
     }
   }
-
+  // 检查用户是否具有指定权限
+ function hasPerm(code: string) {
+  return permissions.value.includes(code);
+}
   // 获取用户信息
   async function getUserInfo() {
     try {
@@ -183,11 +193,18 @@ export const useUserStore = defineStore("user", () => {
 
   return {
     userInfo,
+    permissions,
+    hasPerm,
     login,
     getUserInfo,
     logout,
     resetAllState,
   };
+
+}, {
+   persist: {
+    storage: sessionStorage,
+  },
 });
 
 export function useUserStoreHook() {

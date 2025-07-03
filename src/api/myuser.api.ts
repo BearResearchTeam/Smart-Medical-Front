@@ -14,7 +14,7 @@ const MyUserAPI = {
     // 正常API调用
     console.log("执行实际登录API调用", data);
 
-    return request<any, LoginResult>({
+    return request<LoginResult>({
       url: "api/app/user/login",
       method: "post",
       data, // 将登录数据作为请求体发送
@@ -48,7 +48,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, UserInfo>({
+    return request<UserInfo>({
       url: "api/app/account/info",
       method: "get",
     });
@@ -82,7 +82,7 @@ const MyUserAPI = {
    * 获取验证码
    */
   getCaptcha() {
-    return request<any, CaptchaInfo>({
+    return request<CaptchaInfo>({
       url: "api/app/account/captcha",
       method: "get",
     });
@@ -112,7 +112,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, UserListItem>({
+    return request<UserListItem>({
       url: `api/app/user/${id}`,
       method: "get",
     });
@@ -135,7 +135,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
+    return request<any>({
       url: "api/app/user",
       method: "post",
       data,
@@ -160,7 +160,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
+    return request<any>({
       url: `api/app/user/${id}`,
       method: "put",
       data,
@@ -184,7 +184,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
+    return request<any>({
       url: `api/app/user/${ids}`, // 根据后端设计，可能需要调整为 query param 或 request body
       method: "delete",
     });
@@ -287,7 +287,7 @@ const MyUserAPI = {
     }
 
     // 实际API调用 - 根据Swagger接口规范调用后端API
-    return request<any, UserPageResult>({
+    return request<UserPageResult>({
       url: "api/app/user",
       method: "get",
       params,
@@ -311,7 +311,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
+    return request<any>({
       url: "api/app/user",
       method: "post",
       data,
@@ -333,6 +333,9 @@ export interface LoginFormData {
   captchaCode: string;
   /** 记住我 */
   rememberMe: boolean;
+  /** 权限 */
+  //permissions: string[];
+  
 }
 
 /** 登录响应体中的用户数据和令牌信息 */
@@ -351,6 +354,7 @@ export interface LoginResult {
   refreshToken?: string;
   tokenType?: string;
   expiresIn?: number;
+  permissions?: string[];
 }
 
 /** 用户信息 (用于Pinia store) */
