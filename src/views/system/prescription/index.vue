@@ -107,7 +107,7 @@
           <el-button @click="handleCloseDialog">取 消</el-button>
         </div>
       </template>
-      
+
     </el-dialog>
   </div>
 </template>
@@ -118,7 +118,7 @@ defineOptions({
   inheritAttrs: false,
 });
 
-import DeptAPI, { DeptForm, DeptQuery, DeptListResponse } from "@/api/doctordept/doctordept.api";
+import DeptAPI, { DeptForm, DeptQuery, DeptListResponse } from "@/api/doctor/doctordept.api";
 
 const queryFormRef = ref();
 const deptFormRef = ref();

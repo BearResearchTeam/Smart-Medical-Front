@@ -5,6 +5,9 @@ import { usePermissionStore } from "./permission.store";
 import { Storage } from "@/utils/storage";
 import { AUTH_KEYS } from "@/constants";
 import MyUserAPI from "@/api/myuser.api";
+import { defineStore } from 'pinia'
+import { log } from "console";
+
 
 export const useUserStore = defineStore("user", () => {
   // 用户信息
@@ -16,7 +19,8 @@ export const useUserStore = defineStore("user", () => {
     roles: ["admin"],
     perms: ["*:*:*"],
   });
-
+ 
+const permissions = ref<string[]>([]);
   // 登录
   async function login(loginData: LoginFormData) {
     try {
@@ -45,7 +49,9 @@ export const useUserStore = defineStore("user", () => {
       // 调用API进行登录
       console.log("调用真实API登录");
       const result = await MyUserAPI.login(loginData);
-
+      console.log("result", result);
+       
+      permissions.value = result.permissions ?? [];
       // 保存记住我选项
       Storage.set(AUTH_KEYS.REMEMBER_ME, loginData.rememberMe);
 
@@ -53,7 +59,7 @@ export const useUserStore = defineStore("user", () => {
       Auth.setTokens(
         result.accessToken || "mock-token",
         result.refreshToken || "mock-refresh-token",
-        loginData.rememberMe
+        loginData.rememberMe,
       );
 
       return result;
@@ -65,7 +71,10 @@ export const useUserStore = defineStore("user", () => {
       throw error;
     }
   }
-
+  // 检查用户是否具有指定权限
+ function hasPerm(code: string) {
+  return permissions.value.includes(code);
+}
   // 获取用户信息
   async function getUserInfo() {
     try {
@@ -105,11 +114,18 @@ export const useUserStore = defineStore("user", () => {
 
   return {
     userInfo,
+    permissions,
+    hasPerm,
     login,
     getUserInfo,
     logout,
     resetAllState,
   };
+
+}, {
+   persist: {
+    storage: sessionStorage,
+  },
 });
 
 export function useUserStoreHook() {

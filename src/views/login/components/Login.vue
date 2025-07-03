@@ -231,9 +231,9 @@ async function handleLoginSubmit() {
     // 2. 调用登录API
     const userStore = useUserStore();
     await userStore.login(loginFormData.value);
-
+    console.log("userStore.permissions", userStore.permissions);
     // 3. 登录成功
-    ElMessage.success(t("login.loginSuccess"));
+    ElMessage.success(t("login.loginSuccess", ));
 
     // 4. 获取重定向地址或默认跳转到仪表盘
     const redirect = route.query.redirect?.toString() || '/dashboard';

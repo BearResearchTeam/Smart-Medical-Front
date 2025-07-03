@@ -21,7 +21,7 @@
         <el-card shadow="hover" class="data-table">
           <div class="data-table__toolbar">
             <div class="data-table__toolbar--actions">
-              <el-button v-hasPerm="['sys:menu:add']" type="success" icon="plus" @click="handleOpenDialog()">
+              <el-button v-if="userStore.hasPerm('dept:edit')" type="success" icon="plus" @click="handleOpenDialog()">
                 新增
               </el-button>
               <el-button v-hasPerm="'sys:menu:delete'" type="danger" icon="delete" :disabled="selectIds.length === 0"
@@ -86,6 +86,7 @@
           <!-- 分页组件 -->
           <pagination v-if="pageData.totleCount > 0" v-model:total="pageData.totleCount"
             v-model:page="queryParams.SkipCount" v-model:limit="queryParams.MaxResultCount" @pagination="fetchData" />
+          a " />
         </el-card>
       </el-col>
     </el-row>
@@ -98,7 +99,7 @@
           <!-- 使用树形选择器 -->
           <el-tree-select v-model="formData.parentId" :data="menuOptions"
             :props="{ label: 'permissionName', value: 'id', children: 'children' }" check-strictly
-            :render-after-expand="false" style="width: 240px" />
+            :render-after-expand="false" style="width: 240px" disabled />
 
         </el-form-item>
 
@@ -140,13 +141,14 @@
 import { useAppStore } from "@/store/modules/app.store";
 import { DeviceEnum } from "@/enums/settings/device.enum";
 import MenuAPI, { type MenuVO, type MenuForm, type MenuQuery, type tables, type MenuTree } from "@/api/system/menu.api";
-import { ElMessage, ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox, useDisabled } from "element-plus";
 import { useDebounceFn } from "@vueuse/core";
 // import SvgIcon from '@/components/SvgIcon/index.vue';
 import IconSelect from '@/components/IconSelect/index.vue'; // 假设有这个组件
 import { MenuTypeEnum } from "@/enums";
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
-
+import { useUserStore } from "@/store";
+const userStore = useUserStore();
 defineOptions({
   name: "Menu",
   inheritAttrs: false,
@@ -193,7 +195,7 @@ const formData = reactive<MenuForm>({
 });
 
 const rules = reactive({
-  parentId: [{ required: true, message: "父菜单ID不能为空", trigger: "blur" }],
+  //parentId: [{ required: true, message: "父菜单ID不能为空", trigger: "blur" }],
   permissionName: [{ required: true, message: "菜单名称不能为空", trigger: "change" }],
 
 });
@@ -216,7 +218,7 @@ async function fetchData() {
       PermissionName: queryParams.PermissionName,
       Sorting: queryParams.Sorting,
       SkipCount: (queryParams.SkipCount - 1) * queryParams.MaxResultCount, // 计算跳过的记录数
-      MaxResultCount: queryParams.MaxResultCount, // 每页数量
+      MaxResultCount: queryParams.MaxResultCount, // 每页数量 1) * pageSize.value,
     };
     const result = await MenuAPI.getList(params);
     //pageData.data = result.data;

@@ -117,7 +117,7 @@ defineOptions({
   inheritAttrs: false,
 });
 
-import DeptAPI, { DeptForm, DeptQuery, DeptListResponse } from "@/api/doctordept/doctordept.api";
+import DeptAPI, { DeptForm, DeptQuery, DeptListResponse } from "@/api/doctor/doctordept.api";
 
 const queryFormRef = ref();
 const deptFormRef = ref();
