@@ -6,6 +6,9 @@ import { Storage } from "@/utils/storage";
 import { AUTH_KEYS } from "@/constants";
 import MyUserAPI from "@/api/myuser.api";
 
+// 用户信息的存储键
+const USER_INFO_KEY = "user_info";
+
 export const useUserStore = defineStore("user", () => {
   // 用户信息
   const userInfo = ref({
@@ -15,7 +18,24 @@ export const useUserStore = defineStore("user", () => {
     avatar: "",
     roles: ["admin"],
     perms: ["*:*:*"],
+    // 添加更多用户相关字段
+    userEmail: "",
+    userPhone: "",
+    userSex: true,
   });
+
+  // 初始化时从本地存储加载用户信息
+  const initUserInfo = () => {
+    const savedUserInfo = Storage.get(USER_INFO_KEY);
+    if (savedUserInfo) {
+      userInfo.value = { ...userInfo.value, ...savedUserInfo };
+    }
+  };
+
+  // 保存用户信息到本地存储
+  const saveUserInfo = () => {
+    Storage.set(USER_INFO_KEY, userInfo.value);
+  };
 
   // 登录
   async function login(loginData: LoginFormData) {
@@ -33,6 +53,20 @@ export const useUserStore = defineStore("user", () => {
         // 设置登录状态（使用模拟令牌）
         Auth.setTokens("mock-token", "mock-refresh-token", loginData.rememberMe);
 
+        // 模拟数据也更新 userInfo
+        userInfo.value = {
+          ...userInfo.value,
+          userId: "1", // 模拟用户ID
+          username: loginData.username,
+          realName: loginData.username, // 模拟真实姓名
+          userEmail: "mock@example.com",
+          userPhone: "13800138000",
+          userSex: true, // 模拟性别
+        };
+
+        // 保存用户信息到本地存储
+        saveUserInfo();
+
         return {
           id: "1",
           userName: loginData.username,
@@ -45,6 +79,31 @@ export const useUserStore = defineStore("user", () => {
       // 调用API进行登录
       console.log("调用真实API登录");
       const result = await MyUserAPI.login(loginData);
+
+      // 打印登录结果，以便调试
+      console.log("登录API返回结果:", result);
+
+      // 更新用户信息状态
+      userInfo.value = {
+        ...userInfo.value,
+        userId: result.id,
+        username: result.userName,
+        realName: result.userName,
+        userEmail: result.userEmail,
+        userPhone: result.userPhone,
+        userSex: result.userSex === true,
+        // 保持现有的角色和权限
+        roles: userInfo.value.roles,
+        perms: userInfo.value.perms,
+      };
+
+      // 保存用户信息到本地存储
+      saveUserInfo();
+
+      // 检查 accessToken 和 refreshToken 是否存在
+      if (!result.accessToken || !result.refreshToken) {
+        console.warn("警告: 登录响应中缺少 accessToken 或 refreshToken。请检查后端或API接口定义。");
+      }
 
       // 保存记住我选项
       Storage.set(AUTH_KEYS.REMEMBER_ME, loginData.rememberMe);
@@ -59,7 +118,6 @@ export const useUserStore = defineStore("user", () => {
       return result;
     } catch (error) {
       console.error("登录失败:", error);
-      // 如果API调用失败，尝试使用模拟数据
       localStorage.setItem("useMockData", "true");
       console.log("切换到模拟数据模式");
       throw error;
@@ -69,7 +127,10 @@ export const useUserStore = defineStore("user", () => {
   // 获取用户信息
   async function getUserInfo() {
     try {
-      // 返回静态用户信息
+      // 如果本地没有用户信息，尝试从本地存储加载
+      if (!userInfo.value.userId) {
+        initUserInfo();
+      }
       return userInfo.value;
     } catch (error) {
       console.error("获取用户信息失败:", error);
@@ -94,6 +155,20 @@ export const useUserStore = defineStore("user", () => {
     try {
       // 清除token
       Auth.clearAuth();
+      // 清除本地存储的用户信息
+      Storage.remove(USER_INFO_KEY);
+      // 重置用户信息
+      userInfo.value = {
+        userId: "",
+        username: "",
+        realName: "",
+        avatar: "",
+        roles: [],
+        perms: [],
+        userEmail: "",
+        userPhone: "",
+        userSex: true,
+      };
       // 重置路由
       usePermissionStore().resetRouter();
       return true;
@@ -102,6 +177,9 @@ export const useUserStore = defineStore("user", () => {
       throw error;
     }
   }
+
+  // 初始化时加载用户信息
+  initUserInfo();
 
   return {
     userInfo,

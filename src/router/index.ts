@@ -162,13 +162,34 @@ export const constantRoutes: RouteRecordRaw[] = [
   //       {
   //         path: "menuitem",
   //         name: "menuitem",
-  //         component: () => import("@/views/system/menu/index.vue"), 
+  //         component: () => import("@/views/system/menu/index.vue"),
   //         meta: { title: "菜单管理", icon: "Management" },
   //       },
   //     ],
   //   },
 
   // 401 and 404 routes (now general, not under '/')
+  // 401 and 404 routes (now general, not under '')
+  {
+    path: "/patient",
+    component: Layout,
+    redirect: "/patient/list",
+    meta: { title: "患者管理", icon: "user-filled", affix: true },
+    children: [
+      {
+        path: "list",
+        name: "PatientManagement",
+        component: () => import("@/views/patient/index.vue"),
+        meta: { title: "患者管理", icon: "user-filled", affix: true },
+      },
+      {
+        path: "appointments",
+        name: "PatientAppointments",
+        component: () => import("@/views/patient/appointments.vue"),
+        meta: { title: "预约记录", icon: "calendar", hidden: true },
+      },
+    ],
+  },
   {
     path: "/401",
     component: () => import("@/views/error/401.vue"),

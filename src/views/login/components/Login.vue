@@ -1,8 +1,13 @@
 <template>
   <div>
     <h3 text-center m-0 mb-20px>{{ t("login.login") }}</h3>
-    <el-form ref="loginFormRef" :model="loginFormData" :rules="loginRules" size="large"
-      :validate-on-rule-change="false">
+    <el-form
+      ref="loginFormRef"
+      :model="loginFormData"
+      :rules="loginRules"
+      size="large"
+      :validate-on-rule-change="false"
+    >
       <!-- 用户名 -->
       <el-form-item prop="username">
         <el-input v-model.trim="loginFormData.username" :placeholder="t('login.username')">
@@ -17,8 +22,14 @@
       <!-- 密码 -->
       <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
         <el-form-item prop="userPwd">
-          <el-input v-model.trim="loginFormData.userPwd" :placeholder="t('login.password')" type="password"
-            show-password @keyup="checkCapsLock" @keyup.enter="handleLoginSubmit">
+          <el-input
+            v-model.trim="loginFormData.userPwd"
+            :placeholder="t('login.password')"
+            type="password"
+            show-password
+            @keyup="checkCapsLock"
+            @keyup.enter="handleLoginSubmit"
+          >
             <template #prefix>
               <el-icon>
                 <Lock />
@@ -59,17 +70,13 @@
 
       <!-- 开发模式下显示模拟数据开关 -->
       <div class="flex-x-between w-full mt-2">
-        <el-checkbox v-model="useMockData" @change="handleMockDataChange">
-          使用模拟数据
-        </el-checkbox>
+        <el-checkbox v-model="useMockData" @change="handleMockDataChange">使用模拟数据</el-checkbox>
         <el-text type="info" size="small">后端未启动时使用</el-text>
       </div>
 
       <!-- 添加后端连接测试按钮 -->
       <div v-if="showDiagnosticTools" class="flex-x-between w-full mt-2">
-        <el-button size="small" type="info" @click="testBackendConnection">
-          测试后端连接
-        </el-button>
+        <el-button size="small" type="info" @click="testBackendConnection">测试后端连接</el-button>
         <el-text v-if="connectionStatus" type="info" size="small">{{ connectionStatus }}</el-text>
       </div>
 
@@ -146,7 +153,7 @@ const useMockData = ref(localStorage.getItem("useMockData") === "true");
 // 显示诊断工具（开发环境）
 const showDiagnosticTools = ref(import.meta.env.DEV);
 // 连接状态信息
-const connectionStatus = ref('');
+const connectionStatus = ref("");
 
 // 测试后端连接
 async function testBackendConnection() {
@@ -156,7 +163,7 @@ async function testBackendConnection() {
     const result = await ApiDetector.testConnection(baseUrl);
     connectionStatus.value = result;
   } catch (error: any) {
-    connectionStatus.value = `测试失败: ${error.message || '未知错误'}`;
+    connectionStatus.value = `测试失败: ${error.message || "未知错误"}`;
   }
 }
 
@@ -236,7 +243,7 @@ async function handleLoginSubmit() {
     ElMessage.success(t("login.loginSuccess"));
 
     // 4. 获取重定向地址或默认跳转到仪表盘
-    const redirect = route.query.redirect?.toString() || '/dashboard';
+    const redirect = route.query.redirect?.toString() || "/dashboard";
     await router.push(redirect);
   } catch (error: any) {
     console.error("登录失败:", error);
