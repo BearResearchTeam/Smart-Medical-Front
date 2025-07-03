@@ -48,11 +48,11 @@ const app = createApp(App);
 // 注册插件
 app.use(setupPlugins);
 
-// 添加全局错误处理
-app.config.errorHandler = (err, instance, info) => {
-  console.error("Vue应用错误:", err);
-  console.error("错误信息:", info);
-};
+// // 添加全局错误处理
+// app.config.errorHandler = (err, instance, info) => {
+//   console.error("Vue应用错误:", err);
+//   console.error("错误信息:", info);
+// };
 
 // 确保应用挂载后立即加载路由
 app.mount("#app");

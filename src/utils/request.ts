@@ -202,27 +202,15 @@ async function refreshTokenAndRetry(config: InternalAxiosRequestConfig): Promise
  * 重定向到登录页面
  */
 async function redirectToLogin(message: string = "请重新登录"): Promise<void> {
-  try {
-    ElNotification({
-      title: "提示",
-      message,
-      type: "warning",
-      duration: 3000,
-    });
-
-    await useUserStoreHook().resetAllState();
-
-    // 跳转到登录页，保留当前路由用于登录后跳转
-    const currentPath = router.currentRoute.value.fullPath;
-    await router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-  } catch (error) {
-    console.error("Redirect to login error:", error);
-  }
+  const userStore = useUserStoreHook();
+  await userStore.logout();
+  ElMessage.warning(message);
+  await router.push("/login");
 }
 
-// 定义一个通用的请求函数，返回Promise<T>而不是Promise<AxiosResponse<T>>
-const request = <T = any>(config: AxiosRequestConfig): Promise<T> => {
-  return service(config) as Promise<T>; // Assert the return type to Promise<T>
-};
+// 之前这里导出了一个包裹函数，现在直接导出axios实例
+// const request = <T = any>(config: AxiosRequestConfig): Promise<T> => {
+//   return service(config);
+// };
 
-export default request;
+export default service; // 直接导出service实例，它拥有get, post等方法

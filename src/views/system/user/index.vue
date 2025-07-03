@@ -8,19 +8,36 @@
         <div class="search-container">
           <el-form ref="queryFormRef" :model="queryParams" :inline="true" label-width="auto">
             <el-form-item label="关键字" prop="keywords">
-              <el-input v-model="queryParams.keywords" placeholder="用户名/昵称/手机号" clearable @keyup.enter="handleQuery" />
+              <el-input
+                v-model="queryParams.keywords"
+                placeholder="用户名/昵称/手机号"
+                clearable
+                @keyup.enter="handleQuery"
+              />
             </el-form-item>
 
             <el-form-item label="状态" prop="status">
-              <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 100px">
+              <el-select
+                v-model="queryParams.status"
+                placeholder="全部"
+                clearable
+                style="width: 100px"
+              >
                 <el-option label="正常" :value="1" />
                 <el-option label="禁用" :value="0" />
               </el-select>
             </el-form-item>
 
             <el-form-item label="创建时间">
-              <el-date-picker v-model="queryParams.createTime" :editable="false" type="daterange" range-separator="~"
-                start-placeholder="开始时间" end-placeholder="截止时间" value-format="YYYY-MM-DD" />
+              <el-date-picker
+                v-model="queryParams.createTime"
+                :editable="false"
+                type="daterange"
+                range-separator="~"
+                start-placeholder="开始时间"
+                end-placeholder="截止时间"
+                value-format="YYYY-MM-DD"
+              />
             </el-form-item>
 
             <el-form-item class="search-buttons">
@@ -33,16 +50,30 @@
         <el-card shadow="hover" class="data-table">
           <div class="data-table__toolbar">
             <div class="data-table__toolbar--actions">
-              <el-button v-hasPerm="['sys:user:add']" type="success" icon="plus" @click="handleOpenDialog()">
+              <el-button
+                v-hasPerm="['sys:user:add']"
+                type="success"
+                icon="plus"
+                @click="handleOpenDialog()"
+              >
                 新增
               </el-button>
-              <el-button v-hasPerm="'sys:user:delete'" type="danger" icon="delete" :disabled="selectIds.length === 0"
-                @click="handleDelete()">
+              <el-button
+                v-hasPerm="'sys:user:delete'"
+                type="danger"
+                icon="delete"
+                :disabled="selectIds.length === 0"
+                @click="handleDelete()"
+              >
                 删除
               </el-button>
             </div>
             <div class="data-table__toolbar--tools">
-              <el-button v-hasPerm="'sys:user:import'" icon="upload" @click="handleOpenImportDialog">
+              <el-button
+                v-hasPerm="'sys:user:import'"
+                icon="upload"
+                @click="handleOpenImportDialog"
+              >
                 导入
               </el-button>
 
@@ -52,8 +83,15 @@
             </div>
           </div>
 
-          <el-table v-loading="loading" :data="pageData" border stripe highlight-current-row class="data-table__content"
-            @selection-change="handleSelectionChange">
+          <el-table
+            v-loading="loading"
+            :data="pageData"
+            border
+            stripe
+            highlight-current-row
+            class="data-table__content"
+            @selection-change="handleSelectionChange"
+          >
             <el-table-column type="selection" width="50" align="center" />
             <el-table-column label="用户名" prop="userName" />
             <el-table-column label="邮箱" align="center" prop="userEmail" width="160" />
@@ -67,32 +105,63 @@
             </el-table-column>
             <el-table-column label="操作" fixed="right" width="220">
               <template #default="{ row }">
-                <el-button type="primary" link size="small" icon="edit" @click="handleOpenDialog(row)">
+                <el-button
+                  type="primary"
+                  link
+                  size="small"
+                  icon="edit"
+                  @click="handleOpenDialog(row)"
+                >
                   编辑
                 </el-button>
-                <el-button type="danger" link size="small" icon="delete" @click="handleDelete(row.id)">
+                <el-button
+                  type="danger"
+                  link
+                  size="small"
+                  icon="delete"
+                  @click="handleDelete(row.id)"
+                >
                   删除
                 </el-button>
               </template>
             </el-table-column>
           </el-table>
 
-          <pagination v-if="total > 0" v-model:total="total" v-model:page="queryParams.pageNum"
-            v-model:limit="queryParams.pageSize" @pagination="fetchData" />
+          <pagination
+            v-if="total > 0"
+            v-model:total="total"
+            v-model:page="queryParams.pageNum"
+            v-model:limit="queryParams.pageSize"
+            @pagination="fetchData"
+          />
         </el-card>
       </el-col>
     </el-row>
 
     <!-- 用户表单 -->
-    <el-drawer v-model="dialog.visible" :title="dialog.title" append-to-body :size="drawerSize"
-      @close="handleCloseDialog">
+    <el-drawer
+      v-model="dialog.visible"
+      :title="dialog.title"
+      append-to-body
+      :size="drawerSize"
+      @close="handleCloseDialog"
+    >
       <el-form ref="userFormRef" :model="formData" :rules="rules" label-width="80px">
         <el-form-item label="用户名" prop="userName">
-          <el-input v-model="formData.userName" :readonly="!!formData.id" placeholder="请输入用户名" />
+          <el-input
+            v-model="formData.userName"
+            :readonly="!!formData.id"
+            placeholder="请输入用户名"
+          />
         </el-form-item>
 
         <el-form-item v-if="!formData.id" label="用户密码" prop="userPwd">
-          <el-input v-model="formData.userPwd" placeholder="请输入用户密码" type="password" show-password />
+          <el-input
+            v-model="formData.userPwd"
+            placeholder="请输入用户密码"
+            type="password"
+            show-password
+          />
         </el-form-item>
 
         <el-form-item label="邮箱" prop="userEmail">
@@ -129,7 +198,11 @@
 <script setup lang="ts">
 import { useAppStore } from "@/store/modules/app.store";
 import { DeviceEnum } from "@/enums/settings/device.enum";
-import MyUserAPI, { type UserListItem, type UserAddRequest, type UserUpdateRequest } from "@/api/myuser.api";
+import MyUserAPI, {
+  type UserListItem,
+  type UserAddRequest,
+  type UserUpdateRequest,
+} from "@/api/myuser.api";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useDebounceFn } from "@vueuse/core";
 
@@ -166,7 +239,7 @@ const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600
 const formData = reactive<UserAddRequest & UserUpdateRequest & { id?: string }>({
   userName: "",
   userPwd: "", // 初始化密码字段
-  userEmail: "", 
+  userEmail: "",
   userPhone: "",
   userSex: null, // 恢复性别字段
   id: undefined,
@@ -179,7 +252,11 @@ const rules = reactive({
     { min: 6, message: "密码不能少于6位", trigger: "blur" },
   ],
   userEmail: [
-    { pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/, message: "请输入正确的邮箱地址", trigger: "blur" },
+    {
+      pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/,
+      message: "请输入正确的邮箱地址",
+      trigger: "blur",
+    },
   ],
   userPhone: [
     { pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/, message: "请输入正确的手机号码", trigger: "blur" },
@@ -198,10 +275,10 @@ const displayUserSex = computed({
   get() {
     if (formData.userSex === true) return true;
     if (formData.userSex === false) return false;
-    return 'unknown'; // 将null映射为'unknown'字符串
+    return "unknown"; // 将null映射为'unknown'字符串
   },
-  set(value: boolean | 'unknown') {
-    if (value === 'unknown') {
+  set(value: boolean | "unknown") {
+    if (value === "unknown") {
       formData.userSex = null;
     } else {
       formData.userSex = value;
