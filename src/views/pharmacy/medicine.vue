@@ -44,6 +44,7 @@
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--actions">
           <ElButton type="success" icon="Plus" @click="handleOpenDialog()">新增</ElButton>
+
           <ElButton
             type="danger"
             :disabled="selectIds.length === 0"
@@ -52,6 +53,10 @@
           >
             删除
           </ElButton>
+
+          <a href="https://localhost:44394/api/app/drug/export-drug-excel" download>
+            <ElButton>导出药品数据</ElButton>
+          </a>
         </div>
       </div>
 
@@ -82,7 +87,12 @@
         />
         <ElTableColumn prop="expiryDate" label="有效期至" width="160" :formatter="formatDateOnly" />
         <ElTableColumn prop="effect" label="功效" width="120" />
-        <ElTableColumn prop="pharmaceuticalCompanyName" label="公司名称" width="120" />
+        <ElTableColumn prop="category" label="中药/西药" width="120">
+          <template #default="scope">
+            {{ scope.row.category === 1 ? "中药" : "西药" }}
+          </template>
+        </ElTableColumn>
+        <ElTableColumn prop="pharmaceuticalCompanyName" label="供应商名称" width="90" />
         <ElTableColumn label="操作" fixed="right" align="left" width="160">
           <template #default="scope">
             <ElButton
@@ -103,7 +113,6 @@
             >
               删除
             </ElButton>
-            <ElTableColumn prop="pharmaceuticalCompanyName" label="制药公司" width="120" />
           </template>
         </ElTableColumn>
       </ElTable>
@@ -190,7 +199,7 @@
           </ElCol>
           <ElCol :span="12">
             <ElFormItem label="分类" prop="category">
-              <ElInputNumber v-model="formData.category" :min="0" style="width: 100%" />
+              <ElInputNumber v-model="formData.category" :min="1" :max="2" style="width: 100%" />
             </ElFormItem>
           </ElCol>
           <ElCol :span="12">
@@ -219,9 +228,9 @@
             </ElFormItem>
           </ElCol>
 
-          <ElCol :span="12">
+          <ElCol :span="24">
             <ElFormItem label="制药公司" prop="pharmaceuticalCompanyId">
-              <ElSelect v-model="formData.pharmaceuticalCompanyId" placeholder="请选择制药公司">
+              <ElSelect v-model="formData.pharmaceuticalCompanyId" placeholder="请选择公司">
                 <ElOption
                   v-for="item in companyOptions"
                   :key="item.id"
@@ -338,6 +347,8 @@ const rules = reactive({
     { validator: validateExpiryDate, trigger: "change" },
   ],
   category: [{ required: true, message: "分类不能为空", trigger: "blur" }],
+
+  // ...其他字段校验...
   pharmaceuticalCompanyId: [{ required: true, message: "请选择制药公司", trigger: "change" }],
 });
 
@@ -347,23 +358,22 @@ const rules = reactive({
  * @returns 规范化后的药品对象
  */
 function normalizeDrugData(drug: any): DrugListItem {
-  // @ts-ignore
   return {
-    id: drug.id,
-    drugName: drug.drugName || drug["药品名称"],
-    drugType: drug.drugType || drug["药品类型"],
-    feeName: drug.feeName || drug["收费项目"],
-    dosageForm: drug.dosageForm || drug["剂型"],
-    specification: drug.specification || drug["规格"],
-    purchasePrice: drug.purchasePrice || drug["购买价格"],
-    salePrice: drug.salePrice || drug["销售价格"],
-    stock: drug.stock || drug["库存"],
-    stockUpper: drug.stockUpper || drug["库存上限"],
-    stockLower: drug.stockLower || drug["库存下限"],
-    productionDate: drug.productionDate || drug["生产日期"],
-    expiryDate: drug.expiryDate || drug["到期日期"],
-    effect: drug.effect || drug["功效"] || drug["效果"],
-    category: drug.category || drug["分类"],
+    id: drug.id || drug.drugID, // 兼容后端返回的drugID
+    drugName: drug.drugName,
+    drugType: drug.drugType,
+    feeName: drug.feeName,
+    dosageForm: drug.dosageForm,
+    specification: drug.specification,
+    purchasePrice: drug.purchasePrice,
+    salePrice: drug.salePrice,
+    stock: drug.stock,
+    stockUpper: drug.stockUpper,
+    stockLower: drug.stockLower,
+    productionDate: drug.productionDate,
+    expiryDate: drug.expiryDate,
+    effect: drug.effect,
+    category: drug.category,
     pharmaceuticalCompanyId: drug.pharmaceuticalCompanyId,
     pharmaceuticalCompanyName: drug.pharmaceuticalCompanyName,
   };
@@ -429,7 +439,6 @@ function handleOpenDialog(row?: DrugListItem) {
     Object.keys(formData).forEach((key) => (formData[key as keyof DrugListItem] = undefined));
   }
 }
-
 async function handleSubmit() {
   drugFormRef.value?.validate(async (valid: boolean) => {
     if (valid) {
@@ -495,14 +504,17 @@ const companyOptions = ref<{ id: string; name: string }[]>([]);
 
 async function fetchCompanyOptions() {
   try {
-    // 调用你封装的公司列表API
     const res = await PharmaceuticalCompanyAPI.getAll();
-    // 假设返回的是公司数组 [{ id, name }]
-    companyOptions.value = res;
+
+    // 假如后端返回 { data: [{ companyId, companyName }, ...] }
+
+    companyOptions.value = (res.data || res).map((item: any) => ({
+      id: item.id, // 用 companyId 作为 value
+      name: item.companyName, // 用 companyName 作为 label
+    }));
+    console.log("公司下拉数据：", companyOptions.value);
   } catch {
     companyOptions.value = [];
-    // 可选：错误提示
-    // ElMessage.error("获取公司列表失败");
   }
 }
 
@@ -513,6 +525,7 @@ function formatDateOnly(row: any, column: any, cellValue: string) {
 
 onMounted(() => {
   fetchCompanyOptions();
+
   handleQuery();
 });
 </script>
