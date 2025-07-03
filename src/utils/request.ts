@@ -1,8 +1,4 @@
-import axios, {
-  type InternalAxiosRequestConfig,
-  type AxiosResponse,
-  type AxiosRequestConfig,
-} from "axios";
+import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from "axios";
 import qs from "qs";
 import { useUserStoreHook } from "@/store/modules/user.store";
 import { ResultEnum } from "@/enums/api/result.enum";
@@ -24,7 +20,7 @@ interface BackendApiResponse<T = any> {
  * - 如果使用Docker或其他环境，请相应调整
  * - 如果后端服务未启动，可以将baseURL设置为空字符串，前端将使用模拟数据
  */
-const service = axios.create({
+const httpRequest = axios.create({
   baseURL: "https://localhost:44394/",
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
@@ -33,7 +29,7 @@ const service = axios.create({
 });
 
 // 打印baseURL值，方便调试
-console.log("HTTP请求baseURL:", service.defaults.baseURL);
+console.log("HTTP请求baseURL:", httpRequest.defaults.baseURL);
 
 
 
@@ -42,9 +38,9 @@ console.log("HTTP请求baseURL:", service.defaults.baseURL);
 /**
  * 请求拦截器 - 添加 Authorization 头
  */
-service.interceptors.request.use(
+httpRequest.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    console.log(`📤 发送请求: ${config.method?.toUpperCase()} ${config.url}`);
+    //console.log(`📤 发送请求: ${config.method?.toUpperCase()} ${config.url}`);
 
     if (config.url?.includes("/login") && !config.method) {
       config.method = "post";
@@ -71,7 +67,7 @@ service.interceptors.request.use(
 /**
  * 响应拦截器 - 统一处理响应和错误
  */
-service.interceptors.response.use(
+httpRequest.interceptors.response.use(
   (response: AxiosResponse<BackendApiResponse>) => {
     // 二进制流（如 Excel）直接返回
     if (response.config.responseType === "blob") {
@@ -89,7 +85,7 @@ service.interceptors.response.use(
   },
 
   async (error) => {
-    console.error("❌ 响应拦截器捕获错误:", error);
+    //console.error("❌ 响应拦截器捕获错误:", error);
 
     const useMockData = localStorage.getItem("useMockData") === "true";
     const { response, code, message, config } = error;
@@ -121,8 +117,8 @@ service.interceptors.response.use(
 
     // ✅ 401 未授权 - 尝试刷新 Token
     if (response.status === 401 || code === "ERR_BAD_REQUEST") {
-      console.warn("⛔ 未授权或Token失效，尝试刷新...");
-
+      //console.warn("⛔ 未授权或Token失效，尝试刷新...");
+      //debugger;
       try {
         const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
         const refreshToken = userInfo.refreshToken;
@@ -145,7 +141,7 @@ service.interceptors.response.use(
           throw new Error("无有效 refreshToken");
         }
       } catch (refreshErr) {
-        console.error("🔁 刷新 token 失败:", refreshErr);
+        //console.error("🔁 刷新 token 失败:", refreshErr);
         ElMessage.warning("登录状态已过期，请重新登录");
         // 你也可以在这里跳转到登录页
         window.location.href = "/login";
@@ -186,7 +182,7 @@ async function refreshTokenAndRetry(config: InternalAxiosRequestConfig): Promise
       if (newToken && config.headers) {
         config.headers.Authorization = `Bearer ${newToken}`;
       }
-      service(config).then(resolve).catch(reject);
+      httpRequest(config).then(resolve).catch(reject);
     };
 
     // 将请求加入等待队列
@@ -250,9 +246,4 @@ async function redirectToLogin(message: string = "请重新登录"): Promise<voi
   }
 }
 
-// 定义一个通用的请求函数，返回Promise<T>而不是Promise<AxiosResponse<T>>
-const request = <T = any>(config: AxiosRequestConfig): Promise<T> => {
-  return service(config) as Promise<T>; // Assert the return type to Promise<T>
-};
-
-export default request;
+export default httpRequest;

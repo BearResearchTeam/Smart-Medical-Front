@@ -165,6 +165,7 @@ export default [
       ],
       "vue/component-name-in-template-casing": ["error", "PascalCase"],
       "@typescript-eslint/no-explicit-any": "off",
+      "vue/first-attribute-linebreak": "off",
     },
   },
 

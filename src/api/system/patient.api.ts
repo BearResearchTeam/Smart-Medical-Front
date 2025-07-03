@@ -29,6 +29,18 @@ const UserAPI = {
       method: "get",
     });
   },
+
+  /**
+   * 右侧病历信息卡片
+   * @param query 
+   * @returns 
+   */
+  Getpatientsick(query: string) {
+    return request<any, patientsickFormData>({
+      url: `${USER_BASE_URL}patient-sick-info/${query}`,
+      method: "get",
+    })
+  }
 };
 
 
@@ -45,6 +57,31 @@ export interface ApiResponse<T> {
   code: number;
   msg: string;
 }
+
+/** 患者所有病历信息 */
+export interface patientsickFormData {
+  temperature: string;
+  pulse: string;
+  breath: string;
+  bloodPressure: string,
+  chiefComplaint: string,
+  drugIds: null,
+  prescriptionTemplateNumber: string;
+  medicalAdvice: string,
+  drugItems: [
+    {
+      drugId: string;
+      dosage: string;
+      dosageUnit: string,
+      usage: string,
+      frequency: string,
+      number: string;
+      numberUnit: string,
+      medicalAdvice: string,
+    },
+  ]
+}
+
 
 /** 患者列表查询参数接口 */
 export interface PatientListQuery {
@@ -79,9 +116,9 @@ export interface FormData {
   patientName: string;
   gender: string;
   age: string;
-  contact: string;
+  contactPhone: string;
   idNumber: string;
-  treatmentType: string;
-  infectiousDisease: string;
-  onsetTime: string;
+  visitType: string;
+  isInfectiousDisease: boolean;
+  diseaseOnsetTime: string;
 }

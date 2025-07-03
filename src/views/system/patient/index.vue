@@ -54,7 +54,8 @@
 						</template>
 						<div class="list-wrapper">
 							<template v-if="completedPatients.length > 0">
-								<div v-for="(patient, index) in completedPatients" :key="patient.id" class="patient-list-item">
+								<div v-for="(patient, index) in completedPatients" :key="patient.id" class="patient-list-item"
+									@click="handlePatientClick(patient.id)">
 									<div class="patient-info">
 										<span class="index">{{ (currentPage - 1) * pageSize + index + 1 }}.</span>
 										<span class="name">{{ patient.patientName }}</span>
@@ -89,44 +90,50 @@
 					<el-col :span="4"><span class="label">患者姓名：</span>{{ formData.patientName }}</el-col>
 					<el-col :span="3"><span class="label">性别：</span>{{ formData.gender }}</el-col>
 					<el-col :span="4"><span class="label">年龄：</span>{{ formData.age }}</el-col>
-					<el-col :span="5"><span class="label">联系方式：</span>{{ formData.contact }}</el-col>
+					<el-col :span="5"><span class="label">联系方式：</span>{{ formData.contactPhone }}</el-col>
 					<el-col :span="5"><span class="label">身份证号：</span>{{ formData.idNumber }}</el-col>
 				</el-row>
 				<el-row :gutter="24" class="base-info-row" style="margin-top: 18px;">
 					<el-col :span="6">
 						<span class="label">治疗类型：</span>
-						<el-radio-group v-model="formData.treatmentType" disabled>
-							<el-radio label="初诊">初诊</el-radio>
-							<el-radio label="复诊">复诊</el-radio>
+						<el-radio-group v-model="formData.visitType" disabled>
+							<el-radio label="初诊" value="初诊">初诊</el-radio>
+							<el-radio label="复诊" value="复诊">复诊</el-radio>
 						</el-radio-group>
 					</el-col>
 					<el-col :span="6">
 						<span class="label">传染病：</span>
-						<el-radio-group v-model="formData.infectiousDisease" disabled>
-							<el-radio label="否">否</el-radio>
-							<el-radio label="是">是</el-radio>
+						<el-radio-group v-model="formData.isInfectiousDisease" disabled>
+							<el-radio :label=false>否</el-radio>
+							<el-radio :label=true>是</el-radio>
 						</el-radio-group>
 					</el-col>
 					<el-col :span="7">
 						<span class="label">发病时间：</span>
-						<el-date-picker v-model="formData.onsetTime" type="datetime" placeholder="选择日期时间" disabled
-							style="width: 220px" />
+						<el-date-picker v-model="formData.diseaseOnsetTime" type="datetime" disabled style="width: 220px" />
 					</el-col>
 					<el-col :span="5" style="text-align: right;">
 						<el-button type="primary" @click="viewRecords">就诊记录</el-button>
 					</el-col>
 				</el-row>
 			</el-card>
-
 			<!-- 右侧中间病历信息卡片 -->
 			<el-card class="middle-info-card">
 				<template #header>
 					<span class="base-info-title">病历</span>
 				</template>
-
+				<el-table :data="sickFormData">
+					<el-table-column fixed prop="temperature" label="体温" />
+					<el-table-column prop="pulse" label="脉搏" />
+					<el-table-column prop="breath" label="呼吸" />
+					<el-table-column prop="bloodPressure" label="血压" />
+					<el-table-column prop="chiefComplaint" label="主诉" />
+					<el-table-column prop="prescriptionTemplateNumber" label=" 处方模板号" />
+					<el-table-column fixed="medicalAdvice" label="medicalAdvice">
+					</el-table-column>
+				</el-table>
 			</el-card>
-
-			<!-- 右侧处方病历信息卡片 -->
+			<!-- 右侧处方信息卡片 -->
 			<el-card class="middle-info-card">
 				<template #header>
 					<span class="base-info-title">处方</span>
@@ -136,13 +143,17 @@
 		</div>
 
 	</div>
+
+
+
+
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
 import { Search, Plus, ArrowRight } from '@element-plus/icons-vue';
 import UserAPI, {
-	IPatient, PatientListQuery, FormData,
+	IPatient, PatientListQuery, FormData, patientsickFormData
 } from '@/api/system/patient.api';
 import { ElMessage } from 'element-plus';
 
@@ -181,15 +192,52 @@ const formatDateTime = (dateTimeStr: string): string => {
 
 // 右侧基础信息卡片数据
 const formData = ref<FormData>({
-	patientName: '王芳',
-	gender: '女',
-	age: '5岁2月',
-	contact: '',
+	patientName: '',
+	gender: '',
+	age: '',
+	contactPhone: '',
 	idNumber: '',
-	treatmentType: '初诊',
-	infectiousDisease: '否',
-	onsetTime: ''
+	visitType: '',
+	isInfectiousDisease: false,
+	diseaseOnsetTime: ''
 });
+
+const sickFormData: any = ref<patientsickFormData[]>([{
+	temperature: '',
+	pulse: '',
+	breath: '',
+	bloodPressure: '',
+	chiefComplaint: '',
+	drugIds: null,
+	prescriptionTemplateNumber: '',
+	medicalAdvice: '',
+	drugItems: [
+		{
+			drugId: '',
+			dosage: '',
+			dosageUnit: '',
+			usage: '',
+			frequency: '',
+			number: '',
+			numberUnit: '',
+			medicalAdvice: '',
+		},
+	]
+}])
+
+//handlePatientClick 重复清空 formData
+const resetFormData = () => {
+	formData.value = {
+		patientName: '',
+		gender: '',
+		age: '',
+		contactPhone: '',
+		idNumber: '',
+		visitType: '',
+		isInfectiousDisease: false,
+		diseaseOnsetTime: '',
+	};
+};
 
 // 获取患者列表
 const fetchPatientList = async (status: 'pending' | 'completed') => {
@@ -245,10 +293,16 @@ const handlePageChange = (newPage: number) => {
 
 // 患者列表项点击事件
 const handlePatientClick = async (id: string) => {
+	resetFormData();
 	const way = await UserAPI.getPatientIDWay(id);
 	formData.value = way;
-	console.log(way);
+
+	// 获取患者的病情信息
+	const patientSick = await UserAPI.Getpatientsick(id);
+	sickFormData.value = patientSick
+	console.log(patientSick);
 };
+
 
 // 就诊记录按钮事件
 const viewRecords = () => {
@@ -452,6 +506,7 @@ onMounted(() => {
 }
 
 .middle-info-card {
+	width: 120vh;
 	background: #fff;
 	border-radius: 12px;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);

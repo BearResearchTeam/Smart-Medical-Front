@@ -113,15 +113,15 @@ export const constantRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/clinic",
+    path: "/system",
     component: Layout,
-    redirect: "/clinic/outpatient",
+    redirect: "/system/patient",
     meta: { title: "门诊管理", icon: "service" },
     children: [
       {
-        path: "outpatient",
+        path: "index",
         name: "OutpatientManagement",
-        component: () => import("@/views/system/user/index.vue"), // 请替换为实际的门诊管理页面
+        component: () => import("@/views/system/patient/index.vue"), // 请替换为实际的门诊管理页面
         meta: { title: "门诊管理", icon: "service" },
       },
     ],

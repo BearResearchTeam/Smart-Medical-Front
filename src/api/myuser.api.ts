@@ -1,5 +1,5 @@
 import request from "@/utils/request";
-//import axios from "axios";
+import axios from "axios";
 
 /**
  * 用户API接口
@@ -11,33 +11,35 @@ const MyUserAPI = {
    * @param data 登录表单数据
    */
   login(data: LoginFromDataLMZ) {
+    const cases = request;
+    debugger;
     // 检查是否应该使用模拟数据（当baseURL为空或明确指定使用模拟数据时）
-    const useMockData = !request.defaults.baseURL || localStorage.getItem("useMockData") === "true";
+    // const useMockData = !request.defaults.baseURL || localStorage.getItem("useMockData") === "true";
 
-    if (useMockData) {
-      console.log("使用模拟登录数据");
-      return new Promise<LoginResult>((resolve, reject) => {
-        setTimeout(() => {
-          // 模拟登录成功
-          if (data.username === "admin" && data.password === "123456") {
-            resolve({
-              id: "1",
-              userName: data.username,
-              userEmail: "admin@example.com",
-              userPhone: "13800138000",
-              userSex: true,
-              nickname: "管理员",
-              avatar: "",
-              roles: ["admin"],
-              perms: ["*:*:*"],
-            });
-          } else {
-            // 模拟登录失败
-            reject(new Error("用户名或密码错误"));
-          }
-        }, 500); // 模拟网络延迟
-      });
-    }
+    // if (useMockData) {
+    //   console.log("使用模拟登录数据");
+    //   return new Promise<LoginResult>((resolve, reject) => {
+    //     setTimeout(() => {
+    //       // 模拟登录成功
+    //       if (data.username === "admin" && data.password === "123456") {
+    //         resolve({
+    //           id: "1",
+    //           userName: data.username,
+    //           userEmail: "admin@example.com",
+    //           userPhone: "13800138000",
+    //           userSex: true,
+    //           nickname: "管理员",
+    //           avatar: "",
+    //           roles: ["admin"],
+    //           perms: ["*:*:*"],
+    //         });
+    //       } else {
+    //         // 模拟登录失败
+    //         reject(new Error("用户名或密码错误"));
+    //       }
+    //     }, 500); // 模拟网络延迟
+    //   });
+    // }
 
     // 正常API调用
     console.log("执行实际登录API调用", data);
@@ -48,15 +50,14 @@ const MyUserAPI = {
       userPwd: data.password,
       rememberMe: data.rememberMe,
     };
+
     //api/app/user/login
     //api/app/user-login-async/login
-    return request<any, LoginResult>({
+    return request<LoginResult>({
       url: "api/app/user-login-async/login",
       method: "post",
       data: loginRequestData, // 将登录数据作为请求体发送
-      headers: {
-        "Content-Type": "application/json",
-      },
+
     });
   },
 
@@ -65,29 +66,29 @@ const MyUserAPI = {
    */
   getUserInfo() {
     // 检查是否使用模拟数据
-    const useMockData = false;
+    const useMockData = !request.defaults.baseURL || localStorage.getItem("useMockData") === "true";
 
-    if (useMockData) {
-      console.log("使用模拟用户信息数据");
-      return new Promise<UserInfo>((resolve) => {
-        setTimeout(() => {
-          const username = localStorage.getItem("loginUser") || "admin";
-          resolve({
-            userId: "1",
-            username,
-            nickname: username === "admin" ? "管理员" : username,
-            avatar: "",
-            roles: ["admin"],
-            perms: ["*:*:*"],
-            userEmail: "admin@example.com",
-            userPhone: "13800138000",
-            userSex: true,
-          });
-        }, 300);
-      });
-    }
+    // if (useMockData) {
+    //   console.log("使用模拟用户信息数据");
+    //   return new Promise<UserInfo>((resolve) => {
+    //     setTimeout(() => {
+    //       const username = localStorage.getItem("loginUser") || "admin";
+    //       resolve({
+    //         userId: "1",
+    //         username,
+    //         nickname: username === "admin" ? "管理员" : username,
+    //         avatar: "",
+    //         roles: ["admin"],
+    //         perms: ["*:*:*"],
+    //         userEmail: "admin@example.com",
+    //         userPhone: "13800138000",
+    //         userSex: true,
+    //       });
+    //     }, 300);
+    //   });
+    // }
 
-    return request<any, UserInfo>({
+    return request<UserInfo>({
       url: "api/app/account/info",
       method: "get",
     });
@@ -365,7 +366,7 @@ export interface LoginFormData {
   /** 用户名 */
   username: string;
   /** 密码 */
-  userPwd: string;
+  password: string;
   /** 验证码缓存key */
   captchaKey: string;
   /** 验证码 */
