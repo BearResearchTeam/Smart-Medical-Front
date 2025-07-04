@@ -4,7 +4,7 @@
     <div class="search-container">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true">
         <el-form-item label="关键字" prop="DepartmentName">
-          <el-input v-model="queryParams.EmployeeName" placeholder="科室名称" @keyup.enter="handleQuery" />
+          <el-input v-model="queryParams.EmployeeName" placeholder="医生名称" @keyup.enter="handleQuery" />
         </el-form-item>
 
 
@@ -38,7 +38,7 @@
         <el-table-column prop="employeeName" label="医生名称" width="200" />
         <el-table-column prop="isActive" label="状态" width="100">
           <template #default="scope">
-            <el-tag v-if="scope.row.isActive == 'true'" type="success">正常</el-tag>
+            <el-tag v-if="scope.row.isActive === true" type="success">正常</el-tag>
             <el-tag v-else type="info">禁用</el-tag>
           </template>
         </el-table-column>
@@ -46,7 +46,7 @@
 
         <el-table-column label="操作" fixed="right" align="left" width="200">
           <template #default="scope">
-            <el-button type="primary" link size="small" icon="edit" @click.stop="handleOpenDialog(scope.row)">
+            <el-button type="primary"  link size="small" icon="edit" @click.stop="handleOpenDialog(scope.row)">
               编辑
             </el-button>
             <el-button type="danger" link size="small" icon="delete" @click.stop="handleDelete(scope.row.id)">
@@ -73,7 +73,7 @@
           <el-input v-model="formData.employeeId" placeholder="请输入医生单号" />
         </el-form-item>
 
-        <el-form-item label="医生名称" prop="directorName">
+        <el-form-item label="医生名称" prop="employeeName">
           <el-input v-model="formData.employeeName" placeholder="请输入医生名称" />
         </el-form-item>
         <el-form-item label="账号标识" prop="accountId">
@@ -146,9 +146,9 @@ const formData = reactive<DoctorForm>({
 });
 
 const rules = reactive({
-  parentId: [{ required: true, message: "上级部门不能为空", trigger: "change" }],
-  name: [{ required: true, message: "部门名称不能为空", trigger: "blur" }],
-  code: [{ required: true, message: "部门编号不能为空", trigger: "blur" }],
+  departmentId: [{ required: true, message: "科室名称不能为空", trigger: "change" }],
+  employeeId: [{ required: true, message: "部门名称不能为空", trigger: "blur" }],
+  employeeName: [{ required: true, message: "部门编号不能为空", trigger: "blur" }],
   sort: [{ required: true, message: "显示排序不能为空", trigger: "blur" }],
 });
 
@@ -162,7 +162,7 @@ async function fetchDeptOptions() {
   console.log("打印科室列表", res);
 }
 
-// 显示科室列表
+// 显示医生列表
 async function handleQuery() {
   loading.value = true;
   const param = {
@@ -172,7 +172,7 @@ async function handleQuery() {
     MaxResultCount: queryParams.MaxResultCount,
   }
   const res = await DoctorAPI.getdoctorPage(param);
-  console.log("打印完整响应对象", res); // 打印完整响应对象
+  console.log("打印完整显示医生列表响应对象", res); // 打印完整响应对象
   tableData.data = res.data || [];
   tableData.totleCount = res.totleCount;
   tableData.totlePage = res.totlePage;
@@ -191,27 +191,23 @@ function handleSelectionChange(selection: any) {
 }
 
 /**
- * 打开科室弹窗
- * @param deptId 科室ID
+ * 打开医生弹窗
+ * @param deptId 医生ID
  */
 async function handleOpenDialog(dept?: any) {
 
   console.log("打开科室弹窗，deptId:", dept.id); // 打印传入的 deptId
   dialog.visible = true;
   if (dept.id) {
-    dialog.title = "修改科室";
-    //formData. = dept.type;
+    dialog.title = "修改医生";
     Object.assign(formData, dept); // 使用 Object.assign 合并对象
-    // DeptAPI.getFormData(deptId).then((data) => {
-    //   Object.assign(formData, data);
-    // });
   } else {
-    dialog.title = "新增科室";
+    dialog.title = "新增医生";
     //formData.parentId = parentId || "0";
   }
 }
 
-// 提交科室表单
+// 提交医生表单
 async function handleSubmit() {
   deptFormRef.value.validate(async (valid: any) => {
     if (valid) {
@@ -237,7 +233,7 @@ async function handleSubmit() {
   });
 }
 
-// 删除科室
+// 删除医生
 function handleDelete(deptId?: number) {
   const deptIds = [deptId || selectIds.value].join(",").toString();
 
@@ -252,7 +248,7 @@ function handleDelete(deptId?: number) {
     type: "warning",
   }).then(
     () => {
-      console.log("deptIds:", deptIds); // 打印要删除科室ID
+      console.log("deptIds:", deptIds); // 打印要删除医生ID
       loading.value = true;
       DoctorAPI.deletedoctor(deptIds)
         .then(() => {

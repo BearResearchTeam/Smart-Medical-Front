@@ -69,34 +69,29 @@ function menuTreeToRoutes(menuList: MenuTree[]): RouteRecordRaw[] {
 
     // 2. 转换为前端路由格式
     const dynamicRoutes = menuTreeToRoutes(menuTree);
-
-    // 3. 注册到 vue-router
-    dynamicRoutes.forEach(route => {
-      if (!router.hasRoute(route.name as string)) {
-        router.addRoute(route);
-        router.getRoutes();
-        console.log('添加路由routeroute：', route);
-        console.log('添加路由routeroute：', router.getRoutes());
-
-      }
-
-    });
+      debugger
+      console.log('dynamicRoutes：', dynamicRoutes);
       
 
+      //#region
+   // 3. 注册到 vue-router
+    // dynamicRoutes.forEach(route => {
+    //   if (!router.hasRoute(route.name as string)) {
+    //     router.addRoute(route);
+    //     router.getRoutes();
+    //     console.log('添加路由routeroute：', route);
+    //     console.log('添加路由routeroute：', router.getRoutes());
+
+    //   }
+
+    // });
+      //#endregion
+
     // 4. 存入 store ...constantRoutes
-    // routes.value = [ ...dynamicRoutes];
-     
-    //   //// 直接使用 constantRoutes，因为所有静态路由已在 router/index.ts 中定义并注册
-    //  // routes.value = [...constantRoutes];
-    //   routesLoaded.value = true;
-
-    //   console.log("✅ 动态菜单生成完成11",res);
-      //    resolve(routes.value);
-      // 4. 存入 store，合并静态路由
-    routes.value = constantRoutes.concat(dynamicRoutes);
+      routes.value = [...constantRoutes, ...dynamicRoutes];
     routesLoaded.value = true;
-
-    resolve(dynamicRoutes);
+      resolve(routes.value);
+      
     });
   }
 
@@ -109,15 +104,6 @@ function menuTreeToRoutes(menuList: MenuTree[]): RouteRecordRaw[] {
       sideMenuRoutes.value = matchedItem.children;
       console.log("✅ 侧边菜单更新完成", sideMenuRoutes.value);
     }
-    //  if (parentPath === '/' || !parentPath) {
-    //   sideMenuRoutes.value = routes.value;
-    // } else {
-    //   const matchedItem = routes.value.find((item) => item.path === parentPath);
-    //   if (matchedItem && matchedItem.children) {
-    //     sideMenuRoutes.value = matchedItem.children;
-    //   }
-    // }
-    // console.log("✅ 侧边菜单更新完成", sideMenuRoutes.value);
   };
 
   /**
@@ -128,11 +114,11 @@ function menuTreeToRoutes(menuList: MenuTree[]): RouteRecordRaw[] {
     const constantRouteNames = new Set(constantRoutes.map((route) => route.name).filter(Boolean));
 
     // 由于所有路由已在 router/index.ts 中静态定义，这里不再需要从 router 实例中移除路由。
-    // routes.value.forEach((route) => {
-    //   if (route.name && !constantRouteNames.has(route.name)) {
-    //     router.removeRoute(route.name);
-    //   }
-    // });
+    routes.value.forEach((route) => {
+      if (route.name && !constantRouteNames.has(route.name)) {
+        router.removeRoute(route.name);
+      }
+    });
 
     // 重置为仅包含常量路由 (这里实际是清除 store 内部的路由列表，准备重新生成)
     routes.value = []; // 清空 routes.value 以便重新生成

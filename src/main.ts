@@ -61,7 +61,7 @@ app.mount("#app");
 
 // 初始化静态路由
 const permissionStore = usePermissionStore();
-await permissionStore.generateRoutes(); // 动态路由注册
+//await permissionStore.generateRoutes(); // 动态路由注册
 
 // permissionStore.generateRoutes().then(() => {
 //   console.log("✅ 静态路由初始化完成");

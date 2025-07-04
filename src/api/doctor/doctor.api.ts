@@ -5,7 +5,7 @@ const DoctorAPI = {
   //查询医生列表
   getdoctorPage(queryParams?: DoctorPageQuery) {
     return request<DoctorListResponse>({
-      url: `/api/app/doctor-account-serivce/doctor-account-list`,
+      url: `${BASE_URL}/doctor-account-list`,
       method: "get",
       params: queryParams,
     });
@@ -13,7 +13,7 @@ const DoctorAPI = {
   //新增医生
   createdoctor(data: DoctorForm) {
     return request<DoctorForm>({
-      url: `/api/app/doctor-account-serivce/doctor-account`,
+      url: `${BASE_URL}/doctor-account`,
       method: "post",
       data,
     });
@@ -21,16 +21,17 @@ const DoctorAPI = {
   //修改医生
   updatedoctor(id: string, data: DoctorForm) {
     return request<DoctorPageVO[]>({
-      url: `/api/app/doctor-account-serivce/${id}/edit-doctor-account`,
-      method: "put",
+      url: `${BASE_URL}/${id}/edit-doctor-account`,
+      method: "post",
       data,
     });
   },
   //删除医生
-  deletedoctor(id: string) {
+  deletedoctor(idsString: string) {
     return request<DoctorPageVO[]>({
-      url: `/api/app/doctor-account-serivce/${id}/edit-doctor-account`,
+      url: `${BASE_URL}/doctor-account`,
       method: "delete",
+      params: { idsString: idsString },
     });
   }
 };

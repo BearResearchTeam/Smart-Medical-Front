@@ -29,6 +29,7 @@ export function setupPermission() {
 
     // 已登录用户处理逻辑
     if (isLoggedIn) {
+      
       // 如果已登录用户尝试访问登录页，重定向到首页
       if (to.path === "/login") {
         console.log("已登录用户访问登录页，重定向到首页");
@@ -40,7 +41,7 @@ export function setupPermission() {
       await handleAuthenticatedUser(to, from, next);
       return;
     }
-
+    
     // 未登录用户访问非白名单页面，重定向到登录页
     console.log(`⚠️ User not logged in, redirecting to login page from: ${to.path}`);
     redirectToLogin(to, next);
@@ -77,22 +78,28 @@ async function handleAuthenticatedUser(
 
     // 检查路由是否已生成
     if (!permissionStore.routesLoaded) {
+      
       console.log("⚠️ Routes not loaded, initiating generation for:", to.path);
 
       // 防止重复生成路由
       if (isGeneratingRoutes) {
+        
         console.log("⏳ Routes already generating, waiting for completion.");
         // 等待当前路由生成完成
         await waitForRoutesGeneration(permissionStore);
         console.log("✅ Routes generation completed (waited).");
       } else {
+       
         console.log("🚀 Generating and adding routes now.");
         await generateAndAddRoutes(permissionStore);
         console.log("✅ Routes generated and added.");
       }
 
       // 路由生成完成后，重新导航到目标路由
-      console.log("🔄 Routes generated, re-navigating to original target:", to.path);
+      //console.log("🔄 Routes generated, re-navigating to original target:", to.path);
+
+      console.log(router.getRoutes());
+      debugger
       next({ ...to, replace: true });
       return;
     }
@@ -127,23 +134,12 @@ async function generateAndAddRoutes(permissionStore: any) {
   isGeneratingRoutes = true;
 
   try {
-    console.log("🔧 Generating dynamic routes...");
     const dynamicRoutes = await permissionStore.generateRoutes();
-
+    debugger
     // 添加路由到路由器
     dynamicRoutes.forEach((route: RouteRecordRaw) => {
       router.addRoute(route);
     });
-
-    // 关键：最后注册404路由
-    router.addRoute({
-      path: "/:pathMatch(.*)*",
-      name: "NotFound",
-      component: () => import("@/views/error/404.vue"),
-      meta: { hidden: true }
-    });
-
-    console.log("✅ All dynamic routes generated and added");
   } finally {
     isGeneratingRoutes = false;
   }

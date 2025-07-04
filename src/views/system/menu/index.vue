@@ -58,6 +58,7 @@
                   <component :is="ElementPlusIconsVue[row.icon as keyof typeof ElementPlusIconsVue] || null" />
                 </el-icon>
                 <!-- <svg-icon v-if="row.icon" :icon-class="row.icon" /> -->
+
               </template>
             </el-table-column>
             <el-table-column label="路由路径" prop="pagePath" min-width="120" />
@@ -86,7 +87,7 @@
           <!-- 分页组件 -->
           <pagination v-if="pageData.totleCount > 0" v-model:total="pageData.totleCount"
             v-model:page="queryParams.SkipCount" v-model:limit="queryParams.MaxResultCount" @pagination="fetchData" />
-          a " />
+
         </el-card>
       </el-col>
     </el-row>
