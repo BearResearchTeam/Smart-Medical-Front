@@ -32,7 +32,7 @@ export function setupPermission() {
       // 如果已登录用户尝试访问登录页，重定向到首页
       if (to.path === "/login") {
         console.log("已登录用户访问登录页，重定向到首页");
-        next({ path: "/" });
+        next({ path: "/redirect" });
         return;
       }
 
@@ -46,6 +46,8 @@ export function setupPermission() {
     redirectToLogin(to, next);
   });
 
+ // ...你的守卫逻辑...
+  console.log("当前所有已注册的路由：", router.getRoutes());
   // 后置守卫，确保进度条关闭
   router.afterEach((to, from) => {
     console.log("✅ Route navigation completed:", { to: to.path, from: from.path });
@@ -133,6 +135,14 @@ async function generateAndAddRoutes(permissionStore: any) {
       router.addRoute(route);
     });
 
+    // 关键：最后注册404路由
+    router.addRoute({
+      path: "/:pathMatch(.*)*",
+      name: "NotFound",
+      component: () => import("@/views/error/404.vue"),
+      meta: { hidden: true }
+    });
+
     console.log("✅ All dynamic routes generated and added");
   } finally {
     isGeneratingRoutes = false;
@@ -149,14 +159,14 @@ async function waitForRoutesGeneration(permissionStore: any): Promise<void> {
         clearInterval(checkInterval);
         resolve();
       }
-    }, 50); // 每50ms检查一次
+    }, 1); // 每50ms检查一次
 
     // 超时保护，最多等待5秒
     setTimeout(() => {
       clearInterval(checkInterval);
       console.warn("⚠️ Routes generation timeout");
       resolve();
-    }, 5000);
+    }, 50000);
   });
 }
 

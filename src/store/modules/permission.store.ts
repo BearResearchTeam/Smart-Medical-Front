@@ -3,12 +3,13 @@ import { constantRoutes } from "@/router";
 import { store } from "@/store";
 import type { MenuTree } from "@/api/system/menu.api";
 import MenuAPI from "@/api/system/menu.api";
- import router from "@/router"; // 不再需要直接操作 router 实例，所以注释掉
-import { log } from "console";
+import router from "@/router"; // 不再需要直接操作 router 实例，所以注释掉
 
-// import MenuAPI, { type RouteVO } from "@/api/system/menu.api"; // 注释掉动态菜单API的导入
+
+//import MenuAPI, { type RouteVO } from "@/api/system/menu.api"; // 注释掉动态菜单API的导入
 const modules = import.meta.glob("../../views/**/**.vue");
 console.log("DEBUG: modules object keys:", Object.keys(modules));
+
 const Layout = () => import("@/layouts/index.vue");
 
 export const usePermissionStore = defineStore("permission", () => {
@@ -18,24 +19,43 @@ export const usePermissionStore = defineStore("permission", () => {
   const sideMenuRoutes = ref<RouteRecordRaw[]>([]);
   // 路由是否加载完成
   const routesLoaded = ref(false);
-  function menuTreeToRoutes(menuList: MenuTree[]): RouteRecordRaw[] {
- 
-  console.log("DEBUG: menuTreeToRoutes called with menuList:", menuList);
+// src/store/modules/permission.store.ts
+
+// ... 其他代码 ...
+
+function menuTreeToRoutes(menuList: MenuTree[]): RouteRecordRaw[] {
   return menuList.map(menu => {
+    const isRoot = menu.parentId == null;
+    const componentPath = isRoot
+      ? null
+      : (menu.pagePath.startsWith('/')
+          ? `../../views${menu.pagePath}.vue`
+          : `../../views/${menu.pagePath}.vue`);
+    const componentModule = componentPath ? modules[componentPath] : null;
+
+    // 生成路由对象
     const route: RouteRecordRaw = {
       path: menu.pagePath,
       name: menu.permissionCode,
-      component: menu.pagePath === "Layout" ? Layout : modules[`../../views${menu.pagePath}.vue`] || modules["../../views/error-page/404.vue"],
+      component: isRoot ? Layout : (componentModule || modules["../../views/error-page/404.vue"]),
       meta: {
         title: menu.permissionName,
         icon: menu.icon,
-        alwaysShow: menu.children && menu.children.length > 0, // 只有有子菜单才设置 alwaysShow
+        alwaysShow: menu.children && menu.children.length > 0,
       },
       children: menu.children && menu.children.length > 0 ? menuTreeToRoutes(menu.children) : [],
     };
+
+    // 如果有子菜单，给父级加 redirect 到第一个子菜单
+    if (menu.children && menu.children.length > 0) {
+      route.redirect = route.children[0].path;
+    }
+
     return route;
   });
-  }
+}
+
+// ... 其他代码 ...
   
   /**
    * 生成静态路由数据并注册到全局路由
@@ -54,18 +74,29 @@ export const usePermissionStore = defineStore("permission", () => {
     dynamicRoutes.forEach(route => {
       if (!router.hasRoute(route.name as string)) {
         router.addRoute(route);
+        router.getRoutes();
+        console.log('添加路由routeroute：', route);
+        console.log('添加路由routeroute：', router.getRoutes());
+
       }
+
     });
+      
 
     // 4. 存入 store ...constantRoutes
-    routes.value = [ ...dynamicRoutes];
+    // routes.value = [ ...dynamicRoutes];
      
-      //// 直接使用 constantRoutes，因为所有静态路由已在 router/index.ts 中定义并注册
-     // routes.value = [...constantRoutes];
-      routesLoaded.value = true;
+    //   //// 直接使用 constantRoutes，因为所有静态路由已在 router/index.ts 中定义并注册
+    //  // routes.value = [...constantRoutes];
+    //   routesLoaded.value = true;
 
-      console.log("✅ 动态菜单生成完成11",res);
-       resolve(routes.value);
+    //   console.log("✅ 动态菜单生成完成11",res);
+      //    resolve(routes.value);
+      // 4. 存入 store，合并静态路由
+    routes.value = constantRoutes.concat(dynamicRoutes);
+    routesLoaded.value = true;
+
+    resolve(dynamicRoutes);
     });
   }
 
@@ -76,7 +107,17 @@ export const usePermissionStore = defineStore("permission", () => {
     const matchedItem = routes.value.find((item) => item.path === parentPath);
     if (matchedItem && matchedItem.children) {
       sideMenuRoutes.value = matchedItem.children;
+      console.log("✅ 侧边菜单更新完成", sideMenuRoutes.value);
     }
+    //  if (parentPath === '/' || !parentPath) {
+    //   sideMenuRoutes.value = routes.value;
+    // } else {
+    //   const matchedItem = routes.value.find((item) => item.path === parentPath);
+    //   if (matchedItem && matchedItem.children) {
+    //     sideMenuRoutes.value = matchedItem.children;
+    //   }
+    // }
+    // console.log("✅ 侧边菜单更新完成", sideMenuRoutes.value);
   };
 
   /**

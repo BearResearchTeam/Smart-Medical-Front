@@ -1,13 +1,8 @@
 <template>
   <div>
     <h3 text-center m-0 mb-20px>{{ t("login.login") }}</h3>
-    <el-form
-      ref="loginFormRef"
-      :model="loginFormData"
-      :rules="loginRules"
-      size="large"
-      :validate-on-rule-change="false"
-    >
+    <el-form ref="loginFormRef" :model="loginFormData" :rules="loginRules" size="large"
+      :validate-on-rule-change="false">
       <!-- 用户名 -->
       <el-form-item prop="username">
         <el-input v-model.trim="loginFormData.username" :placeholder="t('login.username')">
@@ -22,14 +17,8 @@
       <!-- 密码 -->
       <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
         <el-form-item prop="userPwd">
-          <el-input
-            v-model.trim="loginFormData.userPwd"
-            :placeholder="t('login.password')"
-            type="password"
-            show-password
-            @keyup="checkCapsLock"
-            @keyup.enter="handleLoginSubmit"
-          >
+          <el-input v-model.trim="loginFormData.userPwd" :placeholder="t('login.password')" type="password"
+            show-password @keyup="checkCapsLock" @keyup.enter="handleLoginSubmit">
             <template #prefix>
               <el-icon>
                 <Lock />
@@ -129,7 +118,8 @@ import { ElMessage } from "element-plus";
 import { ApiDetector } from "@/utils/apiDetector";
 import { useUserStore } from "@/store/modules/user.store";
 import { useRoute, useRouter } from "vue-router";
-
+import { usePermissionStore } from "@/store/modules/permission.store";
+const permissionStore = usePermissionStore();
 const { t } = useI18n();
 
 // 获取路由实例
@@ -240,10 +230,12 @@ async function handleLoginSubmit() {
     await userStore.login(loginFormData.value);
     console.log("userStore.permissions", userStore.permissions);
     // 3. 登录成功
-    ElMessage.success(t("login.loginSuccess", ));
-
+    ElMessage.success(t("login.loginSuccess",));
+    // 2. 动态路由注册（如果需要）
+    await permissionStore.generateRoutes();
     // 4. 获取重定向地址或默认跳转到仪表盘
-    const redirect = route.query.redirect?.toString() || "/dashboard";
+    const redirect = route.query.redirect?.toString() || "/dashboard/index";
+    console.log("redirect", redirect);
     await router.push(redirect);
   } catch (error: any) {
     console.error("登录失败:", error);
