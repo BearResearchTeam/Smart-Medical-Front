@@ -102,15 +102,15 @@ export const constantRoutes: RouteRecordRaw[] = [
         path: "medicine",
         name: "MedicineManagement",
         // 确保这里的路径是正确的
-        component: () => import("@/views/pharmacy/medicine.vue"), 
+        component: () => import("@/views/pharmacy/medicine.vue"),
         meta: { title: "药品管理", icon: "medicine-box" },
       },
-      {
-        path: "prescription",
-        name: "PrescriptionManagement",
-        component: () => import("@/views/system/user/index.vue"), // 请替换为实际的处方管理页面
-        meta: { title: "处方管理", icon: "document" },
-      },
+        {
+      path: "pharmaceutical-company", // 不要加 /
+      name: "PharmaceuticalCompanyManagement",
+      component: () => import("@/views/pharmacy/PharmaceuticalCompany.vue"),
+      meta: { title: "制药公司管理", icon: "document" },
+    },
     ],
   },
   {

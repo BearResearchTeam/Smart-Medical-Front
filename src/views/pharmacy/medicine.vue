@@ -37,6 +37,9 @@
         <ElFormItem>
           <ElButton type="primary" icon="Search" @click="handleQuery">搜索</ElButton>
           <ElButton icon="Refresh" @click="handleResetQuery">重置</ElButton>
+          <ElButton type="info" icon="OfficeBuilding" @click="goToPharmaceuticalCompany">
+            制药公司
+          </ElButton>
         </ElFormItem>
       </ElForm>
     </div>
@@ -44,6 +47,8 @@
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--actions">
           <ElButton type="success" icon="Plus" @click="handleOpenDialog()">新增</ElButton>
+
+          <ElButton type="primary" icon="Download" @click="handleOpenStockInDialog">入库</ElButton>
 
           <ElButton
             type="danger"
@@ -249,6 +254,129 @@
         </div>
       </template>
     </ElDialog>
+
+    <!-- 药品入库对话框 -->
+    <ElDialog
+      v-model="stockInDialog.visible"
+      title="药品入库"
+      width="400px"
+      @closed="handleCloseStockInDialog"
+    >
+      <ElForm ref="stockInFormRef" :model="stockInForm" label-width="100px" :rules="stockInRules">
+        <ElRow :gutter="16">
+          <ElCol :span="12">
+            <ElFormItem label="入库数量" prop="quantity" required>
+              <ElInputNumber v-model="stockInForm.quantity" :min="1" style="width: 100%" />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="12">
+            <ElFormItem label="单价" prop="unitPrice" required>
+              <ElInputNumber
+                v-model="stockInForm.unitPrice"
+                :min="0"
+                :precision="2"
+                style="width: 100%"
+                @change="calcTotalAmount"
+              />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="12">
+            <ElFormItem label="总金额" prop="totalAmount" required>
+              <ElInputNumber
+                v-model="stockInForm.totalAmount"
+                :min="0"
+                :precision="2"
+                style="width: 100%"
+                disabled
+              />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="12">
+            <ElFormItem label="批号" prop="batchNumber" required>
+              <ElInput v-model="stockInForm.batchNumber" />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="24">
+            <ElFormItem label="供应商" prop="supplier" required>
+              <ElInput v-model="stockInForm.supplier" />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="12">
+            <ElFormItem label="生产日期" prop="productionDate" required>
+              <ElDatePicker
+                v-model="stockInForm.productionDate"
+                type="datetime"
+                value-format="YYYY-MM-DDTHH:mm:ss"
+                style="width: 100%"
+              />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="12">
+            <ElFormItem label="有效期" prop="expiryDate" required>
+              <ElDatePicker
+                v-model="stockInForm.expiryDate"
+                type="datetime"
+                value-format="YYYY-MM-DDTHH:mm:ss"
+                style="width: 100%"
+              />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="12">
+            <ElFormItem label="制药公司" prop="pharmaceuticalCompanyId" required>
+              <ElSelect v-model="stockInForm.pharmaceuticalCompanyId" placeholder="请选择公司">
+                <ElOption
+                  v-for="item in companyOptions"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                />
+              </ElSelect>
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="12">
+            <ElFormItem label="状态" prop="status" required>
+              <ElInput v-model="stockInForm.status" />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="12">
+            <ElFormItem label="创建时间" prop="creationTime" required>
+              <ElDatePicker
+                v-model="stockInForm.creationTime"
+                type="datetime"
+                value-format="YYYY-MM-DDTHH:mm:ss"
+                style="width: 100%"
+              />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="12">
+            <ElFormItem label="操作人" prop="operator" required>
+              <ElInput v-model="stockInForm.operator" />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="24">
+            <ElFormItem label="备注" prop="remark" required>
+              <ElInput v-model="stockInForm.remark" type="textarea" />
+            </ElFormItem>
+          </ElCol>
+          <ElCol :span="24">
+            <ElFormItem label="入库时间" prop="inStockTime" required>
+              <ElDatePicker
+                v-model="stockInForm.inStockTime"
+                type="datetime"
+                value-format="YYYY-MM-DDTHH:mm:ss"
+                style="width: 100%"
+              />
+            </ElFormItem>
+          </ElCol>
+        </ElRow>
+      </ElForm>
+      <template #footer>
+        <div class="dialog-footer">
+          <ElButton type="primary" @click="handleStockInSubmit">确 定</ElButton>
+          <ElButton @click="handleCloseStockInDialog">取 消</ElButton>
+        </div>
+      </template>
+    </ElDialog>
   </div>
 </template>
 
@@ -264,7 +392,14 @@ import DrugAPI, {
 } from "@/api/drug.api";
 import PharmaceuticalCompanyAPI from "@/api/pharmaceutical-company.api";
 import dayjs from "dayjs";
+import { drugStockInBatch } from "@/api/pharmacy.api";
+import { watch } from "vue";
+import { useRouter } from "vue-router";
+const router = useRouter();
 
+function goToPharmaceuticalCompany() {
+  router.push({ path: "pharmaceutical-company" }); // 路由根据实际情况调整
+}
 const queryFormRef = ref<InstanceType<typeof ElForm>>();
 const drugFormRef = ref<InstanceType<typeof ElForm>>();
 
@@ -352,6 +487,17 @@ const rules = reactive({
   pharmaceuticalCompanyId: [{ required: true, message: "请选择制药公司", trigger: "change" }],
 });
 
+const stockInRules = reactive({
+  quantity: [{ required: true, message: "请输入入库数量", trigger: "blur" }],
+  unitPrice: [{ required: true, message: "请输入单价", trigger: "blur" }],
+  totalAmount: [{ required: true, message: "请输入总金额", trigger: "blur" }],
+  batchNumber: [{ required: true, message: "请输入批号", trigger: "blur" }],
+  pharmaceuticalCompanyId: [{ required: true, message: "请选择制药公司", trigger: "change" }],
+  stockUpper: [{ required: true, message: "请输入库存上限", trigger: "blur" }],
+  stockLower: [{ required: true, message: "请输入库存下限", trigger: "blur" }],
+  operator: [{ required: true, message: "请输入操作人", trigger: "blur" }],
+  stockInTime: [{ required: true, message: "请选择入库时间", trigger: "change" }],
+});
 /**
  * 规范化后端返回的药品数据，处理中英文混合键名和测试数据问题
  * @param drug 后端返回的原始药品对象
@@ -523,6 +669,118 @@ function formatDateOnly(row: any, column: any, cellValue: string) {
   return dayjs(cellValue).format("YYYY-MM-DD");
 }
 
+function calcTotalAmount() {
+  stockInForm.totalAmount = Number(stockInForm.unitPrice) * Number(stockInForm.quantity);
+}
+const stockInDialog = reactive({ visible: false });
+const stockInForm = reactive({
+  quantity: 1,
+  unitPrice: 0,
+  totalAmount: 0,
+  batchNumber: "",
+  supplier: "",
+  productionDate: "",
+  expiryDate: "",
+  pharmaceuticalCompanyId: "",
+  status: "已入库",
+  creationTime: dayjs().format("YYYY-MM-DDTHH:mm:ss"),
+  operator: "",
+  remark: "",
+  inStockTime: dayjs().format("YYYY-MM-DDTHH:mm:ss"),
+});
+
+function handleOpenStockInDialog() {
+  stockInDialog.visible = true;
+  if (selectIds.value.length === 1) {
+    const drug = tableData.pageData.find((d) => d.id === selectIds.value[0]);
+    if (drug) {
+      stockInForm.unitPrice = drug.purchasePrice || 0;
+      stockInForm.supplier = drug.pharmaceuticalCompanyName || "";
+      stockInForm.remark = "";
+      stockInForm.quantity = 1;
+      stockInForm.totalAmount = drug.purchasePrice || 0;
+      stockInForm.productionDate = drug.productionDate || "";
+      stockInForm.expiryDate = drug.expiryDate || "";
+      stockInForm.status = "正常";
+    }
+  } else {
+    // 多选时可清空或用默认值
+    stockInForm.unitPrice = 0;
+    stockInForm.supplier = "";
+    stockInForm.remark = "";
+    stockInForm.quantity = 1;
+    stockInForm.totalAmount = 0;
+    stockInForm.productionDate = "";
+    stockInForm.expiryDate = "";
+    stockInForm.status = "正常";
+  }
+  stockInForm.operator = ""; // 可自动带入当前用户
+  stockInForm.inStockTime = dayjs().format("YYYY-MM-DDTHH:mm:ss");
+}
+function handleCloseStockInDialog() {
+  stockInDialog.visible = false;
+}
+watch(
+  () => [stockInForm.unitPrice, stockInForm.quantity],
+  ([unitPrice, quantity]) => {
+    stockInForm.totalAmount = Number(unitPrice) * Number(quantity);
+  }
+);
+// 3. handleStockInSubmit 支持批量
+function handleStockInSubmit() {
+  if (!selectIds.value.length) {
+    ElMessage.warning("请先勾选要入库的药品");
+    return;
+  }
+  const details = tableData.pageData
+    .filter((drug) => selectIds.value.includes(drug.id))
+    .map((drug) => ({
+      drugId: drug.id,
+      pharmaceuticalCompanyId: drug.pharmaceuticalCompanyId,
+      quantity: Number(stockInForm.quantity),
+      unitPrice: Number(stockInForm.unitPrice),
+      totalAmount: Number(stockInForm.totalAmount),
+      productionDate: stockInForm.productionDate, // 或 drug.productionDate
+      expiryDate: stockInForm.expiryDate, // 或 drug.expiryDate
+      supplier: stockInForm.supplier,
+      batchNumber: stockInForm.batchNumber, // 必须有值
+      status: stockInForm.status || "正常",
+      creationTime: dayjs().format("YYYY-MM-DDTHH:mm:ss"),
+      // 允许扩展更多字段
+    }));
+  const payload = {
+    details,
+    operator: stockInForm.operator,
+    remark: stockInForm.remark,
+    inStockTime: stockInForm.inStockTime,
+  };
+
+  console.log("批量入库请求体：", payload);
+  if (details.length === 0) {
+    ElMessage.warning("没有可入库的药品");
+    return;
+  }
+  if (details.some((item) => item.quantity <= 0)) {
+    ElMessage.warning("入库数量必须大于0");
+    return;
+  }
+  drugStockInBatch(payload)
+    .then(() => {
+      if (!stockInForm.remark || stockInForm.remark.trim() === "") {
+        ElMessage.warning("备注不能为空！");
+        return;
+      }
+      ElMessage.success("批量入库成功");
+      handleCloseStockInDialog();
+      handleQuery();
+    })
+    .catch((err) => {
+      ElMessage.error("批量入库失败");
+      if (err && err.response && err.response.data) {
+        console.error("后端错误信息：", err.response.data);
+      }
+    });
+}
 onMounted(() => {
   fetchCompanyOptions();
 
