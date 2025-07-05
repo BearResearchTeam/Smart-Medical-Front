@@ -5,7 +5,8 @@
 		<div class="today-visit-container">
 			<div class="header-section">
 				<h2 class="page-title">今日就诊</h2>
-				<el-button type="primary" :icon="Plus" class="quick-reception-btn" @click="handleQuickReception">
+				<el-button type="primary" :icon="Plus" class="quick-reception-btn"
+					@click="handleQuickReception, PatientdialogVisible = true">
 					快速接诊
 				</el-button>
 			</div>
@@ -22,7 +23,7 @@
 					<el-tab-pane name="pending">
 						<template #label>
 							<span class="tab-label">待就诊 <el-tag v-if="pendingCount > 0" type="danger" size="small">{{ pendingCount
-}}</el-tag></span>
+							}}</el-tag></span>
 						</template>
 						<div class="list-wrapper">
 							<template v-if="pendingPatients.length > 0">
@@ -113,7 +114,7 @@
 						<el-date-picker v-model="formData.diseaseOnsetTime" type="datetime" disabled style="width: 220px" />
 					</el-col>
 					<el-col :span="5" style="text-align: right;">
-						<el-button type="primary" @click="viewRecords">就诊记录</el-button>
+						<el-button type="primary" @click="viewRecords(formData.idNumber)">就诊事件</el-button>
 					</el-col>
 				</el-row>
 			</el-card>
@@ -122,13 +123,17 @@
 				<template #header>
 					<span class="base-info-title">病历</span>
 				</template>
-				<el-table :data="sickFormData">
+				<el-table :data="sickFormData" @row-click="handleSickFormClick">
 					<el-table-column fixed prop="temperature" label="体温" />
 					<el-table-column prop="pulse" label="脉搏" />
 					<el-table-column prop="breath" label="呼吸" />
 					<el-table-column prop="bloodPressure" label="血压" />
 					<el-table-column prop="chiefComplaint" label="主诉" />
-					<el-table-column prop="prescriptionTemplateNumber" label=" 处方模板号" />
+					<el-table-column prop="prescriptionTemplateNumber" label=" 处方模板号">
+						<template #default="scope">
+							<span v-if="scope.row.prescriptionTemplateNumber == 0">无</span>
+						</template>
+					</el-table-column>
 					<el-table-column fixed="medicalAdvice" label="medicalAdvice">
 					</el-table-column>
 				</el-table>
@@ -138,24 +143,55 @@
 				<template #header>
 					<span class="base-info-title">处方</span>
 				</template>
-
+				<el-table :data="drugInfo" @row-click="handleSickFormClick">
+					<el-table-column prop="drugName" label="药品名称" />
+					<el-table-column prop="dosage" label="单次用药剂量">
+						<template #default="scope">
+							<el-input v-model="scope.row.dosage" :readonly="!canEditDosage" />
+						</template>
+					</el-table-column>
+					<el-table-column prop="dosageUnit" label="剂量单位">
+						<template #default="scope">
+							<el-input v-model="scope.row.dosageUnit" readonly />
+						</template>
+					</el-table-column>
+					<el-table-column prop="usage" label="用法">
+						<template #default="scope">
+							<el-input v-model="scope.row.usage" readonly />
+						</template>
+					</el-table-column>
+					<el-table-column prop="frequency" label="用药频率">
+						<template #default="scope">
+							<el-input v-model="scope.row.frequency" readonly />
+						</template>
+					</el-table-column>
+					<el-table-column prop="number" label="开药总数量">
+						<template #default="scope">
+							<el-input v-model="scope.row.number" readonly />
+						</template>
+					</el-table-column>
+					<el-table-column prop="numberUnit" label="数量单位">
+						<template #default="scope">
+							<el-input v-model="scope.row.numberUnit" readonly />
+						</template>
+					</el-table-column>
+					<el-table-column prop="medicalAdvice" label="医嘱内容" />
+				</el-table>
 			</el-card>
 		</div>
-
 	</div>
-
-
-
-
+	<eldialogpatient v-model="PatientdialogVisible" />
 </template>
-
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
 import { Search, Plus, ArrowRight } from '@element-plus/icons-vue';
 import UserAPI, {
-	IPatient, PatientListQuery, FormData, patientsickFormData
+	IPatient, PatientListQuery, FormData,
+	patientsickFormData, DrugItem
 } from '@/api/system/patient.api';
 import { ElMessage } from 'element-plus';
+import eldialogpatient from './AddPatientCon.vue'
+//#region  参数列表
 
 // 搜索框的值
 const searchQuery = ref('');
@@ -167,8 +203,9 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 
 // 待就诊数量和列表
-const pendingCount = ref(0);
+const pendingCount = ref();
 const pendingPatients = ref<IPatient[]>([]);
+
 
 // 已就诊数量和列表
 const completedCount = ref(0);
@@ -202,7 +239,9 @@ const formData = ref<FormData>({
 	diseaseOnsetTime: ''
 });
 
+// 右侧病情信息卡片数据
 const sickFormData: any = ref<patientsickFormData[]>([{
+	basicPatientId: '',
 	temperature: '',
 	pulse: '',
 	breath: '',
@@ -225,7 +264,39 @@ const sickFormData: any = ref<patientsickFormData[]>([{
 	]
 }])
 
-//handlePatientClick 重复清空 formData
+// 右侧处方信息卡片数据
+const drugInfo = ref<DrugItem[]>([{
+	drugId: '',
+	drugName: '',
+	dosage: '',
+	dosageUnit: '',
+	usage: '',
+	frequency: '',
+	number: '',
+	numberUnit: '',
+	medicalAdvice: '',
+}])
+
+//#endregion
+
+//#region  显示方法列表
+
+//清空 drugInfo
+const resetdrugInfo = () => {
+	drugInfo.value = [{
+		drugId: '',
+		drugName: '',
+		dosage: '',
+		dosageUnit: '',
+		usage: '',
+		frequency: '',
+		number: '',
+		numberUnit: '',
+		medicalAdvice: '',
+	}]
+}
+
+//清空 formData
 const resetFormData = () => {
 	formData.value = {
 		patientName: '',
@@ -268,13 +339,8 @@ const fetchPatientList = async (status: 'pending' | 'completed') => {
 	}
 };
 
-// 快速接诊按钮点击事件
-const handleQuickReception = () => {
-	ElMessage.success('跳转到快速接诊页面或打开弹窗！');
-};
-
 // 搜索按钮点击事件
-const handleSearch = () => {
+const handleSearch = async () => {
 	currentPage.value = 1;
 	fetchPatientList(activeTab.value as 'pending' | 'completed');
 };
@@ -294,23 +360,54 @@ const handlePageChange = (newPage: number) => {
 // 患者列表项点击事件
 const handlePatientClick = async (id: string) => {
 	resetFormData();
+	resetdrugInfo();
 	const way = await UserAPI.getPatientIDWay(id);
 	formData.value = way;
 
 	// 获取患者的病情信息
 	const patientSick = await UserAPI.Getpatientsick(id);
 	sickFormData.value = patientSick
-	console.log(patientSick);
+	// console.log("患者的病情信息", patientSick);
+	// console.log("sickFormData.value", sickFormData.value[0].drugItems);
+};
+
+const handleSickFormClick = (row: patientsickFormData) => {
+	console.log(row.drugItems);
+	drugInfo.value = row.drugItems.map((item: any) => ({
+		drugName: item.drugName ?? '',
+		// ==>   ...item   <== 
+		// 对象展开语法，把 item 里的所有其他字段都带上
+		...item
+	}));
 };
 
 
-// 就诊记录按钮事件
-const viewRecords = () => {
-	ElMessage.info('查看就诊记录');
+
+//#endregion
+
+// 快速接诊按钮点击事件
+const handleQuickReception = () => {
+	ElMessage.success('跳转到快速接诊页面或打开弹窗！');
+
 };
+
+const PatientdialogVisible = ref(false)
+// 是否可以编辑处方
+const canEditDosage = ref(false);
+
+// 就诊事件按钮事件
+const viewRecords = (idNumber: string) => {
+	ElMessage.info(idNumber);
+
+	//处方信息清空
+	resetdrugInfo()
+};
+
 
 // 组件挂载时默认加载待就诊列表
 onMounted(() => {
+	//清空处方数据
+	resetdrugInfo()
 	fetchPatientList('pending');
 });
 

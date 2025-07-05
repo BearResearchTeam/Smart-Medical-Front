@@ -11,8 +11,8 @@ const MyUserAPI = {
    * @param data 登录表单数据
    */
   login(data: LoginFromDataLMZ) {
-    const cases = request;
-    debugger;
+    //const cases = request;
+    //debugger;
     // 检查是否应该使用模拟数据（当baseURL为空或明确指定使用模拟数据时）
     // const useMockData = !request.defaults.baseURL || localStorage.getItem("useMockData") === "true";
 
@@ -66,7 +66,7 @@ const MyUserAPI = {
    */
   getUserInfo() {
     // 检查是否使用模拟数据
-    const useMockData = !request.defaults.baseURL || localStorage.getItem("useMockData") === "true";
+    //const useMockData = !request.defaults.baseURL || localStorage.getItem("useMockData") === "true";
 
     // if (useMockData) {
     //   console.log("使用模拟用户信息数据");
@@ -414,6 +414,9 @@ export interface LoginResult {
   userSex: boolean;
   nickname?: string;
   avatar?: string;
+  roleName: null,
+  userRoles: [],
+  permissions: [];
   roles?: string[];
   perms?: string[];
   // 假设令牌信息也包含在登录响应的data中，如果实际没有，则需要修改后端或前端逻辑

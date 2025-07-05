@@ -53,7 +53,7 @@ httpRequest.interceptors.request.use(
 
       if (accessToken && config.headers?.Authorization !== "no-auth") {
         config.headers.Authorization = `Bearer ${accessToken}`;
-        console.log("✅ 已添加 accessToken 到请求头");
+        //console.log("✅ 已添加 accessToken 到请求头");
       }
     } catch (e) {
       console.warn("⚠️ 解析 userInfo 出错", e);
@@ -116,7 +116,7 @@ httpRequest.interceptors.response.use(
     }
 
     // ✅ 401 未授权 - 尝试刷新 Token
-    if (response.status === 401 || code === "ERR_BAD_REQUEST") {
+    if (response.status === 401) {
       //console.warn("⛔ 未授权或Token失效，尝试刷新...");
       //debugger;
       try {
@@ -136,6 +136,7 @@ httpRequest.interceptors.response.use(
             originalRequest.headers.Authorization = `Bearer ${newTokenInfo.accessToken}`;
           }
           // 返回重试后的请求结果
+          //console.log("🔁 刷新 token 成功", originalRequest);
           return httpRequest(originalRequest);
         } else {
           throw new Error("无有效 refreshToken");
