@@ -22,39 +22,7 @@ const DictAPI = {
       params: data, // 将登录数据作为请求体发送
     });
   },
-  // getPage(queryParams: DictPageQuery) {
-  //   // 发送GET请求获取字典分页数据
-  //   return request<PageResult<DictPageVO[]>>({
-  //     url: `/api/app/dictionary-data/dictionary-data-list`,
-  //     method: "get",
-  //     params: queryParams,
-  //   });
-  // },
-
-  /**
-   * 字典列表
-   *
-   * @returns 字典列表
-   */
-  getList() {
-    return request<any, OptionType[]>({
-      url: `${DICT_BASE_URL}`,
-      method: "get",
-    });
-  },
-
-  /**
-   * 字典表单数据
-   *
-   * @param id 字典ID
-   * @returns 字典表单数据
-   */
-  getFormData(id: string) {
-    return request<any, DictForm>({
-      url: `${DICT_BASE_URL}/${id}/form`,
-      method: "get",
-    });
-  },
+ 
 
   /**
    * 新增字典
@@ -241,7 +209,7 @@ export interface DictForm {
  */
 export interface DictItemPageQuery extends PageQuery {
   /** 关键字(字典数据值/标签) */
-  DictionaryTypeName?: string;
+  DictionaryLabel?: string;
 
   /** 字典编码 */
   datetype: string;
@@ -310,7 +278,6 @@ export interface DictItemForm {
    * 标签类型
    */
   dictionaryTypeDesc?: "success" | "warning" | "info" | "primary" | "danger" | "";
- // tagType?: "success" | "warning" | "info" | "primary" | "danger" | "";
 }
 
 /**

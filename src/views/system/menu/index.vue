@@ -7,7 +7,7 @@
         <div class="search-container">
           <el-form ref="queryFormRef" :model="queryParams" :inline="true" label-width="auto">
             <el-form-item label="关键字" prop="keywords">
-              <el-input v-model="queryParams.keywords" placeholder="菜单名称/路由路径/权限标识" clearable
+              <el-input v-model="queryParams.PermissionName" placeholder="菜单名称/路由路径/权限标识" clearable
                 @keyup.enter="handleQuery" />
             </el-form-item>
 
@@ -21,7 +21,7 @@
         <el-card shadow="hover" class="data-table">
           <div class="data-table__toolbar">
             <div class="data-table__toolbar--actions">
-              <el-button v-hasPerm="['sys:menu:add']" type="success" icon="plus" @click="handleOpenDialog()">
+              <el-button v-if="userStore.hasPerm('dept:edit')" type="success" icon="plus" @click="handleOpenDialog()">
                 新增
               </el-button>
               <el-button v-hasPerm="'sys:menu:delete'" type="danger" icon="delete" :disabled="selectIds.length === 0"
@@ -34,47 +34,47 @@
             </div>
           </div>
 
-          <el-table v-loading="loading" :data="pageData" row-key="id"
+          <el-table v-loading="loading" :data="pageData.data" row-key="id"
             :tree-props="{ children: 'children', hasChildren: 'hasChildren' }" border stripe highlight-current-row
             class="data-table__content" @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="50" align="center" />
-            <el-table-column label="菜单名称" prop="name" min-width="150" />
-            <el-table-column label="类型" width="80" align="center">
+            <el-table-column type="index" label="序号" min-width="70" align="center" />
+
+            <el-table-column label="菜单名称" prop="permissionName" min-width="150" align="center" />
+            <el-table-column label="权限" prop="permissionCode" min-width="150" align="center" />
+
+            <el-table-column label="类型" prop="type" width="80" align="center">
               <template #default="{ row }">
-                <el-tag v-if="row.type === 1">目录</el-tag>
-                <el-tag v-else-if="row.type === 2" type="success">菜单</el-tag>
-                <el-tag v-else-if="row.type === 3" type="info">按钮</el-tag>
+                <el-tag v-if="row.type === 0">菜单</el-tag>
+                <el-tag v-else-if="row.type === 1" type="success">按钮</el-tag>
+                <el-tag v-else-if="row.type === 2" type="info">其他</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="图标" width="80" align="center">
+
+            <el-table-column label="图标" prop="icon" width="80" align="center">
               <template #default="{ row }">
-                <svg-icon v-if="row.icon" :icon-class="row.icon" />
+                <el-icon v-if="row.icon && ElementPlusIconsVue[row.icon as keyof typeof ElementPlusIconsVue]"
+                  :class="`icon-${row.icon}`">
+                  <component :is="ElementPlusIconsVue[row.icon as keyof typeof ElementPlusIconsVue] || null" />
+                </el-icon>
+                <!-- <svg-icon v-if="row.icon" :icon-class="row.icon" /> -->
+
               </template>
             </el-table-column>
-            <el-table-column label="排序" prop="sort" width="80" align="center" />
-            <el-table-column label="路由路径" prop="routePath" min-width="120" />
-            <el-table-column label="组件路径" prop="component" min-width="150" />
-            <el-table-column label="权限标识" prop="perm" min-width="150" />
-            <el-table-column label="可见" width="80" align="center">
+            <el-table-column label="路由路径" prop="pagePath" min-width="120" />
+            <el-table-column label="父级Id" prop="parentId" min-width="120">
               <template #default="{ row }">
-                <el-tag v-if="row.visible === 1" type="success">显示</el-tag>
-                <el-tag v-else type="info">隐藏</el-tag>
+                <span>{{ row.parentId }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="缓存" width="80" align="center">
-              <template #default="{ row }">
-                <el-tag v-if="row.keepAlive === 1" type="success">是</el-tag>
-                <el-tag v-else-if="row.type === 2" type="info">否</el-tag>
-                <span v-else>-</span>
-              </template>
-            </el-table-column>
+
             <el-table-column label="操作" fixed="right" width="220">
               <template #default="{ row }">
                 <el-button type="primary" link size="small" icon="edit" @click="handleOpenDialog(row)">
                   编辑
                 </el-button>
                 <el-button type="success" link size="small" icon="plus" @click="handleOpenDialog(undefined, row.id)"
-                  v-if="row.type !== 3">
+                  v-if="row.type !== 1">
                   新增
                 </el-button>
                 <el-button type="danger" link size="small" icon="delete" @click="handleDelete(row.id)">
@@ -83,6 +83,11 @@
               </template>
             </el-table-column>
           </el-table>
+
+          <!-- 分页组件 -->
+          <pagination v-if="pageData.totleCount > 0" v-model:total="pageData.totleCount"
+            v-model:page="queryParams.SkipCount" v-model:limit="queryParams.MaxResultCount" @pagination="fetchData" />
+
         </el-card>
       </el-col>
     </el-row>
@@ -92,62 +97,35 @@
       @close="handleCloseDialog">
       <el-form ref="menuFormRef" :model="formData" :rules="rules" label-width="100px">
         <el-form-item label="父级菜单" prop="parentId">
-          <el-tree-select v-model="formData.parentId" :data="menuOptions" :props="{ value: 'id', label: 'name' }"
-            check-strictly value-key="id" placeholder="选择父级菜单" clearable style="width: 100%" />
+          <!-- 使用树形选择器 -->
+          <el-tree-select v-model="formData.parentId" :data="menuOptions"
+            :props="{ label: 'permissionName', value: 'id', children: 'children' }" check-strictly
+            :render-after-expand="false" style="width: 240px" disabled />
+
         </el-form-item>
 
         <el-form-item label="菜单类型" prop="type">
           <el-radio-group v-model="formData.type">
-            <el-radio :value="1">目录</el-radio>
-            <el-radio :value="2">菜单</el-radio>
-            <el-radio :value="3">按钮</el-radio>
+            <el-radio :value="0">菜单</el-radio>
+            <el-radio :value="1">按钮</el-radio>
+            <el-radio :value="2">其他</el-radio>
           </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="菜单名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入菜单名称" />
+        <el-form-item label="菜单名称" prop="permissionName">
+          <el-input v-model="formData.permissionName" placeholder="请输入菜单名称" />
         </el-form-item>
-
-        <el-form-item label="图标" prop="icon" v-if="formData.type !== 3">
+        <el-form-item label="图标" prop="icon" v-if="formData.type !== 1">
           <icon-select v-model="formData.icon" />
         </el-form-item>
-
-        <el-form-item label="排序" prop="sort">
-          <el-input-number v-model="formData.sort" :min="0" controls-position="right" style="width: 100%" />
+        <!-- :disabled="formData.type !== 0" -->
+        <el-form-item label="路由路径" prop="pagePath" v-if="formData.type !== 1">
+          <el-input v-model="formData.pagePath" placeholder="请输入路由路径" />
+        </el-form-item>
+        <el-form-item label="权限" prop="permissionCode">
+          <el-input v-model="formData.permissionCode" placeholder="请输入权限标识" />
         </el-form-item>
 
-        <el-form-item label="路由路径" prop="routePath" v-if="formData.type !== 3">
-          <el-input v-model="formData.routePath" placeholder="请输入路由路径" />
-        </el-form-item>
-
-        <el-form-item label="组件路径" prop="component" v-if="formData.type === 2">
-          <el-input v-model="formData.component" placeholder="请输入组件路径" />
-        </el-form-item>
-
-        <el-form-item label="权限标识" prop="perm" v-if="formData.type === 3">
-          <el-input v-model="formData.perm" placeholder="请输入权限标识" />
-        </el-form-item>
-
-        <el-form-item label="是否可见" prop="visible" v-if="formData.type !== 3">
-          <el-radio-group v-model="formData.visible">
-            <el-radio :value="1">显示</el-radio>
-            <el-radio :value="0">隐藏</el-radio>
-          </el-radio-group>
-        </el-form-item>
-
-        <el-form-item label="是否缓存" prop="keepAlive" v-if="formData.type === 2">
-          <el-radio-group v-model="formData.keepAlive">
-            <el-radio :value="1">是</el-radio>
-            <el-radio :value="0">否</el-radio>
-          </el-radio-group>
-        </el-form-item>
-
-        <el-form-item label="总是显示" prop="alwaysShow" v-if="formData.type === 1">
-          <el-radio-group v-model="formData.alwaysShow">
-            <el-radio :value="1">是</el-radio>
-            <el-radio :value="0">否</el-radio>
-          </el-radio-group>
-        </el-form-item>
       </el-form>
 
       <template #footer>
@@ -163,13 +141,15 @@
 <script setup lang="ts">
 import { useAppStore } from "@/store/modules/app.store";
 import { DeviceEnum } from "@/enums/settings/device.enum";
-import MenuAPI, { type MenuVO, type MenuForm, type MenuQuery } from "@/api/system/menu.api";
-import { ElMessage, ElMessageBox } from "element-plus";
+import MenuAPI, { type MenuVO, type MenuForm, type MenuQuery, type tables, type MenuTree } from "@/api/system/menu.api";
+import { ElMessage, ElMessageBox, useDisabled } from "element-plus";
 import { useDebounceFn } from "@vueuse/core";
-import SvgIcon from '@/components/SvgIcon/index.vue';
+// import SvgIcon from '@/components/SvgIcon/index.vue';
 import IconSelect from '@/components/IconSelect/index.vue'; // 假设有这个组件
-
-
+import { MenuTypeEnum } from "@/enums";
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import { useUserStore } from "@/store";
+const userStore = useUserStore();
 defineOptions({
   name: "Menu",
   inheritAttrs: false,
@@ -181,10 +161,17 @@ const queryFormRef = ref();
 const menuFormRef = ref();
 
 const queryParams = reactive<MenuQuery>({
-  keywords: undefined,
+  PermissionName: undefined,
+  Sorting: "0",
+  SkipCount: 1,
+  MaxResultCount: 50, // 每页数量
 });
 
-const pageData = ref<MenuVO[]>([]);
+const pageData = reactive<tables>({
+  data: [],
+  totleCount: 0,
+  totlePage: 0,
+});
 const total = ref(0);
 const loading = ref(false);
 
@@ -195,73 +182,62 @@ const dialog = reactive({
 const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
 
 const formData = reactive<MenuForm>({
-  parentId: "-1", // 默认顶级菜单
-  name: "",
-  type: 2, // 默认菜单类型为"菜单"
-  visible: 1, // 默认显示
-  sort: 0,
-  routePath: "",
-  component: "",
-  perm: "",
-  keepAlive: 0, // 默认不缓存
-  alwaysShow: 0, // 默认不总是显示
+  /** 菜单ID */
+  id: "",
+  /** 父菜单ID */
+  parentId: "",
+  /** 菜单名称 */
+  "permissionName": "",
+  "permissionCode": "",
+  "type": 0,
+  "pagePath": "",
+  "icon": "",
+  //alwaysShow: 0, // 默认不总是显示
 });
 
 const rules = reactive({
-  name: [{ required: true, message: "菜单名称不能为空", trigger: "blur" }],
-  type: [{ required: true, message: "菜单类型不能为空", trigger: "change" }],
-  routePath: [
-    {
-      validator: (rule: any, value: any, callback: any) => {
-        if (formData.type !== 3 && !value) {
-          callback(new Error("路由路径不能为空"));
-        } else {
-          callback();
-        }
-      }, trigger: "blur"
-    }
-  ],
-  component: [
-    {
-      validator: (rule: any, value: any, callback: any) => {
-        if (formData.type === 2 && !value) {
-          callback(new Error("组件路径不能为空"));
-        } else {
-          callback();
-        }
-      }, trigger: "blur"
-    }
-  ],
-  perm: [
-    {
-      validator: (rule: any, value: any, callback: any) => {
-        if (formData.type === 3 && !value) {
-          callback(new Error("权限标识不能为空"));
-        } else {
-          callback();
-        }
-      }, trigger: "blur"
-    }
-  ],
+  //parentId: [{ required: true, message: "父菜单ID不能为空", trigger: "blur" }],
+  permissionName: [{ required: true, message: "菜单名称不能为空", trigger: "change" }],
+
 });
 
 // 选中的菜单ID
 const selectIds = ref<string[]>([]);
 
 // 菜单下拉选项 (用于父级菜单选择)
-const menuOptions = ref<MenuVO[]>([]);
+const menuOptions = ref<MenuTree[]>([]);
+const menuOptionsLoading = async () => {
+  const menuOptionlist = await MenuAPI.getMenuTree(null);
+  menuOptions.value = menuOptionlist;
 
+};
 // 获取数据
 async function fetchData() {
   loading.value = true;
   try {
-    const result = await MenuAPI.getList(queryParams);
+    const params = {
+      PermissionName: queryParams.PermissionName,
+      Sorting: queryParams.Sorting,
+      SkipCount: (queryParams.SkipCount - 1) * queryParams.MaxResultCount, // 计算跳过的记录数
+      MaxResultCount: queryParams.MaxResultCount, // 每页数量 1) * pageSize.value,
+    };
+    const result = await MenuAPI.getList(params);
+    //pageData.data = result.data;
+    pageData.totleCount = result.totleCount;
+    pageData.totlePage = result.totlePage;
+
+    console.log("菜单列表:", result);
     // MenuAPI.getList 返回的是扁平化列表，需要转换成树形结构
-    pageData.value = buildMenuTree(result.data || []); // 假设 MenuAPI.getList 返回 { data: MenuVO[] } 或者直接 MenuVO[]
+    pageData.data = buildMenuTree(result.data || []); // 假设 MenuAPI.getList 返回 { data: MenuVO[] } 或者直接 MenuVO[]
+
+
+
   } catch (error) {
     console.error("获取菜单列表失败:", error);
     ElMessage.error("获取菜单列表失败，请稍后重试");
-    pageData.value = [];
+    pageData.data = [];
+    pageData.totleCount = 0;
+    pageData.totlePage = 0;
   } finally {
     loading.value = false;
   }
@@ -269,51 +245,39 @@ async function fetchData() {
 
 // 构建菜单树形结构
 function buildMenuTree(menuList: MenuVO[]): MenuVO[] {
-  const tree: MenuVO[] = [];
-  const menuMap: { [key: string]: MenuVO } = {};
+  const tree: MenuVO[] = []; // 用于存放最终的树形结构
+  const menuMap: { [key: string]: MenuVO } = {}; // 用于根据id快速查找菜单项
 
-  // 将所有菜单放入一个map中，方便查找
+  // 1. 先把所有菜单放到 map，key为id，value为菜单对象（并初始化children为空数组）
   menuList.forEach(menu => {
-    menuMap[menu.id!] = { ...menu, children: [] };
+    menuMap[String(menu.id)] = { ...menu, children: [] };
   });
 
+  // 2. 再遍历所有菜单，根据parentId归类到父级的children数组
   menuList.forEach(menu => {
-    if (menu.parentId && menu.parentId !== '-1') {
-      const parent = menuMap[menu.parentId];
-      if (parent) {
-        parent.children!.push(menuMap[menu.id!]);
-      } else {
-        // 如果父级不存在，则视为顶级菜单
-        tree.push(menuMap[menu.id!]);
-      }
-    } else {
-      tree.push(menuMap[menu.id!]);
+    // 处理parentId，确保是字符串类型，且null/undefined时设为''
+    const pid = menu.parentId === undefined || menu.parentId === null ? '' : String(menu.parentId);
+
+    if (pid !== '' && menuMap[pid]) {
+      // 如果有父级且父级存在于map中，则加入父级的children
+      menuMap[pid].children!.push(menuMap[String(menu.id)]);
+    } else if (pid === '' || !menuMap[pid]) {
+      // 如果没有父级（顶级菜单）或父级不存在于map中，则作为根节点加入tree
+      tree.push(menuMap[String(menu.id)]);
     }
   });
-
-  // 对树进行排序（如果需要）
-  // tree.sort((a, b) => (a.sort || 0) - (b.sort || 0));
-  // tree.forEach(sortChildren);
 
   return tree;
 }
 
-// 递归排序子菜单 (如果需要)
-// function sortChildren(menu: MenuVO) {
-//   if (menu.children && menu.children.length > 0) {
-//     menu.children.sort((a, b) => (a.sort || 0) - (b.sort || 0));
-//     menu.children.forEach(sortChildren);
-//   }
-// }
-
 // 获取菜单下拉选项
 async function getMenuOptions() {
-  try {
-    const result = await MenuAPI.getOptions(true); // true 表示只获取父级菜单
-    menuOptions.value = [{ id: "-1", name: "顶级菜单", children: [] }, ...result]; // 添加顶级菜单选项
-  } catch (error) {
-    console.error("获取菜单选项失败:", error);
-  }
+  // try {
+  //   const result = await MenuAPI.getOptions(true); // true 表示只获取父级菜单
+  //   menuOptions.value = [{ id: "-1", name: "顶级菜单", children: [] }, ...result]; // 添加顶级菜单选项
+  // } catch (error) {
+  //   console.error("获取菜单选项失败:", error);
+  // }
 }
 
 // 查询（重置页码后获取数据）
@@ -323,7 +287,7 @@ function handleQuery() {
 
 // 重置查询
 function handleResetQuery() {
-  queryFormRef.value.resetFields();
+  queryParams.PermissionName = undefined;
   fetchData();
 }
 
@@ -347,16 +311,13 @@ async function handleOpenDialog(row?: MenuVO, parentId?: string) {
   } else {
     dialog.title = "新增菜单";
     Object.assign(formData, {
-      parentId: parentId || "-1", // 设置父级菜单，默认为顶级菜单
-      name: "",
-      type: 2, // 默认菜单类型为"菜单"
-      visible: 1, // 默认显示
-      sort: 0,
-      routePath: "",
-      component: "",
-      perm: "",
-      keepAlive: 0,
-      alwaysShow: 0,
+      parentId: parentId || null, // 设置父级菜单，默认为顶级菜单
+      /** 菜单名称 */
+      "permissionName": "",
+      "permissionCode": "",
+      "type": 0,
+      "pagePath": "",
+      "icon": "",
       id: undefined,
     });
   }
@@ -370,16 +331,15 @@ function handleCloseDialog() {
 
   // 重置 formData 到初始状态
   Object.assign(formData, {
-    parentId: "-1",
-    name: "",
-    type: 2,
-    visible: 1,
-    sort: 0,
-    routePath: "",
-    component: "",
-    perm: "",
-    keepAlive: 0,
-    alwaysShow: 0,
+
+    /** 父菜单ID */
+    parentId: "",
+    /** 菜单名称 */
+    "permissionName": "",
+    "permissionCode": "",
+    "type": 0,
+    "pagePath": "",
+    "icon": "",
     id: undefined,
   });
 }
@@ -391,12 +351,16 @@ const handleSubmit = useDebounceFn(async () => {
 
   loading.value = true;
   try {
+
     if (formData.id) {
       // 编辑菜单
+      formData.icon = (formData.icon?.split('-').pop()) || '';
       await MenuAPI.update(formData.id, formData);
       ElMessage.success("修改成功");
     } else {
       // 新增菜单
+      formData.icon = formData.icon?.split('-').pop() || '';
+
       await MenuAPI.create(formData);
       ElMessage.success("新增成功");
     }
@@ -450,6 +414,10 @@ const initComponent = () => {
   handleQuery();
 };
 
-onMounted(initComponent);
 
+onMounted(() => {
+  initComponent();
+  getMenuOptions();
+  menuOptionsLoading();
+});
 </script>

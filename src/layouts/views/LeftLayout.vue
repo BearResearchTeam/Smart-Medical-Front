@@ -7,19 +7,16 @@
         <AppLogo v-if="isShowLogo" :collapse="!isSidebarOpen" />
         <!-- 主菜单内容 -->
         <el-scrollbar>
-          <BasicMenu :data="routes" base-path="" />
+          <BasicMenu :data="routes" base-path="" :router="true" />
         </el-scrollbar>
       </div>
     </div>
 
     <!-- 主内容区 -->
-    <div
-      :class="{
-        hasTagsView: isShowTagsView,
-        'layout__main--collapsed': !isSidebarOpen,
-      }"
-      class="layout__main"
-    >
+    <div :class="{
+      hasTagsView: isShowTagsView,
+      'layout__main--collapsed': !isSidebarOpen,
+    }" class="layout__main">
       <NavBar />
       <TagsView v-if="isShowTagsView" />
       <AppMain />

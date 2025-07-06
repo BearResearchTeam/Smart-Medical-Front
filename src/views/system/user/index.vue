@@ -67,6 +67,9 @@
             </el-table-column>
             <el-table-column label="操作" fixed="right" width="220">
               <template #default="{ row }">
+                <el-button type="primary" link size="small" icon="edit" @click="handleuserrole(row)">
+                  分配角色
+                </el-button>
                 <el-button type="primary" link size="small" icon="edit" @click="handleOpenDialog(row)">
                   编辑
                 </el-button>
@@ -123,17 +126,40 @@
 
     <!-- 用户导入 (保留) -->
     <UserImport v-model="importDialogVisible" @import-success="handleQuery()" />
+
+    <!-- 分配角色弹窗 -->
+    <el-dialog v-model="userRoleDialog.visible" title="分配角色" width="400px">
+      <el-form>
+        <el-form-item label="用户名称">
+          <el-input :value="userRoleDialog.userName" disabled />
+        </el-form-item>
+        <el-form-item label="角色">
+          <el-select v-model="userRoleDialog.roleIds" multiple placeholder="请选择角色" style="width: 100%">
+            <el-option v-for="item in roleOptions" :key="item.id" :label="item.roleName" :value="item.id" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="userRoleDialog.visible = false">取消</el-button>
+        <el-button type="primary" @click="submitUserRole">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useAppStore } from "@/store/modules/app.store";
 import { DeviceEnum } from "@/enums/settings/device.enum";
-import MyUserAPI, { type UserListItem, type UserAddRequest, type UserUpdateRequest } from "@/api/myuser.api";
+import MyUserAPI, {
+  type UserListItem,
+  type UserAddRequest,
+  type UserUpdateRequest,
+} from "@/api/myuser.api";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useDebounceFn } from "@vueuse/core";
 
 import UserImport from "./components/UserImport.vue";
+import MyRoleAPI, { type RoleItems } from "@/api/myrole.api";
 
 defineOptions({
   name: "User",
@@ -146,11 +172,12 @@ const queryFormRef = ref();
 const userFormRef = ref();
 
 const queryParams = reactive<any>({
-  pageNum: 1,
-  pageSize: 10,
-  keywords: undefined,
-  status: undefined,
-  createTime: undefined,
+  Sorting: "",
+  SkipCount: 1,
+  MaxResultCount: 10,
+  UserName: "",
+  UserEmail: "",
+  UserPhone: "",
 });
 
 const pageData = ref<UserListItem[]>([]);
@@ -179,7 +206,11 @@ const rules = reactive({
     { min: 6, message: "密码不能少于6位", trigger: "blur" },
   ],
   userEmail: [
-    { pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/, message: "请输入正确的邮箱地址", trigger: "blur" },
+    {
+      pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/,
+      message: "请输入正确的邮箱地址",
+      trigger: "blur",
+    },
   ],
   userPhone: [
     { pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/, message: "请输入正确的手机号码", trigger: "blur" },
@@ -198,10 +229,10 @@ const displayUserSex = computed({
   get() {
     if (formData.userSex === true) return true;
     if (formData.userSex === false) return false;
-    return 'unknown'; // 将null映射为'unknown'字符串
+    return "unknown"; // 将null映射为'unknown'字符串
   },
-  set(value: boolean | 'unknown') {
-    if (value === 'unknown') {
+  set(value: boolean | "unknown") {
+    if (value === "unknown") {
       formData.userSex = null;
     } else {
       formData.userSex = value;
@@ -209,18 +240,28 @@ const displayUserSex = computed({
   },
 });
 
+// 弹窗显示与表单数据
+const userRoleDialog = reactive({
+  visible: false,
+  userId: "",
+  userName: "",
+  roleIds: [],
+});
+
+const roleOptions = ref<RoleItems[]>([]);
+
 // 获取数据
 async function fetchData() {
   loading.value = true;
   try {
     // 构造查询参数，与API接口匹配
     const params = {
-      pageIndex: queryParams.pageNum,
-      pageSize: queryParams.pageSize,
-      keywords: queryParams.keywords,
-      status: queryParams.status,
-      beginTime: queryParams.createTime ? queryParams.createTime[0] : undefined,
-      endTime: queryParams.createTime ? queryParams.createTime[1] : undefined,
+      UserName: queryParams.UserName,
+      UserEmail: queryParams.UserEmail,
+      UserPhone: queryParams.UserPhone,
+      Sorting: queryParams.Sorting,
+      SkipCount: (queryParams.SkipCount - 1) * queryParams.MaxResultCount,
+      MaxResultCount: queryParams.MaxResultCount,
     };
 
     console.log("发送查询参数:", params);
@@ -231,6 +272,7 @@ async function fetchData() {
     if (result) {
       pageData.value = result.data || [];
       total.value = result.totalCount || 0;
+      console.log("pageData.value", pageData.value);
     } else {
       pageData.value = [];
       total.value = 0;
@@ -379,4 +421,30 @@ const initComponent = () => {
 };
 
 onMounted(initComponent);
+
+async function fetchRoleOptions() {
+  const res = await MyRoleAPI.getRoleasync();
+  roleOptions.value = res;
+}
+
+function handleuserrole(row: UserListItem) {
+  userRoleDialog.visible = true;
+  userRoleDialog.userId = row.id;
+  userRoleDialog.userName = row.userName;
+  userRoleDialog.roleIds = []; // 默认不选
+  fetchRoleOptions();
+  console.log("11111", row);
+}
+
+async function submitUserRole() {
+  if (!userRoleDialog.roleIds || userRoleDialog.roleIds.length === 0) {
+    ElMessage.warning("请选择角色");
+    return;
+  }
+  // 调用批量分配角色API
+  await MyUserAPI.batchUserrole(userRoleDialog.userId, userRoleDialog.roleIds);
+  ElMessage.success("分配成功");
+  userRoleDialog.visible = false;
+  fetchData();
+}
 </script>

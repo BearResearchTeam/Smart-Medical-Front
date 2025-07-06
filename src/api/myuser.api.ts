@@ -11,44 +11,94 @@ const MyUserAPI = {
    * @param data 登录表单数据
    */
   login(data: LoginFormData) {
+    //const cases = request;
+    //debugger;
+    // 检查是否应该使用模拟数据（当baseURL为空或明确指定使用模拟数据时）
+    // const useMockData = !request.defaults.baseURL || localStorage.getItem("useMockData") === "true";
+
+    // if (useMockData) {
+    //   console.log("使用模拟登录数据");
+    //   return new Promise<LoginResult>((resolve, reject) => {
+    //     setTimeout(() => {
+    //       // 模拟登录成功
+    //       if (data.username === "admin" && data.password === "123456") {
+    //         resolve({
+    //           id: "1",
+    //           userName: data.username,
+    //           userEmail: "admin@example.com",
+    //           userPhone: "13800138000",
+    //           userSex: true,
+    //           nickname: "管理员",
+    //           avatar: "",
+    //           roles: ["admin"],
+    //           perms: ["*:*:*"],
+    //         });
+    //       } else {
+    //         // 模拟登录失败
+    //         reject(new Error("用户名或密码错误"));
+    //       }
+    //     }, 500); // 模拟网络延迟
+    //   });
+    // }
+
     // 正常API调用
     console.log("执行实际登录API调用", data);
 
-    return request<any, LoginResult>({
+    // 构造后端接口需要的请求格式
+    const loginRequestData = {
+      userName: data.username,
+      userPwd: data.password,
+      rememberMe: data.rememberMe,
+    };
+
+    //api/app/user/login
+    //api/app/user-login-async/login
+    return request<LoginResult>({
       url: "api/app/user/login",
       method: "post",
-      data, // 将登录数据作为请求体发送
+      data: loginRequestData, // 将登录数据作为请求体发送
+
     });
   },
-
+  /**
+   * 获取用户列表 
+   * @param params 查询参数
+   */
+  batchUserrole(userId: string, roleIds: string[]) {
+    return request({
+      url: `/api/app/user-role/batch-create/${userId}`,
+      method: "post",
+      data: roleIds ,
+    });
+  },
   /**
    * 获取当前登录用户信息
    */
   getUserInfo() {
     // 检查是否使用模拟数据
-    const useMockData = false;
+    //const useMockData = !request.defaults.baseURL || localStorage.getItem("useMockData") === "true";
 
-    if (useMockData) {
-      console.log("使用模拟用户信息数据");
-      return new Promise<UserInfo>((resolve) => {
-        setTimeout(() => {
-          const username = localStorage.getItem("loginUser") || "admin";
-          resolve({
-            userId: "1",
-            username,
-            nickname: username === "admin" ? "管理员" : username,
-            avatar: "",
-            roles: ["admin"],
-            perms: ["*:*:*"],
-            userEmail: "admin@example.com",
-            userPhone: "13800138000",
-            userSex: true,
-          });
-        }, 300);
-      });
-    }
+    // if (useMockData) {
+    //   console.log("使用模拟用户信息数据");
+    //   return new Promise<UserInfo>((resolve) => {
+    //     setTimeout(() => {
+    //       const username = localStorage.getItem("loginUser") || "admin";
+    //       resolve({
+    //         userId: "1",
+    //         username,
+    //         nickname: username === "admin" ? "管理员" : username,
+    //         avatar: "",
+    //         roles: ["admin"],
+    //         perms: ["*:*:*"],
+    //         userEmail: "admin@example.com",
+    //         userPhone: "13800138000",
+    //         userSex: true,
+    //       });
+    //     }, 300);
+    //   });
+    // }
 
-    return request<any, UserInfo>({
+    return request<UserInfo>({
       url: "api/app/account/info",
       method: "get",
     });
@@ -82,7 +132,7 @@ const MyUserAPI = {
    * 获取验证码
    */
   getCaptcha() {
-    return request<any, CaptchaInfo>({
+    return request<CaptchaInfo>({
       url: "api/app/account/captcha",
       method: "get",
     });
@@ -112,7 +162,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, UserListItem>({
+    return request<UserListItem>({
       url: `api/app/user/${id}`,
       method: "get",
     });
@@ -135,8 +185,8 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
-      url: "api/app/user",
+    return request<any>({
+      url: "api/app/user/user-pT",
       method: "post",
       data,
     });
@@ -160,7 +210,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
+    return request<any>({
       url: `api/app/user/${id}`,
       method: "put",
       data,
@@ -184,7 +234,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
+    return request<any>({
       url: `api/app/user/${ids}`, // 根据后端设计，可能需要调整为 query param 或 request body
       method: "delete",
     });
@@ -287,7 +337,7 @@ const MyUserAPI = {
     }
 
     // 实际API调用 - 根据Swagger接口规范调用后端API
-    return request<any, UserPageResult>({
+    return request<UserPageResult>({
       url: "api/app/user",
       method: "get",
       params,
@@ -311,8 +361,8 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
-      url: "api/app/user",
+    return request<any>({
+      url: "api/app/user/user-pT",
       method: "post",
       data,
     });
@@ -326,13 +376,46 @@ export interface LoginFormData {
   /** 用户名 */
   username: string;
   /** 密码 */
-  userPwd: string;
+  password: string;
   /** 验证码缓存key */
   captchaKey: string;
   /** 验证码 */
   captchaCode: string;
   /** 记住我 */
   rememberMe: boolean;
+  /** 权限 */
+  //permissions: string[];
+  
+}
+
+export interface LoginFromDataLMZ {
+  /** 用户名 */
+  username: string;
+  /** 密码 */
+  password: string;
+  /** 验证码缓存key */
+  captchaKey: string;
+  /** 验证码 */
+  captchaCode: string;
+  /** 记住我 */
+  rememberMe: boolean;
+  //////////////////////////////////////////////////
+  /** 用户邮箱，用于找回密码、通知等 */
+  userEmail: string;
+  /** 用户手机号，常用于绑定和验证 */
+  userPhone: string;
+  /** 用户性别，true 为男，false 为女，null 表示未设置 */
+  userSex: boolean | null;
+  /** 访问令牌，用于身份认证（JWT 格式） */
+  accessToken: string;
+  /** accessToken 的过期时间（ISO 格式字符串） */
+  accessTokenExpires: string;
+  /** 用户编号，通常为 UUID，唯一标识用户 */
+  userNumber: string;
+  /** 用于刷新 accessToken 的令牌（JWT 格式） */
+  refreshToken: string;
+  /** refreshToken 的过期时间（ISO 格式字符串） */
+  refreshTokenExpires: string;
 }
 
 /** 登录响应体中的用户数据和令牌信息 */
@@ -344,6 +427,8 @@ export interface LoginResult {
   userSex: boolean;
   nickname?: string;
   avatar?: string;
+  roleName: null,
+  userRoles: [],
   roles?: string[];
   perms?: string[];
   // 假设令牌信息也包含在登录响应的data中，如果实际没有，则需要修改后端或前端逻辑
@@ -351,6 +436,7 @@ export interface LoginResult {
   refreshToken?: string;
   tokenType?: string;
   expiresIn?: number;
+  permissions?: string[];
 }
 
 /** 用户信息 (用于Pinia store) */
@@ -412,13 +498,12 @@ export interface UserListItem {
 
 /** 用户列表查询参数 */
 export interface UserListParams {
-  pageIndex?: number;
-  pageSize?: number;
-  keywords?: string;
-  status?: number;
-  deptId?: string;
-  beginTime?: string;
-  endTime?: string;
+  Sorting?: string;
+  SkipCount: number;
+  MaxResultCount: number;
+  UserName?: string;
+  UserEmail?: string;
+  UserPhone?: string;
 }
 
 /** 用户分页结果 */
