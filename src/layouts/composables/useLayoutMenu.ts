@@ -1,6 +1,7 @@
 import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
-import { useAppStore, usePermissionStore } from "@/store";
+import { useAppStore, usePermissionStore, useSettingsStore } from "@/store";
+import { LayoutMode } from "@/enums";
 
 /**
  * 布局菜单处理逻辑
@@ -9,6 +10,7 @@ export function useLayoutMenu() {
   const route = useRoute();
   const appStore = useAppStore();
   const permissionStore = usePermissionStore();
+  const settingsStore = useSettingsStore();
 
   // 顶部菜单激活路径
   const activeTopMenuPath = computed(() => appStore.activeTopMenuPath);
@@ -35,7 +37,10 @@ export function useLayoutMenu() {
   watch(
     () => activeTopMenuPath.value,
     (newPath) => {
-      permissionStore.updateSideMenu(newPath);
+      // 仅在混合模式下更新侧边菜单
+      if (settingsStore.layout === LayoutMode.MIX) {
+        permissionStore.updateSideMenu(newPath);
+      }
     },
     { immediate: true }
   );

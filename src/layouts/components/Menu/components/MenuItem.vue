@@ -1,34 +1,19 @@
 <template>
   <div v-if="!item.meta || !item.meta.hidden">
     <!--【叶子节点】显示叶子节点或唯一子节点且父节点未配置始终显示 -->
-    <template
-      v-if="
-        // 未配置始终显示，使用唯一子节点替换父节点显示为叶子节点
-        (hasOneShowingChild(item.children, item) &&
-          !item.meta?.alwaysShow &&
-          (!onlyOneChild.children || onlyOneChild.noShowingChildren)) ||
-        // 即使配置了始终显示，但无子节点，也显示为叶子节点
-        (item.meta?.alwaysShow && !item.children)
-      "
-    >
-      <AppLink
-        v-if="onlyOneChild.meta"
-        :to="{
-          path: resolvePath(onlyOneChild.path),
-          query: onlyOneChild.meta.params,
-        }"
-      >
-        <el-menu-item
-          :index="resolvePath(onlyOneChild.path)"
-          :class="{ 'submenu-title-noDropdown': !isNest }"
-        >
-          <MenuItemContent
-            v-if="onlyOneChild.meta"
-            :icon="onlyOneChild.meta.icon || item.meta?.icon"
-            :title="onlyOneChild.meta.title"
-          />
-        </el-menu-item>
-      </AppLink>
+    <template v-if="
+      // 未配置始终显示，使用唯一子节点替换父节点显示为叶子节点
+      (hasOneShowingChild(item.children, item) &&
+        !item.meta?.alwaysShow &&
+        (!onlyOneChild.children || onlyOneChild.noShowingChildren)) ||
+      // 即使配置了始终显示，但无子节点，也显示为叶子节点
+      (item.meta?.alwaysShow && !item.children)
+    ">
+      <el-menu-item v-if="onlyOneChild.meta" :index="resolvePath(onlyOneChild.path)"
+        :class="{ 'submenu-title-noDropdown': !isNest }">
+        <MenuItemContent v-if="onlyOneChild.meta" :icon="onlyOneChild.meta.icon || item.meta?.icon"
+          :title="onlyOneChild.meta.title" />
+      </el-menu-item>
     </template>
 
     <!--【非叶子节点】显示含多个子节点的父菜单，或始终显示的单子节点 -->
@@ -37,13 +22,8 @@
         <MenuItemContent v-if="item.meta" :icon="item.meta.icon" :title="item.meta.title" />
       </template>
 
-      <MenuItem
-        v-for="child in item.children"
-        :key="child.path"
-        :is-nest="true"
-        :item="child"
-        :base-path="resolvePath(child.path)"
-      />
+      <MenuItem v-for="child in item.children" :key="child.path" :is-nest="true" :item="child"
+        :base-path="resolvePath(child.path)" />
     </el-sub-menu>
   </div>
 </template>
@@ -131,8 +111,12 @@ function resolvePath(routePath: string) {
   if (isExternal(routePath)) return routePath;
   if (isExternal(props.basePath)) return props.basePath;
 
-  // 拼接父路径和当前路径
-  return path.resolve(props.basePath, routePath);
+  // 绝对路径直接返回
+  if (routePath.startsWith('/')) return routePath;
+
+  // 相对路径拼接
+  if (!props.basePath) return `/${routePath}`;
+  return `${props.basePath.replace(/\/$/, '')}/${routePath.replace(/^\//, '')}`;
 }
 </script>
 
@@ -141,7 +125,7 @@ function resolvePath(routePath: string) {
   .submenu-title-noDropdown {
     position: relative;
 
-    & > span {
+    &>span {
       display: inline-block;
       visibility: hidden;
       width: 0;
@@ -153,7 +137,7 @@ function resolvePath(routePath: string) {
   .el-sub-menu {
     overflow: hidden;
 
-    & > .el-sub-menu__title {
+    &>.el-sub-menu__title {
       .sub-el-icon {
         margin-left: 19px;
       }
@@ -168,7 +152,7 @@ function resolvePath(routePath: string) {
     width: $sidebar-width-collapsed;
 
     .el-sub-menu {
-      & > .el-sub-menu__title > span {
+      &>.el-sub-menu__title>span {
         display: inline-block;
         visibility: hidden;
         width: 0;
@@ -193,6 +177,7 @@ html.sidebar-color-blue {
 
 // 父菜单激活状态样式 - 当子菜单激活时，父菜单显示激活状态
 .el-sub-menu {
+
   // 当父菜单包含激活子菜单时的样式
   &.has-active-child .el-sub-menu__title {
     color: var(--el-color-primary) !important;

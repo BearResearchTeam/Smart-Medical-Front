@@ -19,7 +19,14 @@ const DeptAPI = {
       params: data, // 将查询参数作为请求体发送
     });
   },
-
+  //查询科室列表(下拉)
+getdept(){
+    return request<Deptselete>({
+      url: "/api/app/doctor-department/doctor-department",
+      method: "get",
+     
+    });
+  },
   /**
    * 获取科室表单数据
    *
@@ -82,7 +89,10 @@ const DeptAPI = {
 };
 
 export default DeptAPI;
-
+export interface Deptselete{
+  id: string;
+  departmentName: string;
+}
 /** 部门查询参数 */
 export interface DeptQuery {
   /** 搜索关键字 */

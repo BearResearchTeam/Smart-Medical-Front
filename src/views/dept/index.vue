@@ -7,12 +7,6 @@
           <el-input v-model="queryParams.DepartmentName" placeholder="科室名称" @keyup.enter="handleQuery" />
         </el-form-item>
 
-        <!-- <el-form-item label="科室状态" prop="status">
-          <el-select v-model="queryParams." placeholder="全部" clearable style="width: 100px">
-            <el-option :value="1" label="正常" />
-            <el-option :value="0" label="禁用" />
-          </el-select>
-        </el-form-item> -->
 
         <el-form-item class="search-buttons">
           <el-button class="filter-item" type="primary" icon="search" @click="handleQuery">
@@ -26,10 +20,11 @@
     <el-card shadow="hover" class="data-table">
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--actions">
-          <el-button type="success" icon="plus" @click="handleOpenDialog(1)">
+          <el-button type="success" v-if="userStore.hasPerm('dept:add')" icon="plus" @click="handleOpenDialog(1)">
             新增
           </el-button>
-          <el-button type="danger" :disabled="selectIds.length === 0" icon="delete" @click="handleDelete()">
+          <el-button type="danger" v-if="userStore.hasPerm('dept:delete')" :disabled="selectIds.length === 0"
+            icon="delete" @click="handleDelete()">
             删除
           </el-button>
         </div>
@@ -57,10 +52,12 @@
 
         <el-table-column label="操作" fixed="right" align="left" width="200">
           <template #default="scope">
-            <el-button type="primary" link size="small" icon="edit" @click.stop="handleOpenDialog(scope.row)">
+            <el-button type="primary" v-if="userStore.hasPerm('dept:edit')" link size="small" icon="edit"
+              @click.stop="handleOpenDialog(scope.row)">
               编辑
             </el-button>
-            <el-button type="danger" link size="small" icon="delete" @click.stop="handleDelete(scope.row.id)">
+            <el-button type="danger" v-if="userStore.hasPerm('dept:delete')" link size="small" icon="delete"
+              @click.stop="handleDelete(scope.row.id)">
               删除
             </el-button>
           </template>
@@ -117,13 +114,15 @@
 </template>
 
 <script setup lang="ts">
+
 defineOptions({
   name: "Dept",
   inheritAttrs: false,
 });
 
-import DeptAPI, { DeptForm, DeptQuery, DeptListResponse } from "@/api/doctordept/doctordept.api";
-
+import DeptAPI, { DeptForm, DeptQuery, DeptListResponse } from "@/api/doctor/doctordept.api";
+import { useUserStore } from '@/store/modules/user.store';
+const userStore = useUserStore();
 const queryFormRef = ref();
 const deptFormRef = ref();
 
@@ -165,14 +164,18 @@ const formData = reactive<DeptForm>({
   "doctorCount": 0,
   "pharmacistCount": 0,
   "nurseCount": 0,
-  "type": "启用"
+  "type": "正常"
 });
 
 const rules = reactive({
-  parentId: [{ required: true, message: "上级部门不能为空", trigger: "change" }],
-  name: [{ required: true, message: "部门名称不能为空", trigger: "blur" }],
-  code: [{ required: true, message: "部门编号不能为空", trigger: "blur" }],
-  sort: [{ required: true, message: "显示排序不能为空", trigger: "blur" }],
+  departmentName: [{ required: true, message: "科室名称不能为空", trigger: "change" }],
+  departmentCategory: [{ required: true, message: "科室大类不能为空", trigger: "blur" }],
+  address: [{ required: true, message: "地址不能为空", trigger: "blur" }],
+  directorName: [{ required: true, message: "负责人名称不能为空", trigger: "blur" }],
+  doctorCount: [{ required: true, message: "医师人数不能为空", trigger: "change" }],
+  pharmacistCount: [{ required: true, message: "药师人数不能为空", trigger: "change" }],
+  nurseCount: [{ required: true, message: "护士人数不能为空", trigger: "change" }],
+  type: [{ required: true, message: "状态不能为空", trigger: "change" }],
 });
 
 // 显示科室列表
