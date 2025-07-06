@@ -312,7 +312,7 @@ const MyUserAPI = {
     }
 
     return request<any, any>({
-      url: "api/app/user",
+      url: "api/app/user/user-pT",
       method: "post",
       data,
     });
