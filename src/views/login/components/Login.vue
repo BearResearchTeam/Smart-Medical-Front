@@ -173,7 +173,7 @@ const LoginFormDataLmz = ref<LoginFromDataLMZ>({
 });
 const loginFormData = ref<LoginFormData>({
   username: "admin",
-  userPwd: "123456",
+  password: "123456",
   captchaKey: "", // 保留字段但不使用
   captchaCode: "", // 保留字段但不使用
   rememberMe,

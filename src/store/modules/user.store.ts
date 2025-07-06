@@ -1,6 +1,6 @@
 import { store } from "@/store";
 import { Auth } from "@/utils/auth";
-import type { LoginFromDataLMZ } from "@/api/myuser.api";
+import type { LoginFromDataLMZ, LoginFormData } from "@/api/myuser.api";
 import { usePermissionStore } from "./permission.store";
 import { Storage } from "@/utils/storage";
 import { AUTH_KEYS } from "@/constants";
@@ -43,43 +43,44 @@ export const useUserStore = defineStore("user", () => {
  
 const permissions = ref<string[]>([]);
   // 登录
-  async function login(loginData: LoginFromDataLMZ) {
+  async function login(loginData: LoginFormData) {
     try {
+      debugger
       // 检查是否使用模拟数据
-      const useMockData = localStorage.getItem("useMockData") === "true";
+      //const useMockData = localStorage.getItem("useMockData") === "true";
 
       // 如果使用模拟数据，直接返回模拟结果
-      if (useMockData) {
-        console.log("使用模拟数据登录");
+      // if (useMockData) {
+      //   console.log("使用模拟数据登录");
 
-        // 保存记住我选项
-        Storage.set(AUTH_KEYS.REMEMBER_ME, loginData.rememberMe);
+      //   // 保存记住我选项
+      //   Storage.set(AUTH_KEYS.REMEMBER_ME, loginData.rememberMe);
 
-        // 设置登录状态（使用模拟令牌）
-        Auth.setTokens("mock-token", "mock-refresh-token", loginData.rememberMe);
+      //   // 设置登录状态（使用模拟令牌）
+      //   Auth.setTokens("mock-token", "mock-refresh-token", loginData.rememberMe);
 
-        // 模拟数据也更新 userInfo
-        userInfo.value = {
-          ...userInfo.value,
-          userId: "1", // 模拟用户ID
-          username: loginData.username,
-          realName: loginData.username, // 模拟真实姓名
-          userEmail: "mock@example.com",
-          userPhone: "13800138000",
-          userSex: true, // 模拟性别
-        };
+      //   // 模拟数据也更新 userInfo
+      //   userInfo.value = {
+      //     ...userInfo.value,
+      //     userId: "1", // 模拟用户ID
+      //     username: loginData.username,
+      //     realName: loginData.username, // 模拟真实姓名
+      //     userEmail: "mock@example.com",
+      //     userPhone: "13800138000",
+      //     userSex: true, // 模拟性别
+      //   };
 
-        // 保存用户信息到本地存储
-        saveUserInfo();
+      //   // 保存用户信息到本地存储
+      //   saveUserInfo();
 
-        return {
-          id: "1",
-          userName: loginData.username,
-          userEmail: "admin@example.com",
-          userPhone: "13800138000",
-          userSex: true,
-        };
-      }
+      //   return {
+      //     id: "1",
+      //     userName: loginData.username,
+      //     userEmail: "admin@example.com",
+      //     userPhone: "13800138000",
+      //     userSex: true,
+      //   };
+      // }
 
       // 调用API进行登录
       //console.log("调用真实API登录");

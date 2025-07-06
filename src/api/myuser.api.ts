@@ -10,7 +10,7 @@ const MyUserAPI = {
    * 用户登录接口
    * @param data 登录表单数据
    */
-  login(data: LoginFromDataLMZ) {
+  login(data: LoginFormData) {
     //const cases = request;
     //debugger;
     // 检查是否应该使用模拟数据（当baseURL为空或明确指定使用模拟数据时）
@@ -429,7 +429,6 @@ export interface LoginResult {
   avatar?: string;
   roleName: null,
   userRoles: [],
-  permissions: [];
   roles?: string[];
   perms?: string[];
   // 假设令牌信息也包含在登录响应的data中，如果实际没有，则需要修改后端或前端逻辑

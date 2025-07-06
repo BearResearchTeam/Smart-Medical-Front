@@ -99,7 +99,7 @@ async function handleAuthenticatedUser(
       //console.log("🔄 Routes generated, re-navigating to original target:", to.path);
 
       console.log(router.getRoutes());
-      debugger
+      //debugger
       next({ ...to, replace: true });
       return;
     }
@@ -135,7 +135,7 @@ async function generateAndAddRoutes(permissionStore: any) {
 
   try {
     const dynamicRoutes = await permissionStore.generateRoutes();
-    debugger
+    //debugger
     // 添加路由到路由器
     dynamicRoutes.forEach((route: RouteRecordRaw) => {
       router.addRoute(route);
