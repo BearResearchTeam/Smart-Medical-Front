@@ -20,7 +20,17 @@ const MyUserAPI = {
       data, // 将登录数据作为请求体发送
     });
   },
-
+  /**
+   * 获取用户列表 
+   * @param params 查询参数
+   */
+  batchUserrole(userId: string, roleIds: string[]) {
+    return request({
+      url: `/api/app/user-role/batch-create/${userId}`,
+      method: "post",
+      data: roleIds ,
+    });
+  },
   /**
    * 获取当前登录用户信息
    */
@@ -136,7 +146,7 @@ const MyUserAPI = {
     }
 
     return request<any>({
-      url: "api/app/user",
+      url: "api/app/user/user-pT",
       method: "post",
       data,
     });
@@ -312,7 +322,7 @@ const MyUserAPI = {
     }
 
     return request<any>({
-      url: "api/app/user",
+      url: "api/app/user/user-pT",
       method: "post",
       data,
     });
@@ -416,13 +426,12 @@ export interface UserListItem {
 
 /** 用户列表查询参数 */
 export interface UserListParams {
-  pageIndex?: number;
-  pageSize?: number;
-  keywords?: string;
-  status?: number;
-  deptId?: string;
-  beginTime?: string;
-  endTime?: string;
+  Sorting?: string;
+  SkipCount: number;
+  MaxResultCount: number;
+  UserName?: string;
+  UserEmail?: string;
+  UserPhone?: string;
 }
 
 /** 用户分页结果 */

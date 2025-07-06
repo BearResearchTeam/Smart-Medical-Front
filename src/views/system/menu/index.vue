@@ -269,13 +269,6 @@ function buildMenuTree(menuList: MenuVO[]): MenuVO[] {
 
   return tree;
 }
-// 递归排序子菜单 (如果需要)
-// function sortChildren(menu: MenuVO) {
-//   if (menu.children && menu.children.length > 0) {
-//     menu.children.sort((a, b) => (a.sort || 0) - (b.sort || 0));
-//     menu.children.forEach(sortChildren);
-//   }
-// }
 
 // 获取菜单下拉选项
 async function getMenuOptions() {
