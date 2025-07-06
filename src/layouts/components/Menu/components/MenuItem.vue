@@ -9,15 +9,11 @@
       // 即使配置了始终显示，但无子节点，也显示为叶子节点
       (item.meta?.alwaysShow && !item.children)
     ">
-      <AppLink v-if="onlyOneChild.meta" :to="{
-        path: resolvePath(onlyOneChild.path),
-        query: onlyOneChild.meta.params,
-      }">
-        <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{ 'submenu-title-noDropdown': !isNest }">
-          <MenuItemContent v-if="onlyOneChild.meta" :icon="onlyOneChild.meta.icon || item.meta?.icon"
-            :title="onlyOneChild.meta.title" />
-        </el-menu-item>
-      </AppLink>
+      <el-menu-item v-if="onlyOneChild.meta" :index="resolvePath(onlyOneChild.path)"
+        :class="{ 'submenu-title-noDropdown': !isNest }">
+        <MenuItemContent v-if="onlyOneChild.meta" :icon="onlyOneChild.meta.icon || item.meta?.icon"
+          :title="onlyOneChild.meta.title" />
+      </el-menu-item>
     </template>
 
     <!--【非叶子节点】显示含多个子节点的父菜单，或始终显示的单子节点 -->

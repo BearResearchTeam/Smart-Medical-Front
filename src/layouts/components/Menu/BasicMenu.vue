@@ -1,38 +1,18 @@
 <!-- 菜单组件 -->
 <template>
-  <el-menu
-    ref="menuRef"
-    :default-active="activeMenuIndex"
-    :collapse="!appStore.sidebar.opened"
-    :background-color="
-      theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
-        ? variables['menu-background']
-        : undefined
-    "
-    :text-color="
-      theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
+  <el-menu ref="menuRef" :default-active="activeMenuIndex" :collapse="!appStore.sidebar.opened" :background-color="theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
+      ? variables['menu-background']
+      : undefined
+    " :text-color="theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
         ? variables['menu-text']
         : undefined
-    "
-    :active-text-color="
-      theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
+      " :active-text-color="theme === 'dark' || sidebarColorScheme === SidebarColor.CLASSIC_BLUE
         ? variables['menu-active-text']
         : undefined
-    "
-    :popper-effect="theme"
-    :unique-opened="false"
-    :collapse-transition="false"
-    :mode="menuMode"
-    @open="onMenuOpen"
-    @close="onMenuClose"
-  >
+      " :popper-effect="theme" :unique-opened="false" :collapse-transition="false" :mode="menuMode"
+    :router="props.router" @open="onMenuOpen" @close="onMenuClose">
     <!-- 菜单项 -->
-    <MenuItem
-      v-for="route in data"
-      :key="route.path"
-      :item="route"
-      :base-path="resolveFullPath(route.path)"
-    />
+    <MenuItem v-for="route in data" :key="route.path" :item="route" :base-path="resolveFullPath(route.path)" />
   </el-menu>
 </template>
 
@@ -61,6 +41,10 @@ const props = defineProps({
     type: String as PropType<"vertical" | "horizontal">,
     default: "vertical",
     validator: (value: string) => ["vertical", "horizontal"].includes(value),
+  },
+  router: {
+    type: Boolean,
+    default: false,
   },
 });
 

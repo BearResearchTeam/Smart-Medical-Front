@@ -2,20 +2,16 @@ import axios, {
   type InternalAxiosRequestConfig,
   type AxiosResponse,
   type AxiosRequestConfig,
+  type AxiosError,
 } from "axios";
 import qs from "qs";
 import { useUserStoreHook } from "@/store/modules/user.store";
 import { ResultEnum } from "@/enums/api/result.enum";
 import { Auth } from "@/utils/auth";
 import router from "@/router";
-
-// 定义后端响应的基本结构
-interface BackendApiResponse<T = any> {
-  data: T;
-  isSuc: boolean; // 新的成功标识
-  code: number; // 状态码，成功时为 200
-  msg: string; // 消息
-}
+import { ElMessage, ElMessageBox } from "element-plus";
+import { store } from "@/store";
+import type { BackendApiResponse } from "@/types/api";
 
 /**
  * 创建 HTTP 请求实例
@@ -90,46 +86,16 @@ service.interceptors.response.use(
     ElMessage.error(msg || "系统出错");
     return Promise.reject(new Error(msg || "Business Error"));
   },
-  async (error) => {
-    console.error("Response interceptor error:", error);
-
-    // 检查是否应该使用模拟数据
-    const useMockData = localStorage.getItem("useMockData") === "true";
-    if (useMockData) {
-      console.log("已启用模拟数据模式，忽略API错误");
-      // 返回一个空对象，让调用方继续执行
-      return {};
+  async (error: AxiosError) => {
+    const { response, message } = error;
+    if (message?.includes("timeout")) {
+      ElMessage.error("请求超时，请稍后重试");
+    } else if (response) {
+      handleError(response.status);
+    } else {
+      ElMessage.error("网络错误，请检查您的网络连接");
     }
-
-    const { response, code, message } = error;
-
-    // 网络错误或服务器无响应
-    if (!response) {
-      // 提供更详细的错误信息
-      let errorMsg = "网络连接失败";
-
-      if (code === "ERR_NETWORK") {
-        errorMsg = "网络错误，无法连接到服务器";
-      } else if (code === "ECONNABORTED") {
-        errorMsg = "请求超时，服务器响应时间过长";
-      } else if (message) {
-        errorMsg = `${errorMsg}: ${message}`;
-      }
-
-      ElMessage.error(errorMsg);
-      console.error(`[API错误] ${errorMsg}`, error);
-
-      // 建议用户启用模拟数据
-      ElMessage.info('建议启用"使用模拟数据"选项继续开发');
-
-      return Promise.reject(error);
-    }
-
-    // 使用后端返回的msg作为错误信息
-    const { msg } = response.data as BackendApiResponse; // 确保这里使用新的BackendApiResponse类型
-
-    ElMessage.error(msg || "请求失败");
-    return Promise.reject(new Error(msg || "Request Error"));
+    return Promise.reject(error);
   }
 );
 
@@ -206,6 +172,32 @@ async function redirectToLogin(message: string = "请重新登录"): Promise<voi
   await userStore.logout();
   ElMessage.warning(message);
   await router.push("/login");
+}
+
+// 错误处理
+function handleError(status: number) {
+  switch (status) {
+    case 401:
+      ElMessageBox.confirm("登录已过期，请重新登录", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(() => {
+        const userStore = useUserStoreHook();
+        userStore.logout().then(() => {
+          location.reload();
+        });
+      });
+      break;
+    case 403:
+      ElMessage.error("您没有权限访问该资源");
+      break;
+    case 404:
+      ElMessage.error("请求的资源不存在");
+      break;
+    default:
+      ElMessage.error(`请求错误，状态码：${status}`);
+  }
 }
 
 // 之前这里导出了一个包裹函数，现在直接导出axios实例

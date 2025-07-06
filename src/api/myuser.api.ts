@@ -311,8 +311,8 @@ const MyUserAPI = {
       });
     }
 
-    return request<any>({
-      url: "api/app/user",
+    return request<any, any>({
+      url: "api/app/user/user-pT",
       method: "post",
       data,
     });
