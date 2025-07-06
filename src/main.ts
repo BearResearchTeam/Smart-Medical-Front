@@ -5,6 +5,7 @@ import { ApiDetector } from "@/utils/apiDetector";
 import { usePermissionStore } from "@/store";
 import { ElMessage } from "element-plus";
 import { createPinia } from 'pinia'
+
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 // 暗黑主题样式
 import "element-plus/theme-chalk/dark/css-vars.css";
@@ -55,12 +56,13 @@ app.config.errorHandler = (err, instance, info) => {
   console.error("Vue应用错误:", err);
   console.error("错误信息:", info);
 };
-
 // 确保应用挂载后立即加载路由
 app.mount("#app");
 
 // 初始化静态路由
 const permissionStore = usePermissionStore();
-permissionStore.generateRoutes().then(() => {
-  console.log("✅ 静态路由初始化完成");
-});
+//await permissionStore.generateRoutes(); // 动态路由注册
+
+// permissionStore.generateRoutes().then(() => {
+//   console.log("✅ 静态路由初始化完成");
+// });

@@ -8,36 +8,19 @@
         <div class="search-container">
           <el-form ref="queryFormRef" :model="queryParams" :inline="true" label-width="auto">
             <el-form-item label="关键字" prop="keywords">
-              <el-input
-                v-model="queryParams.keywords"
-                placeholder="用户名/昵称/手机号"
-                clearable
-                @keyup.enter="handleQuery"
-              />
+              <el-input v-model="queryParams.keywords" placeholder="用户名/昵称/手机号" clearable @keyup.enter="handleQuery" />
             </el-form-item>
 
             <el-form-item label="状态" prop="status">
-              <el-select
-                v-model="queryParams.status"
-                placeholder="全部"
-                clearable
-                style="width: 100px"
-              >
+              <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 100px">
                 <el-option label="正常" :value="1" />
                 <el-option label="禁用" :value="0" />
               </el-select>
             </el-form-item>
 
             <el-form-item label="创建时间">
-              <el-date-picker
-                v-model="queryParams.createTime"
-                :editable="false"
-                type="daterange"
-                range-separator="~"
-                start-placeholder="开始时间"
-                end-placeholder="截止时间"
-                value-format="YYYY-MM-DD"
-              />
+              <el-date-picker v-model="queryParams.createTime" :editable="false" type="daterange" range-separator="~"
+                start-placeholder="开始时间" end-placeholder="截止时间" value-format="YYYY-MM-DD" />
             </el-form-item>
 
             <el-form-item class="search-buttons">
@@ -50,30 +33,16 @@
         <el-card shadow="hover" class="data-table">
           <div class="data-table__toolbar">
             <div class="data-table__toolbar--actions">
-              <el-button
-                v-hasPerm="['sys:user:add']"
-                type="success"
-                icon="plus"
-                @click="handleOpenDialog()"
-              >
+              <el-button v-hasPerm="['sys:user:add']" type="success" icon="plus" @click="handleOpenDialog()">
                 新增
               </el-button>
-              <el-button
-                v-hasPerm="'sys:user:delete'"
-                type="danger"
-                icon="delete"
-                :disabled="selectIds.length === 0"
-                @click="handleDelete()"
-              >
+              <el-button v-hasPerm="'sys:user:delete'" type="danger" icon="delete" :disabled="selectIds.length === 0"
+                @click="handleDelete()">
                 删除
               </el-button>
             </div>
             <div class="data-table__toolbar--tools">
-              <el-button
-                v-hasPerm="'sys:user:import'"
-                icon="upload"
-                @click="handleOpenImportDialog"
-              >
+              <el-button v-hasPerm="'sys:user:import'" icon="upload" @click="handleOpenImportDialog">
                 导入
               </el-button>
 
@@ -83,15 +52,8 @@
             </div>
           </div>
 
-          <el-table
-            v-loading="loading"
-            :data="pageData"
-            border
-            stripe
-            highlight-current-row
-            class="data-table__content"
-            @selection-change="handleSelectionChange"
-          >
+          <el-table v-loading="loading" :data="pageData" border stripe highlight-current-row class="data-table__content"
+            @selection-change="handleSelectionChange">
             <el-table-column type="selection" width="50" align="center" />
             <el-table-column label="用户名" prop="userName" />
             <el-table-column label="邮箱" align="center" prop="userEmail" width="160" />
@@ -105,63 +67,35 @@
             </el-table-column>
             <el-table-column label="操作" fixed="right" width="220">
               <template #default="{ row }">
-                <el-button
-                  type="primary"
-                  link
-                  size="small"
-                  icon="edit"
-                  @click="handleOpenDialog(row)"
-                >
+                <el-button type="primary" link size="small" icon="edit" @click="handleuserrole(row)">
+                  分配角色
+                </el-button>
+                <el-button type="primary" link size="small" icon="edit" @click="handleOpenDialog(row)">
                   编辑
                 </el-button>
-                <el-button
-                  type="danger"
-                  link
-                  size="small"
-                  icon="delete"
-                  @click="handleDelete(row.id)"
-                >
+                <el-button type="danger" link size="small" icon="delete" @click="handleDelete(row.id)">
                   删除
                 </el-button>
               </template>
             </el-table-column>
           </el-table>
 
-          <pagination
-            v-if="total > 0"
-            v-model:total="total"
-            v-model:page="queryParams.pageNum"
-            v-model:limit="queryParams.pageSize"
-            @pagination="fetchData"
-          />
+          <pagination v-if="total > 0" v-model:total="total" v-model:page="queryParams.pageNum"
+            v-model:limit="queryParams.pageSize" @pagination="fetchData" />
         </el-card>
       </el-col>
     </el-row>
 
     <!-- 用户表单 -->
-    <el-drawer
-      v-model="dialog.visible"
-      :title="dialog.title"
-      append-to-body
-      :size="drawerSize"
-      @close="handleCloseDialog"
-    >
+    <el-drawer v-model="dialog.visible" :title="dialog.title" append-to-body :size="drawerSize"
+      @close="handleCloseDialog">
       <el-form ref="userFormRef" :model="formData" :rules="rules" label-width="80px">
         <el-form-item label="用户名" prop="userName">
-          <el-input
-            v-model="formData.userName"
-            :readonly="!!formData.id"
-            placeholder="请输入用户名"
-          />
+          <el-input v-model="formData.userName" :readonly="!!formData.id" placeholder="请输入用户名" />
         </el-form-item>
 
         <el-form-item v-if="!formData.id" label="用户密码" prop="userPwd">
-          <el-input
-            v-model="formData.userPwd"
-            placeholder="请输入用户密码"
-            type="password"
-            show-password
-          />
+          <el-input v-model="formData.userPwd" placeholder="请输入用户密码" type="password" show-password />
         </el-form-item>
 
         <el-form-item label="邮箱" prop="userEmail">
@@ -192,6 +126,24 @@
 
     <!-- 用户导入 (保留) -->
     <UserImport v-model="importDialogVisible" @import-success="handleQuery()" />
+
+    <!-- 分配角色弹窗 -->
+    <el-dialog v-model="userRoleDialog.visible" title="分配角色" width="400px">
+      <el-form>
+        <el-form-item label="用户名称">
+          <el-input :value="userRoleDialog.userName" disabled />
+        </el-form-item>
+        <el-form-item label="角色">
+          <el-select v-model="userRoleDialog.roleIds" multiple placeholder="请选择角色" style="width: 100%">
+            <el-option v-for="item in roleOptions" :key="item.id" :label="item.roleName" :value="item.id" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="userRoleDialog.visible = false">取消</el-button>
+        <el-button type="primary" @click="submitUserRole">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -207,6 +159,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { useDebounceFn } from "@vueuse/core";
 
 import UserImport from "./components/UserImport.vue";
+import MyRoleAPI, { type RoleItems } from "@/api/myrole.api";
 
 defineOptions({
   name: "User",
@@ -219,11 +172,12 @@ const queryFormRef = ref();
 const userFormRef = ref();
 
 const queryParams = reactive<any>({
-  pageNum: 1,
-  pageSize: 10,
-  keywords: undefined,
-  status: undefined,
-  createTime: undefined,
+  Sorting: "",
+  SkipCount: 1,
+  MaxResultCount: 10,
+  UserName: "",
+  UserEmail: "",
+  UserPhone: "",
 });
 
 const pageData = ref<UserListItem[]>([]);
@@ -286,18 +240,28 @@ const displayUserSex = computed({
   },
 });
 
+// 弹窗显示与表单数据
+const userRoleDialog = reactive({
+  visible: false,
+  userId: "",
+  userName: "",
+  roleIds: [],
+});
+
+const roleOptions = ref<RoleItems[]>([]);
+
 // 获取数据
 async function fetchData() {
   loading.value = true;
   try {
     // 构造查询参数，与API接口匹配
     const params = {
-      pageIndex: queryParams.pageNum,
-      pageSize: queryParams.pageSize,
-      keywords: queryParams.keywords,
-      status: queryParams.status,
-      beginTime: queryParams.createTime ? queryParams.createTime[0] : undefined,
-      endTime: queryParams.createTime ? queryParams.createTime[1] : undefined,
+      UserName: queryParams.UserName,
+      UserEmail: queryParams.UserEmail,
+      UserPhone: queryParams.UserPhone,
+      Sorting: queryParams.Sorting,
+      SkipCount: (queryParams.SkipCount - 1) * queryParams.MaxResultCount,
+      MaxResultCount: queryParams.MaxResultCount,
     };
 
     console.log("发送查询参数:", params);
@@ -456,4 +420,30 @@ const initComponent = () => {
 };
 
 onMounted(initComponent);
+
+async function fetchRoleOptions() {
+  const res = await MyRoleAPI.getRoleasync();
+  roleOptions.value = res;
+}
+
+function handleuserrole(row: UserListItem) {
+  userRoleDialog.visible = true;
+  userRoleDialog.userId = row.id;
+  userRoleDialog.userName = row.userName;
+  userRoleDialog.roleIds = []; // 默认不选
+  fetchRoleOptions();
+  console.log("11111", row);
+}
+
+async function submitUserRole() {
+  if (!userRoleDialog.roleIds || userRoleDialog.roleIds.length === 0) {
+    ElMessage.warning("请选择角色");
+    return;
+  }
+  // 调用批量分配角色API
+  await MyUserAPI.batchUserrole(userRoleDialog.userId, userRoleDialog.roleIds);
+  ElMessage.success("分配成功");
+  userRoleDialog.visible = false;
+  fetchData();
+}
 </script>

@@ -1,6 +1,7 @@
 import request from "@/utils/request";
 import type { AxiosInstance } from "axios";
 import { useUserStoreHook } from "@/store/modules/user.store";
+import { Guide } from "@element-plus/icons-vue/dist/types";
 
 // 患者信息接口 (用于主列表显示)
 export interface PatientInfo {
@@ -108,9 +109,10 @@ export default {
   },
 
   // 获取患者预约信息 (用于预约详情弹窗)
+ 
   getAppointments(patientId: string, params?: { MaxResultCount: string; SkipCount: string }) {
     return request<any, { items: AppointmentInfo[]; totalCount: number }>({
-      url: `api/app/patient/${patientId}/appointments`,
+      url: `api/app/patient/appointments/${patientId}`,
       method: "get",
       params,
     });
@@ -120,6 +122,7 @@ export default {
   getAssociatedPatients() {
     const userStore = useUserStoreHook();
     const userId = userStore.userInfo.userId;
+    //const userId = "f388f807-62c0-820f-412f-3a1ad1d6a48d";
 
     console.log(`调用 PatientAPI.getAssociatedPatients，用户ID: ${userId}`);
     return request<any, UserAssociatedPatientRecord[]>({

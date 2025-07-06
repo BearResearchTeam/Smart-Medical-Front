@@ -86,7 +86,7 @@ const permissions = ref<string[]>([]);
       const result = await MyUserAPI.login(loginData);
       console.log("result", result);
        
-       permissions.value = result.permissions ?? [];
+      permissions.value = result.permissions ?? [];
       // // 保存记住我选项
       // Storage.set(AUTH_KEYS.REMEMBER_ME, loginData.rememberMe);
 

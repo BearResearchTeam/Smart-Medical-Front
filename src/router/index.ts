@@ -39,25 +39,25 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/",
     redirect: "/login",
   },
-  {
-    path: "/dashboard",
-    component: Layout,
-    redirect: "/dashboard/index",
-    meta: { title: "仪表盘管理", icon: "CollectionTag" },
-    children: [
-      {
-        path: "index",
-        name: "Dashboard",
-        component: () => import("@/views/dashboard/index.vue"),
-        meta: { title: "仪表盘", icon: "Aim" },
-      },
-    ],
-  },
+  // {
+  //   path: "/dashboard",
+  //   component: Layout,
+  //   redirect: "/dashboard/index",
+  //   meta: { title: "仪表盘管理", icon: "CollectionTag" },
+  //   children: [
+  //     {
+  //       path: "index",
+  //       name: "Dashboard",
+  //       component: () => import("@/views/dashboard/index.vue"),
+  //       meta: { title: "仪表盘", icon: "Aim" },
+  //     },
+  //   ],
+  // },
   // {
   //   path: "/system",
   //   component: Layout,
   //   redirect: "/system/user",
-  //   meta: { title: "系统管理", icon: "CollectionTag" },
+  //   //meta: { title: "系统管理", icon: "CollectionTag" },
   //   children: [
   //     {
   //       path: "user",
@@ -98,12 +98,6 @@ export const constantRoutes: RouteRecordRaw[] = [
   //       meta: { title: "科室管理", icon: "HomeFilled" },
   //     },
   //     {
-  //       path: "patient",
-  //       name: "patient",
-  //       component: () => import("@/views/medical/patient/index.vue"),
-  //       meta: { title: "患者管理", icon: "Headset" },
-  //     },
-  //     {
   //       path: "online-appointment",
   //       name: "OnlineAppointment",
   //       component: () => import("@/views/medical/online-appointment/index.vue"), // 新增的线上预约页面
@@ -134,11 +128,11 @@ export const constantRoutes: RouteRecordRaw[] = [
   // {
   //   path: "/clinic",
   //   component: Layout,
-  //   redirect: "/clinic/outpatient",
+  //   redirect: "/clinic/appointment",
   //   meta: { title: "门诊管理", icon: "DocumentAdd" },
   //   children: [
   //     {
-  //       path: "outpatient",
+  //       path: "appointment",
   //       name: "OutpatientManagement",
   //       component: () => import("@/views/system/Outpatient/index.vue"), // 请替换为实际的门诊管理页面
   //       meta: { title: "门诊管理", icon: "service" },
@@ -165,23 +159,7 @@ export const constantRoutes: RouteRecordRaw[] = [
   //     },
   //   ],
   // },
-  // //  {
-  // //     path: "/menu",
-  // //     component: Layout,
-  // //     redirect: "/menu/menuitem",
-  // //     meta: { title: "菜单管理", icon: "service" },
-  // //     children: [
-  // //       {
-  // //         path: "menuitem",
-  // //         name: "menuitem",
-  // //         component: () => import("@/views/system/menu/index.vue"),
-  // //         meta: { title: "菜单管理", icon: "Management" },
-  // //       },
-  // //     ],
-  // //   },
-
-  // // 401 and 404 routes (now general, not under '/')
-  // // 401 and 404 routes (now general, not under '')
+  
   // {
   //   path: "/patient",
   //   component: Layout,

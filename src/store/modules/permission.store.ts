@@ -6,9 +6,11 @@ import MenuAPI from "@/api/system/menu.api";
 import router from "@/router"; // 不再需要直接操作 router 实例，所以注释掉
 import { log } from "console";
 
-// import MenuAPI, { type RouteVO } from "@/api/system/menu.api"; // 注释掉动态菜单API的导入
+
+//import MenuAPI, { type RouteVO } from "@/api/system/menu.api"; // 注释掉动态菜单API的导入
 const modules = import.meta.glob("../../views/**/**.vue");
 console.log("DEBUG: modules object keys:", Object.keys(modules));
+
 const Layout = () => import("@/layouts/index.vue");
 
 let generationPromise: Promise<RouteRecordRaw[]> | null = null;
@@ -50,10 +52,16 @@ function menuTreeToRoutes(menuList: MenuTree[]): RouteRecordRaw[] {
       meta: {
         title: menu.permissionName,
         icon: menu.icon,
-        alwaysShow: menu.children && menu.children.length > 0, // 只有有子菜单才设置 alwaysShow
+        alwaysShow: menu.children && menu.children.length > 0,
       },
       children: menu.children && menu.children.length > 0 ? menuTreeToRoutes(menu.children) : [],
     };
+
+    // 如果有子菜单，给父级加 redirect 到第一个子菜单
+    if (menu.children && menu.children.length > 0) {
+      route.redirect = route.children[0].path;
+    }
+
     return route;
   });
 }
@@ -92,7 +100,7 @@ export const usePermissionStore = defineStore("permission", () => {
   const resetRouter = () => {
     // 创建常量路由名称集合
     const constantRouteNames = new Set(constantRoutes.map((route) => route.name).filter(Boolean));
-    routes,
+    //routes,
       // 由于所有路由已在 router/index.ts 中静态定义，这里不再需要从 router 实例中移除路由。
       // routes.value.forEach((route) => {
       //   if (route.name && !constantRouteNames.has(route.name)) {

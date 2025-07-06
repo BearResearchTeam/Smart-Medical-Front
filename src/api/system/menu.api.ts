@@ -19,7 +19,7 @@ const MenuAPI = {
   },
 
   getMenuTree(parentId: string | null = null) {
-    return request<MenuTree[]>({
+    return request<MenuTree>({
       url: `/api/app/permission/menu-permission-tree-list`,
       method: "get",
       params: { parentId }
@@ -106,14 +106,14 @@ const MenuAPI = {
     });
   },
 
-  // getMenuTree(parentId: string) {
+  getMenuTreeAll(parentId: string | null = null) {
 
-  //   return request({
-  //     url: `/api/app/permission/menu-permission-tree-list`,
-  //     method: "get",
-  //     params: { parentId }
-  //   })
-  // },
+    return request({
+      url: `/api/app/permission/menu-permission-treeall-list`,
+      method: "get",
+      params: { parentId }
+    })
+  },
 };
 
 export default MenuAPI;
