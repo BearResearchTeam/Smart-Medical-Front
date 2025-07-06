@@ -272,6 +272,7 @@ async function fetchData() {
     if (result) {
       pageData.value = result.data || [];
       total.value = result.totalCount || 0;
+      console.log("pageData.value", pageData.value);
     } else {
       pageData.value = [];
       total.value = 0;
