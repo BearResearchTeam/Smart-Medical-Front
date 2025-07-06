@@ -6,12 +6,24 @@ export const Layout = () => import("@/layouts/index.vue");
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
   {
-    path: "/redirect",
+    path: "/",
     component: Layout,
-    meta: { hidden: true },
+    name: "Layout",
+    redirect: "/dashboard",
     children: [
       {
-        path: "/redirect/:path(.*)",
+        path: "dashboard",
+        component: () => import("@/views/dashboard/index.vue"),
+        name: "Dashboard",
+        meta: {
+          title: "dashboard",
+          icon: "homepage",
+          affix: true,
+          keepAlive: true,
+        },
+      },
+      {
+        path: "redirect/:path(.*)",
         component: () => import("@/views/redirect/index.vue"),
       },
     ],
@@ -25,123 +37,164 @@ export const constantRoutes: RouteRecordRaw[] = [
 
   {
     path: "/",
-    redirect: "/dashboard",
+    redirect: "/login",
   },
-  {
-    path: "/dashboard",
-    component: Layout,
-    redirect: "/dashboard/index",
-    children: [
-      {
-        path: "index",
-        name: "Dashboard",
-        component: () => import("@/views/dashboard/index.vue"),
-        meta: { title: "仪表盘", icon: "chart", affix: true },
-      },
-    ],
-  },
-  {
-    path: "/system",
-    component: Layout,
-    redirect: "/system/user",
-    meta: { title: "系统管理", icon: "setting" },
-    children: [
-      {
-        path: "user",
-        name: "User",
-        component: () => import("@/views/system/user/index.vue"),
-        meta: { title: "用户管理", icon: "user", activeMenu: "/system" },
-      },
-      {
-        path: "role",
-        name: "Role",
-        component: () => import("@/views/system/role/index.vue"),
-        meta: { title: "角色管理", icon: "role", activeMenu: "/system" },
-      },
-      {
-        path: "menu",
-        name: "Menu",
-        component: () => import("@/views/system/menu/index.vue"),
-        meta: { title: "权限管理", icon: "menu", activeMenu: "/system" },
-      },
-    ],
-  },
-  {
-    path: "/medical",
-    component: Layout,
-    redirect: "/medical/doctor",
-    meta: { title: "医疗管理", icon: "first-aid-kit" },
-    children: [
-      {
-        path: "doctor",
-        name: "DoctorManagement",
-        component: () => import("@/views/system/user/index.vue"), // 请替换为实际的医生管理页面
-        meta: { title: "医生管理", icon: "user" },
-      },
-      {
-        path: "department",
-        name: "DepartmentManagement",
-        component: () => import("@/views/system/dept/index.vue"), // 请替换为实际的科室管理页面
-        meta: { title: "科室管理", icon: "office-building" },
-      },
-      {
-        path: "online-appointment",
-        name: "OnlineAppointment",
-        component: () => import("@/views/medical/online-appointment/index.vue"), // 新增的线上预约页面
-        meta: { title: "线上预约", icon: "calendar" }, // 假设使用calendar图标，你可以根据需要更改
-      },
-    ],
-  },
-  {
-    path: "/pharmacy",
-    component: Layout,
-    redirect: "/pharmacy/medicine",
-    meta: { title: "药房管理", icon: "medicine-box" },
-    children: [
-      {
-        path: "medicine",
-        name: "MedicineManagement",
-        component: () => import("@/views/system/dict/index.vue"), // 请替换为实际的药品管理页面
-        meta: { title: "药品管理", icon: "medicine-box" },
-      },
-      {
-        path: "prescription",
-        name: "PrescriptionManagement",
-        component: () => import("@/views/system/user/index.vue"), // 请替换为实际的处方管理页面
-        meta: { title: "处方管理", icon: "document" },
-      },
-    ],
-  },
-  {
-    path: "/system",
-    component: Layout,
-    redirect: "/system/patient",
-    meta: { title: "门诊管理", icon: "service" },
-    children: [
-      {
-        path: "index",
-        name: "OutpatientManagement",
-        component: () => import("@/views/system/patient/index.vue"), // 请替换为实际的门诊管理页面
-        meta: { title: "门诊管理", icon: "service" },
-      },
-    ],
-  },
-  // 401 and 404 routes (now general, not under '/')
-  {
-    path: "/401",
-    component: () => import("@/views/error/401.vue"),
-    meta: { hidden: true },
-  },
-  {
-    path: "/404",
-    component: () => import("@/views/error/404.vue"),
-    meta: { hidden: true },
-  },
-  {
-    path: "/:pathMatch(.*)*",
-    redirect: "/404",
-    meta: { hidden: true },
-  },
+  // {
+  //   path: "/dashboard",
+  //   component: Layout,
+  //   redirect: "/dashboard/index",
+  //   meta: { title: "仪表盘管理", icon: "CollectionTag" },
+  //   children: [
+  //     {
+  //       path: "index",
+  //       name: "Dashboard",
+  //       component: () => import("@/views/dashboard/index.vue"),
+  //       meta: { title: "仪表盘", icon: "Aim" },
+  //     },
+  //   ],
+  // },
+  // {
+  //   path: "/system",
+  //   component: Layout,
+  //   redirect: "/system/user",
+  //   //meta: { title: "系统管理", icon: "CollectionTag" },
+  //   children: [
+  //     {
+  //       path: "user",
+  //       name: "User",
+  //       component: () => import("@/views/system/user/index.vue"),
+  //       meta: { title: "用户管理", icon: "user", activeMenu: "/system" },
+  //     },
+  //     {
+  //       path: "role",
+  //       name: "Role",
+  //       component: () => import("@/views/system/role/index.vue"),
+  //       meta: { title: "角色管理", icon: "Present", activeMenu: "/system" },
+  //     },
+  //     {
+  //       path: "menu",
+  //       name: "Menu",
+  //       component: () => import("@/views/system/menu/index.vue"),
+  //       meta: { title: "权限管理", icon: "calendar", activeMenu: "/system" },
+  //     },
+  //   ],
+  // },
+  // {
+  //   path: "/medical",
+  //   component: Layout,
+  //   redirect: "/medical/doctor",
+  //   meta: { title: "医疗管理", icon: "Edit" },
+  //   children: [
+  //     {
+  //       path: "doctor",
+  //       name: "DoctorManagement",
+  //       component: () => import("@/views/system/doctor/index.vue"), // 请替换为实际的医生管理页面
+  //       meta: { title: "医生管理", icon: "Avatar" },
+  //     },
+  //     {
+  //       path: "department",
+  //       name: "department",
+  //       component: () => import("@/views/system/dept/index.vue"),
+  //       meta: { title: "科室管理", icon: "HomeFilled" },
+  //     },
+  //     {
+  //       path: "online-appointment",
+  //       name: "OnlineAppointment",
+  //       component: () => import("@/views/medical/online-appointment/index.vue"), // 新增的线上预约页面
+  //       meta: { title: "线上预约", icon: "calendar" }, // 假设使用calendar图标，你可以根据需要更改
+  //     },
+  //   ],
+  // },
+  // {
+  //   path: "/pharmacy",
+  //   component: Layout,
+  //   redirect: "/pharmacy/medicine",
+  //   meta: { title: "药房管理", icon: "TakeawayBox" },
+  //   children: [
+  //     {
+  //       path: "medicine",
+  //       name: "MedicineManagement",
+  //       component: () => import("@/views/system/drug/index.vue"), // 请替换为实际的药品管理页面
+  //       meta: { title: "药品管理", icon: "Eleme" },
+  //     },
+  //     {
+  //       path: "prescription",
+  //       name: "PrescriptionManagement",
+  //       component: () => import("@/views/system/prescription/index.vue"), // 请替换为实际的处方管理页面
+  //       meta: { title: "处方管理", icon: "Tickets" },
+  //     },
+  //   ],
+  // },
+  // {
+  //   path: "/clinic",
+  //   component: Layout,
+  //   redirect: "/clinic/appointment",
+  //   meta: { title: "门诊管理", icon: "DocumentAdd" },
+  //   children: [
+  //     {
+  //       path: "appointment",
+  //       name: "OutpatientManagement",
+  //       component: () => import("@/views/system/Outpatient/index.vue"), // 请替换为实际的门诊管理页面
+  //       meta: { title: "门诊管理", icon: "service" },
+  //     },
+  //   ],
+  // },
+  // {
+  //   path: "/dict",
+  //   component: Layout,
+  //   redirect: "/dict/dictdata",
+  //   meta: { title: "数据字典管理", icon: "Grid" },
+  //   children: [
+  //     {
+  //       path: "dictdata",
+  //       name: "dictdata",
+  //       component: () => import("@/views/system/dict/index.vue"),
+  //       meta: { title: "字典管理", icon: "List" },
+  //     },
+  //     {
+  //       path: "/system/dict-item",
+  //       name: "dict-item",
+  //       component: () => import("@/views/system/dict/dict-item.vue"),
+  //       meta: { title: "字典项管理", icon: "Folder" },
+  //     },
+  //   ],
+  // },
+  
+  // {
+  //   path: "/patient",
+  //   component: Layout,
+  //   redirect: "/patient/list",
+  //   meta: { title: "患者管理", icon: "user-filled", affix: true },
+  //   children: [
+  //     {
+  //       path: "list",
+  //       name: "PatientManagement",
+  //       component: () => import("@/views/patient/index.vue"),
+  //       meta: { title: "患者管理", icon: "user-filled", affix: true },
+  //     },
+  //     {
+  //       path: "appointments",
+  //       name: "PatientAppointments",
+  //       component: () => import("@/views/patient/appointments.vue"),
+  //       meta: { title: "预约记录", icon: "calendar", hidden: true },
+  //     },
+  //   ],
+  // },
+  // {
+  //   path: "/401",
+  //   component: () => import("@/views/error/401.vue"),
+  //   meta: { hidden: true },
+  // },
+  // {
+  //   path: "/404",
+  //   component: () => import("@/views/error/404.vue"),
+  //   meta: { hidden: true },
+  // },
+  // {
+  //   path: "/:pathMatch(.*)*",
+  //   redirect: "/404",
+  //   meta: { hidden: true },
+  // },
 ];
 
 /**

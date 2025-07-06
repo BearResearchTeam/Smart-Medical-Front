@@ -1,16 +1,17 @@
-import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from "axios";
+
+import axios, {
+  type InternalAxiosRequestConfig,
+  type AxiosResponse,
+  type AxiosRequestConfig,
+  type AxiosError,
+} from "axios";
 import qs from "qs";
 import { useUserStoreHook } from "@/store/modules/user.store";
 import { ResultEnum } from "@/enums/api/result.enum";
 import router from "@/router";
-
-// 定义后端响应的基本结构
-interface BackendApiResponse<T = any> {
-  data: T;
-  isSuc: boolean; // 新的成功标识
-  code: number; // 状态码，成功时为 200
-  msg: string; // 消息
-}
+import { ElMessage, ElMessageBox } from "element-plus";
+import { store } from "@/store";
+import type { BackendApiResponse } from "@/types/api";
 
 /**
  * 创建 HTTP 请求实例
@@ -229,22 +230,41 @@ async function refreshTokenAndRetry(config: InternalAxiosRequestConfig): Promise
  * 重定向到登录页面
  */
 async function redirectToLogin(message: string = "请重新登录"): Promise<void> {
-  try {
-    ElNotification({
-      title: "提示",
-      message,
-      type: "warning",
-      duration: 3000,
-    });
+  const userStore = useUserStoreHook();
+  await userStore.logout();
+  ElMessage.warning(message);
+  await router.push("/login");
+}
 
-    await useUserStoreHook().resetAllState();
-
-    // 跳转到登录页，保留当前路由用于登录后跳转
-    const currentPath = router.currentRoute.value.fullPath;
-    await router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-  } catch (error) {
-    console.error("Redirect to login error:", error);
+// 错误处理
+function handleError(status: number) {
+  switch (status) {
+    case 401:
+      ElMessageBox.confirm("登录已过期，请重新登录", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(() => {
+        const userStore = useUserStoreHook();
+        userStore.logout().then(() => {
+          location.reload();
+        });
+      });
+      break;
+    case 403:
+      ElMessage.error("您没有权限访问该资源");
+      break;
+    case 404:
+      ElMessage.error("请求的资源不存在");
+      break;
+    default:
+      ElMessage.error(`请求错误，状态码：${status}`);
   }
 }
 
 export default httpRequest;
+// 之前这里导出了一个包裹函数，现在直接导出axios实例
+// const request = <T = any>(config: AxiosRequestConfig): Promise<T> => {
+//   return service(config);
+// };
+

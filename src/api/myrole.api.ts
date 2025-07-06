@@ -1,89 +1,65 @@
 import request from "@/utils/request";
 
 /**
- * 角色API接口
+ * 角色API接口 
  * 提供角色管理功能
  */
 const MyRoleAPI = {
   /**
    * 根据ID获取角色详情
-   * @param id 角色ID
+   * 
    */
-  getRoleById(id: string) {
-    // 强制使用模拟数据
-    const useMockData = true;
+  getRole(query: RoleListParams) {
 
-    if (useMockData) {
-      console.log("使用模拟获取角色详情数据:", id);
-      return new Promise<RoleListItem>((resolve) => {
-        setTimeout(() => {
-          const mockRole: RoleListItem = {
-            id,
-            roleName: "模拟角色" + id,
-            roleCode: "mock_code_" + id,
-            description: "这是一个模拟角色的描述",
-          };
-          resolve(mockRole);
-        }, 300);
-      });
-    }
+    return request<RoleListItem>({
+      url: `/api/app/role`,
+      method: "get",
+      params: query,
+    });
+  },
 
-    // return request<any, RoleListItem>({
-    //   url: `api/app/role/${id}`,
-    //   method: "get",
-    // });
-    return Promise.reject("实际API未实现"); // 模拟未实现
+  /**
+   * 获取角色 用于下拉
+   *
+   */
+  getRoleasync() {
+
+    return request<RoleItems>({
+      url: `/api/app/role/role-list`,
+      method: "get",
+    });
   },
 
   /**
    * 新增角色
    * @param data 角色数据
    */
-  addRole(data: RoleAddRequest) {
-    const useMockData = true;
-
-    if (useMockData) {
-      console.log("使用模拟新增角色数据:", data);
-      return new Promise<any>((resolve) => {
-        setTimeout(() => {
-          console.log("模拟新增角色成功");
-          resolve(true);
-        }, 300);
-      });
-    }
-
-    // return request<any, any>({
-    //   url: "api/app/role",
-    //   method: "post",
-    //   data,
-    // });
-    return Promise.reject("实际API未实现"); // 模拟未实现
+  addRole(data: RoleListItem) {
+    return request<RoleListItem>({
+      url: "api/app/role",
+      method: "post",
+      data,
+    });
   },
-
+  baseaddRolePermission(roleId: string,permissionIds: string[] ) {
+    return request<RoleListItem>({
+      url: `/api/app/role-permission/batch-create/${roleId}`,
+      method: "post",
+      data: permissionIds
+    });
+  },
   /**
    * 更新角色
    * @param id 角色ID
    * @param data 角色更新数据
    */
-  updateRole(id: string, data: RoleUpdateRequest) {
-    const useMockData = true;
-
-    if (useMockData) {
-      console.log("使用模拟更新角色数据:", id, data);
-      return new Promise<any>((resolve) => {
-        setTimeout(() => {
-          console.log("模拟更新角色成功");
-          resolve(true);
-        }, 300);
-      });
-    }
-
-    // return request<any, any>({
-    //   url: `api/app/role/${id}`,
-    //   method: "put",
-    //   data,
-    // });
-    return Promise.reject("实际API未实现"); // 模拟未实现
+  updateRole(id: string, data: RoleListItem) {
+   
+    return request<RoleListItem>({
+      url: `api/app/role/${id}`,
+      method: "put",
+      data,
+    });
   },
 
   /**
@@ -91,23 +67,12 @@ const MyRoleAPI = {
    * @param ids 角色ID字符串，逗号分隔
    */
   deleteRoles(ids: string) {
-    const useMockData = true;
-
-    if (useMockData) {
-      console.log("使用模拟删除角色数据:", ids);
-      return new Promise<any>((resolve) => {
-        setTimeout(() => {
-          console.log("模拟删除角色成功");
-          resolve(true);
-        }, 300);
-      });
-    }
-
-    // return request<any, any>({
-    //   url: `api/app/role/${ids}`, // 根据后端设计，可能需要调整为 query param 或 request body
-    //   method: "delete",
-    // });
-    return Promise.reject("实际API未实现"); // 模拟未实现
+   
+    return request<RoleListItem>({
+      url: `/api/app/role`, // 根据后端设计，可能需要调整为 query param 或 request body
+      method: "delete",
+      params: { idsString:ids },
+    });
   },
 
   /**
@@ -123,34 +88,20 @@ const MyRoleAPI = {
       return new Promise<RolePageResult>((resolve) => {
         setTimeout(() => {
           const mockRoles: RoleListItem[] = [
-            { id: "1", roleName: "管理员", roleCode: "admin", description: "系统管理员" },
-            { id: "2", roleName: "普通用户", roleCode: "user", description: "普通系统用户" },
-            { id: "3", roleName: "访客", roleCode: "guest", description: "只读权限的访客" },
+            { id: "1", roleName: "管理员", description: "系统管理员" },
+            { id: "2", roleName: "普通用户", description: "普通系统用户" },
+            { id: "3", roleName: "访客", description: "只读权限的访客" },
           ];
 
           let filteredRoles = [...mockRoles];
 
-          if (params?.keywords) {
-            const keyword = params.keywords.toLowerCase();
-            filteredRoles = filteredRoles.filter(
-              (role) =>
-                role.roleName.toLowerCase().includes(keyword) ||
-                role.roleCode.toLowerCase().includes(keyword) ||
-                role.description.toLowerCase().includes(keyword)
-            );
-          }
+          // 这里不再处理keywords、roleCode等
 
-          // 模拟分页
-          const pageIndex = params?.pageIndex || 1;
-          const pageSize = params?.pageSize || 10;
-          const startIndex = (pageIndex - 1) * pageSize;
-          const endIndex = startIndex + pageSize;
-          const paginatedRoles = filteredRoles.slice(startIndex, endIndex);
-
+          // 模拟分页，直接返回全部
           resolve({
             totalCount: filteredRoles.length,
-            totalPage: Math.ceil(filteredRoles.length / pageSize),
-            data: paginatedRoles,
+            totalPage: 1,
+            data: filteredRoles,
           });
         }, 300);
       });
@@ -165,31 +116,43 @@ const MyRoleAPI = {
   },
 };
 
-export interface RoleAddRequest {
+/**
+ * 角色表 用于下拉
+ */
+export interface RoleItems {
+  id: string;
   roleName: string;
-  roleCode: string;
-  description?: string;
 }
 
-export interface RoleUpdateRequest {
-  roleName: string;
-  roleCode: string;
-  description?: string;
-}
-
+/**
+ * 角色表数据
+ */
 export interface RoleListItem {
   id: string;
   roleName: string;
-  roleCode: string;
+  //roleCode: string;
   description?: string;
 }
-
-export interface RoleListParams {
-  pageIndex?: number;
-  pageSize?: number;
-  keywords?: string;
+export interface RolePermissionListItem {
+  id: string;
+  roleId: string;
+  permissionId: string[];
 }
 
+
+/**
+ * 角色列表查询参数
+ */
+export interface RoleListParams {
+  RoleName?: string;
+  Sorting?: string;
+  SkipCount: number;
+  MaxResultCount: number;
+}
+
+/**
+ * 角色列表分页结果
+ */
 export interface RolePageResult {
   totalCount: number;
   totalPage: number;

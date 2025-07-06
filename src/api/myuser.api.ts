@@ -54,13 +54,23 @@ const MyUserAPI = {
     //api/app/user/login
     //api/app/user-login-async/login
     return request<LoginResult>({
-      url: "api/app/user-login-async/login",
+      url: "api/app/user/login",
       method: "post",
       data: loginRequestData, // 将登录数据作为请求体发送
 
     });
   },
-
+  /**
+   * 获取用户列表 
+   * @param params 查询参数
+   */
+  batchUserrole(userId: string, roleIds: string[]) {
+    return request({
+      url: `/api/app/user-role/batch-create/${userId}`,
+      method: "post",
+      data: roleIds ,
+    });
+  },
   /**
    * 获取当前登录用户信息
    */
@@ -122,7 +132,7 @@ const MyUserAPI = {
    * 获取验证码
    */
   getCaptcha() {
-    return request<any, CaptchaInfo>({
+    return request<CaptchaInfo>({
       url: "api/app/account/captcha",
       method: "get",
     });
@@ -152,7 +162,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, UserListItem>({
+    return request<UserListItem>({
       url: `api/app/user/${id}`,
       method: "get",
     });
@@ -175,8 +185,8 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
-      url: "api/app/user",
+    return request<any>({
+      url: "api/app/user/user-pT",
       method: "post",
       data,
     });
@@ -200,7 +210,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
+    return request<any>({
       url: `api/app/user/${id}`,
       method: "put",
       data,
@@ -224,7 +234,7 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
+    return request<any>({
       url: `api/app/user/${ids}`, // 根据后端设计，可能需要调整为 query param 或 request body
       method: "delete",
     });
@@ -327,7 +337,7 @@ const MyUserAPI = {
     }
 
     // 实际API调用 - 根据Swagger接口规范调用后端API
-    return request<any, UserPageResult>({
+    return request<UserPageResult>({
       url: "api/app/user",
       method: "get",
       params,
@@ -351,8 +361,8 @@ const MyUserAPI = {
       });
     }
 
-    return request<any, any>({
-      url: "api/app/user",
+    return request<any>({
+      url: "api/app/user/user-pT",
       method: "post",
       data,
     });
@@ -373,6 +383,9 @@ export interface LoginFormData {
   captchaCode: string;
   /** 记住我 */
   rememberMe: boolean;
+  /** 权限 */
+  //permissions: string[];
+  
 }
 
 export interface LoginFromDataLMZ {
@@ -424,6 +437,7 @@ export interface LoginResult {
   refreshToken?: string;
   tokenType?: string;
   expiresIn?: number;
+  permissions?: string[];
 }
 
 /** 用户信息 (用于Pinia store) */
@@ -485,13 +499,12 @@ export interface UserListItem {
 
 /** 用户列表查询参数 */
 export interface UserListParams {
-  pageIndex?: number;
-  pageSize?: number;
-  keywords?: string;
-  status?: number;
-  deptId?: string;
-  beginTime?: string;
-  endTime?: string;
+  Sorting?: string;
+  SkipCount: number;
+  MaxResultCount: number;
+  UserName?: string;
+  UserEmail?: string;
+  UserPhone?: string;
 }
 
 /** 用户分页结果 */
