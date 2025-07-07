@@ -20,11 +20,10 @@
     <el-card shadow="hover" class="data-table">
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--actions">
-          <el-button type="success" v-if="userStore.hasPerm('dept:add')" icon="plus" @click="handleOpenDialog(1)">
+          <el-button type="success" icon="plus" @click="handleOpenDialog(1)">
             新增
           </el-button>
-          <el-button type="danger" v-if="userStore.hasPerm('dept:delete')" :disabled="selectIds.length === 0"
-            icon="delete" @click="handleDelete()">
+          <el-button type="danger" :disabled="selectIds.length === 0" icon="delete" @click="handleDelete()">
             删除
           </el-button>
         </div>
@@ -52,12 +51,10 @@
 
         <el-table-column label="操作" fixed="right" align="left" width="200">
           <template #default="scope">
-            <el-button type="primary" v-if="userStore.hasPerm('dept:edit')" link size="small" icon="edit"
-              @click.stop="handleOpenDialog(scope.row)">
+            <el-button type="primary" link size="small" icon="edit" @click.stop="handleOpenDialog(scope.row)">
               编辑
             </el-button>
-            <el-button type="danger" v-if="userStore.hasPerm('dept:delete')" link size="small" icon="delete"
-              @click.stop="handleDelete(scope.row.id)">
+            <el-button type="danger" link size="small" icon="delete" @click.stop="handleDelete(scope.row.id)">
               删除
             </el-button>
           </template>
