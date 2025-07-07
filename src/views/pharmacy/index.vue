@@ -197,7 +197,7 @@ function handleQuery() {
   loading.value = true;
   formData.companyName = queryParams.companyName;
   queryParams.pageIndex = 1; // 每次查询都重置为第一页
-  getAllPharmaceuticalCompanies()
+  getAllPharmaceuticalCompanies({ companyName: queryParams.companyName })
     .then((res: any) => {
       companyList.value = Array.isArray(res) ? res : [];
       total.value = companyList.value.length;

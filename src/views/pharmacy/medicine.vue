@@ -398,7 +398,7 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 function goToPharmaceuticalCompany() {
-  router.push({ path: "pharmaceutical-company" }); // 路由根据实际情况调整
+  router.push({ path: "/pharmacy/index" }); // 路由根据实际情况调整
 }
 const queryFormRef = ref<InstanceType<typeof ElForm>>();
 const drugFormRef = ref<InstanceType<typeof ElForm>>();

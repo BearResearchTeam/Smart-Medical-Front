@@ -48,22 +48,13 @@ export interface PharmaceuticalCompanyAddRequest {
 // #endregion
 
 // 获取所有制药公司列表
-export function getAllPharmaceuticalCompanies() {
+export function getAllPharmaceuticalCompanies(params?: { companyName?: string }) {
   return request({
     url: "/api/app/pharmaceutical-company/all",
     method: "get",
+    params,
   });
 }
-
-// 根据公司名称查询公司
-export function findPharmaceuticalCompanyByName(name: any) {
-  return request({
-    url: "/api/app/pharmaceutical-company/find-by-name",
-    method: "get",
-    params: { name },
-  });
-}
-
 // 新增制药公司
 export function createPharmaceuticalCompany(data: any) {
   return request({
