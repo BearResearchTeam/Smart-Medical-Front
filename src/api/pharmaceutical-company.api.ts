@@ -40,6 +40,8 @@ const PharmaceuticalCompanyAPI = {
     });
   },
 
+
+// ... existing code ...
   /**
    * 新增制药公司
    * @param data 公司数据
@@ -52,5 +54,7 @@ const PharmaceuticalCompanyAPI = {
     });
   },
 };
+
+   
 
 export default PharmaceuticalCompanyAPI;

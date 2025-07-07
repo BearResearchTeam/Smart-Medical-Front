@@ -92,7 +92,7 @@ const DrugAPI = {
    * @param params 查询参数
    */
   getDrugList(params?: DrugListParams) {
-    return request<any, DrugPageResult>({
+    return request<DrugPageResult>({
       url: "/api/app/drug", // <--- 改成这样
       method: "get",
       params,
@@ -104,7 +104,7 @@ const DrugAPI = {
    * @param id 药品ID
    */
   getDrugById(id: string) {
-    return request<any, DrugListItem>({
+    return request<DrugListItem>({
       url: `/api/app/drug/${id}`,
       method: "get",
     });
@@ -143,6 +143,18 @@ const DrugAPI = {
     return request({
       url: `/api/app/drug/${id}`,
       method: "delete",
+    });
+  },
+
+  /**
+   * 批量删除药品
+   * @param data 包含drugIds数组和forceDelete布尔值
+   */
+  batchDeleteDrugs(data: { drugIds: (string | number)[]; forceDelete: boolean }) {
+    return request({
+      url: "/batch-delete",
+      method: "post",
+      data,
     });
   },
 };
