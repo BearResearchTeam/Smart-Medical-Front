@@ -6,7 +6,6 @@ import MenuAPI from "@/api/system/menu.api";
 import router from "@/router"; // 不再需要直接操作 router 实例，所以注释掉
 import { log } from "console";
 
-
 //import MenuAPI, { type RouteVO } from "@/api/system/menu.api"; // 注释掉动态菜单API的导入
 const modules = import.meta.glob("../../views/**/**.vue");
 console.log("DEBUG: modules object keys:", Object.keys(modules));
@@ -46,13 +45,14 @@ function menuTreeToRoutes(menuList: MenuTree[]): RouteRecordRaw[] {
       path: menu.pagePath,
       name: menu.permissionCode,
       component:
-        (menu.type === 0 && menu.parentId === null)
+        menu.type === 0 && menu.parentId === null
           ? Layout
           : modules[`../../views${menu.pagePath}.vue`],
       meta: {
         title: menu.permissionName,
         icon: menu.icon,
         alwaysShow: menu.children && menu.children.length > 0,
+        hidden: menu.type == 2,
       },
       children: menu.children && menu.children.length > 0 ? menuTreeToRoutes(menu.children) : [],
     };
@@ -101,15 +101,15 @@ export const usePermissionStore = defineStore("permission", () => {
     // 创建常量路由名称集合
     const constantRouteNames = new Set(constantRoutes.map((route) => route.name).filter(Boolean));
     //routes,
-      // 由于所有路由已在 router/index.ts 中静态定义，这里不再需要从 router 实例中移除路由。
-      // routes.value.forEach((route) => {
-      //   if (route.name && !constantRouteNames.has(route.name)) {
-      //     router.removeRoute(route.name);
-      //   }
-      // });
+    // 由于所有路由已在 router/index.ts 中静态定义，这里不再需要从 router 实例中移除路由。
+    // routes.value.forEach((route) => {
+    //   if (route.name && !constantRouteNames.has(route.name)) {
+    //     router.removeRoute(route.name);
+    //   }
+    // });
 
-      // 重置为仅包含常量路由 (这里实际是清除 store 内部的路由列表，准备重新生成)
-      (routes.value = []); // 清空 routes.value 以便重新生成
+    // 重置为仅包含常量路由 (这里实际是清除 store 内部的路由列表，准备重新生成)
+    routes.value = []; // 清空 routes.value 以便重新生成
     sideMenuRoutes.value = [];
     routesLoaded.value = false;
     generationPromise = null; // 重置时清除Promise锁

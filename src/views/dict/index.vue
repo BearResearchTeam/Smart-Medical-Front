@@ -301,7 +301,7 @@ function handleDelete(id?: number) {
 function handleOpenDictData(row: DictPageVO) {
   console.log("row:", row); // 打印行数据
   router.push({
-    path: "/system/dict-item",
+    path: "/dict/dict-item",
     query: { dictionaryDataType: row.dictionaryDataType, title: "【" + row.dictionaryDataType + "】字典数据" },
   });
 }
