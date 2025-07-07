@@ -21,7 +21,7 @@
         <el-card shadow="hover" class="data-table">
           <div class="data-table__toolbar">
             <div class="data-table__toolbar--actions">
-              <el-button v-if="userStore.hasPerm('dept:edit')" type="success" icon="plus" @click="handleOpenDialog()">
+              <el-button type="success" icon="plus" @click="handleOpenDialog()">
                 新增
               </el-button>
               <el-button v-hasPerm="'sys:menu:delete'" type="danger" icon="delete" :disabled="selectIds.length === 0"
@@ -100,7 +100,7 @@
           <!-- 使用树形选择器 -->
           <el-tree-select v-model="formData.parentId" :data="menuOptions"
             :props="{ label: 'permissionName', value: 'id', children: 'children' }" check-strictly
-            :render-after-expand="false" style="width: 240px" disabled />
+            :render-after-expand="false" style="width: 240px" disabled placeholder="顶级菜单" />
 
         </el-form-item>
 
