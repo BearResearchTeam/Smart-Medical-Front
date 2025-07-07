@@ -52,23 +52,22 @@ const MyUserAPI = {
     };
 
     //api/app/user/login
-    //api/app/user-login-async/login
-    return request<LoginResult>({
-      url: "api/app/user/login",
+    //api/app/user-login-async/login   带token
+    return request<LoginFromDataLMZ>({
+      url: "api/app/user-login-async/login",
       method: "post",
       data: loginRequestData, // 将登录数据作为请求体发送
-
     });
   },
   /**
-   * 获取用户列表 
+   * 获取用户列表
    * @param params 查询参数
    */
   batchUserrole(userId: string, roleIds: string[]) {
     return request({
       url: `/api/app/user-role/batch-create/${userId}`,
       method: "post",
-      data: roleIds ,
+      data: roleIds,
     });
   },
   /**
@@ -245,97 +244,6 @@ const MyUserAPI = {
    * @param params 查询参数
    */
   getUserList(params?: UserListParams) {
-    // 检查是否应该使用模拟数据（当baseURL为空或明确指定使用模拟数据时）
-    // 设置为false强制使用后端API
-    const useMockData = false; // 修改这里强制使用后端API
-    console.log("获取用户列表 - 使用模拟数据:", useMockData);
-
-    if (useMockData) {
-      console.log("使用模拟用户列表数据");
-      return new Promise<UserPageResult>((resolve) => {
-        setTimeout(() => {
-          // 模拟用户列表数据
-          const mockUsers: UserListItem[] = [
-            {
-              id: "1",
-              userName: "admin",
-              userEmail: "admin@example.com",
-              userPhone: "13800138000",
-              userSex: true,
-            },
-            {
-              id: "2",
-              userName: "test",
-              userEmail: "test@example.com",
-              userPhone: "13900139000",
-              userSex: true,
-            },
-            {
-              id: "3",
-              userName: "user",
-              userEmail: "user@example.com",
-              userPhone: "13700137000",
-              userSex: true,
-            },
-            {
-              id: "4",
-              userName: "guest",
-              userEmail: "guest@example.com",
-              userPhone: "13600136000",
-              userSex: true,
-            },
-          ];
-
-          // 简单的分页和筛选逻辑
-          let filteredUsers = [...mockUsers];
-
-          // 关键字筛选
-          if (params?.keywords) {
-            const keyword = params.keywords.toLowerCase();
-            filteredUsers = filteredUsers.filter(
-              (user) =>
-                user.userName.toLowerCase().includes(keyword) ||
-                user.userEmail.toLowerCase().includes(keyword) ||
-                user.userPhone.includes(keyword)
-            );
-          }
-
-          // 状态筛选
-          if (params?.status !== undefined) {
-            filteredUsers = filteredUsers.filter((user) => {
-              // 这里假设status=1为正常，status=0为禁用
-              // 实际逻辑可能需要根据API规范调整
-              const isActive = params.status === 1;
-              return isActive; // 示例逻辑，实际应根据后端API规范处理
-            });
-          }
-
-          // 部门过滤
-          if (params?.deptId) {
-            // 在实际场景中，应该基于deptId过滤用户
-            // 这里简单模拟
-            filteredUsers = filteredUsers.filter((_, index) => index % 2 === 0);
-          }
-
-          // 计算总数
-          const total = filteredUsers.length;
-
-          // 分页
-          const pageSize = params?.pageSize || 10;
-          const pageIndex = params?.pageIndex || 1;
-          const start = (pageIndex - 1) * pageSize;
-          const end = start + pageSize;
-          const pagedUsers = filteredUsers.slice(start, end);
-
-          resolve({
-            totalCount: total,
-            totalPage: Math.ceil(total / pageSize),
-            data: pagedUsers,
-          });
-        }, 500);
-      });
-    }
-
     // 实际API调用 - 根据Swagger接口规范调用后端API
     return request<UserPageResult>({
       url: "api/app/user",
@@ -385,12 +293,14 @@ export interface LoginFormData {
   rememberMe: boolean;
   /** 权限 */
   //permissions: string[];
-  
 }
 
+/** 登录响应数据LMZ */
 export interface LoginFromDataLMZ {
+  /** 用户ID */
+  id: string;
   /** 用户名 */
-  username: string;
+  userName: string;
   /** 密码 */
   password: string;
   /** 验证码缓存key */
@@ -427,8 +337,8 @@ export interface LoginResult {
   userSex: boolean;
   nickname?: string;
   avatar?: string;
-  roleName: null,
-  userRoles: [],
+  roleName: null;
+  userRoles: [];
   roles?: string[];
   perms?: string[];
   // 假设令牌信息也包含在登录响应的data中，如果实际没有，则需要修改后端或前端逻辑
@@ -508,7 +418,7 @@ export interface UserListParams {
 
 /** 用户分页结果 */
 export interface UserPageResult {
-  totalCount: number;
-  totalPage: number;
+  totleCount: number;
+  totlePage: number;
   data: UserListItem[];
 }

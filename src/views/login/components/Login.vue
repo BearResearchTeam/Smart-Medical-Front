@@ -16,8 +16,8 @@
 
       <!-- 密码 -->
       <el-tooltip :visible="isCapsLock" :content="t('login.capsLock')" placement="right">
-        <el-form-item prop="userPwd">
-          <el-input v-model.trim="loginFormData.userPwd" :placeholder="t('login.password')" type="password"
+        <el-form-item prop="password">
+          <el-input v-model.trim="loginFormData.password" :placeholder="t('login.password')" type="password"
             show-password @keyup="checkCapsLock" @keyup.enter="handleLoginSubmit">
             <template #prefix>
               <el-icon>
@@ -242,13 +242,15 @@ async function handleLoginSubmit() {
     // 2. 调用登录API
     const userStore = useUserStore();
     await userStore.login(loginFormData.value);
-    console.log("userStore.permissions", userStore.permissions);
+    //console.log("userStore.permissions", userStore.permissions);
     // 3. 登录成功
     ElMessage.success(t("login.loginSuccess",));
     // 2. 动态路由注册（如果需要）
-    await permissionStore.generateRoutes();
+    //await permissionStore.generateRoutes();
     // 4. 获取重定向地址或默认跳转到仪表盘
     const redirect = route.query.redirect?.toString() || "/dashboard/index";
+
+
     console.log("redirect", redirect);
     await router.push(redirect);
   } catch (error: any) {

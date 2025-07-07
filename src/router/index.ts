@@ -5,29 +5,29 @@ export const Layout = () => import("@/layouts/index.vue");
 
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
-  {
-    path: "/",
-    component: Layout,
-    name: "Layout",
-    redirect: "/dashboard",
-    children: [
-      {
-        path: "dashboard",
-        component: () => import("@/views/dashboard/index.vue"),
-        name: "Dashboard",
-        meta: {
-          title: "dashboard",
-          icon: "homepage",
-          affix: true,
-          keepAlive: true,
-        },
-      },
-      {
-        path: "redirect/:path(.*)",
-        component: () => import("@/views/redirect/index.vue"),
-      },
-    ],
-  },
+  // {
+  //   path: "/",
+  //   component: Layout,
+  //   name: "Layout",
+  //   redirect: "/dashboard",
+  //   children: [
+  //     {
+  //       path: "dashboard",
+  //       component: () => import("@/views/dashboard/index.vue"),
+  //       name: "Dashboard",
+  //       meta: {
+  //         title: "dashboard",
+  //         icon: "homepage",
+  //         affix: true,
+  //         keepAlive: true,
+  //       },
+  //     },
+  //     {
+  //       path: "redirect/:path(.*)",
+  //       component: () => import("@/views/redirect/index.vue"),
+  //     },
+  //   ],
+  // },
 
   {
     path: "/login",
@@ -159,7 +159,7 @@ export const constantRoutes: RouteRecordRaw[] = [
   //     },
   //   ],
   // },
-  
+
   // {
   //   path: "/patient",
   //   component: Layout,
@@ -180,21 +180,16 @@ export const constantRoutes: RouteRecordRaw[] = [
   //     },
   //   ],
   // },
-  // {
-  //   path: "/401",
-  //   component: () => import("@/views/error/401.vue"),
-  //   meta: { hidden: true },
-  // },
-  // {
-  //   path: "/404",
-  //   component: () => import("@/views/error/404.vue"),
-  //   meta: { hidden: true },
-  // },
-  // {
-  //   path: "/:pathMatch(.*)*",
-  //   redirect: "/404",
-  //   meta: { hidden: true },
-  // },
+  {
+    path: "/401",
+    component: () => import("@/views/error/401.vue"),
+    meta: { hidden: true },
+  },
+  {
+    path: "/404",
+    component: () => import("@/views/error/404.vue"),
+    meta: { hidden: true },
+  },
 ];
 
 /**

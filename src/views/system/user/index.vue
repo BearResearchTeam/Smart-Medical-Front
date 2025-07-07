@@ -80,8 +80,8 @@
             </el-table-column>
           </el-table>
 
-          <pagination v-if="total > 0" v-model:total="total" v-model:page="queryParams.pageNum"
-            v-model:limit="queryParams.pageSize" @pagination="fetchData" />
+          <pagination v-if="total > 0" v-model:total="total" v-model:page="queryParams.SkipCount"
+            v-model:limit="queryParams.MaxResultCount" @pagination="fetchData" />
         </el-card>
       </el-col>
     </el-row>
@@ -154,6 +154,7 @@ import MyUserAPI, {
   type UserListItem,
   type UserAddRequest,
   type UserUpdateRequest,
+  type UserPageResult
 } from "@/api/myuser.api";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { useDebounceFn } from "@vueuse/core";
@@ -266,13 +267,14 @@ async function fetchData() {
 
     console.log("发送查询参数:", params);
 
-    const result = await MyUserAPI.getUserList(params);
+    const result = await MyUserAPI.getUserList(params) as unknown as UserPageResult;
     console.log("获取用户列表结果:", result);
 
     if (result) {
       pageData.value = result.data || [];
-      total.value = result.totalCount || 0;
+      total.value = result.totleCount;
       console.log("pageData.value", pageData.value);
+      console.log("total.value", total.value);
     } else {
       pageData.value = [];
       total.value = 0;
