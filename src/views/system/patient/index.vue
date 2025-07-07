@@ -23,7 +23,7 @@
 					<el-tab-pane name="pending">
 						<template #label>
 							<span class="tab-label">待就诊 <el-tag v-if="pendingCount > 0" type="danger" size="small">{{ pendingCount
-							}}</el-tag></span>
+}}</el-tag></span>
 						</template>
 						<div class="list-wrapper">
 							<template v-if="pendingPatients.length > 0">
@@ -144,7 +144,15 @@
 					<span class="base-info-title">处方</span>
 				</template>
 				<el-table :data="drugInfo" @row-click="handleSickFormClick">
-					<el-table-column prop="drugName" label="药品名称" />
+					<el-table-column prop="drugName" label="药品名称">
+						<template #default="scope">
+							<el-select v-model="scope.row.drugName" placeholder="请选择药品" filterable style="width: 100%;"
+								:disabled="!canEditDosage" @change="handleDrugChange(scope.row)">
+								<el-option v-for="drug in drugList" :key="drug.id" :label="drug.name" :value="drug.name" />
+							</el-select>
+						</template>
+					</el-table-column>
+
 					<el-table-column prop="dosage" label="单次用药剂量">
 						<template #default="scope">
 							<el-input v-model="scope.row.dosage" :readonly="!canEditDosage" />
@@ -152,27 +160,27 @@
 					</el-table-column>
 					<el-table-column prop="dosageUnit" label="剂量单位">
 						<template #default="scope">
-							<el-input v-model="scope.row.dosageUnit" readonly />
+							<el-input v-model="scope.row.dosageUnit" :readonly="!canEditDosage" />
 						</template>
 					</el-table-column>
 					<el-table-column prop="usage" label="用法">
 						<template #default="scope">
-							<el-input v-model="scope.row.usage" readonly />
+							<el-input v-model="scope.row.usage" :readonly="!canEditDosage" />
 						</template>
 					</el-table-column>
 					<el-table-column prop="frequency" label="用药频率">
 						<template #default="scope">
-							<el-input v-model="scope.row.frequency" readonly />
+							<el-input v-model="scope.row.frequency" :readonly="!canEditDosage" />
 						</template>
 					</el-table-column>
 					<el-table-column prop="number" label="开药总数量">
 						<template #default="scope">
-							<el-input v-model="scope.row.number" readonly />
+							<el-input v-model="scope.row.number" :readonly="!canEditDosage" />
 						</template>
 					</el-table-column>
 					<el-table-column prop="numberUnit" label="数量单位">
 						<template #default="scope">
-							<el-input v-model="scope.row.numberUnit" readonly />
+							<el-input v-model="scope.row.numberUnit" :readonly="!canEditDosage" />
 						</template>
 					</el-table-column>
 					<el-table-column prop="medicalAdvice" label="医嘱内容" />
@@ -193,6 +201,8 @@ import { ElMessage } from 'element-plus';
 import eldialogpatient from './AddPatientCon.vue'
 //#region  参数列表
 
+// 药品列表
+const drugList = ref<{ id: string; name: string }[]>([]);
 // 搜索框的值
 const searchQuery = ref('');
 // 当前激活的 Tab
@@ -381,7 +391,20 @@ const handleSickFormClick = (row: patientsickFormData) => {
 	}));
 };
 
+// 获取药品表数据
+const fetchDrugList = async () => {
+	// 假设有 UserAPI.getDrugList() 方法
+	const res = await UserAPI.getDrugList();
+	drugList.value = Array.isArray(res) ? res : [];
+};
 
+// 药品选择变化时的处理（如需联动其他字段可在此处理）
+const handleDrugChange = (row: any) => {
+	console.log(row);
+	// 例如根据药品名自动填充剂量单位等
+	// const selected = drugList.value.find(d => d.name === row.drugName);
+	// if (selected) row.dosageUnit = selected.defaultUnit;
+};
 
 //#endregion
 
@@ -398,9 +421,11 @@ const canEditDosage = ref(false);
 // 就诊事件按钮事件
 const viewRecords = (idNumber: string) => {
 	ElMessage.info(idNumber);
-
+	canEditDosage.value = true
 	//处方信息清空
 	resetdrugInfo()
+	//获取药品数据
+	fetchDrugList()
 };
 
 
