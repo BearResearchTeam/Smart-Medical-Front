@@ -259,7 +259,7 @@
     <ElDialog
       v-model="stockInDialog.visible"
       title="药品入库"
-      width="400px"
+      width="650px"
       @closed="handleCloseStockInDialog"
     >
       <ElForm ref="stockInFormRef" :model="stockInForm" label-width="100px" :rules="stockInRules">
