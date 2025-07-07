@@ -107,7 +107,7 @@ async function handleAuthenticatedUser(
     // 路由已加载，检查路由是否存在
     if (to.matched.length === 0) {
       console.log("❌ Route not found in matched routes, redirecting to 404:", to.path);
-      next("/404");
+      next("/error/404");
       return;
     }
 
