@@ -59,17 +59,13 @@
 
       <!-- 开发模式下显示模拟数据开关 -->
       <div class="flex-x-between w-full mt-2">
-        <el-checkbox v-model="useMockData" @change="handleMockDataChange">
-          使用模拟数据
-        </el-checkbox>
+        <el-checkbox v-model="useMockData" @change="handleMockDataChange">使用模拟数据</el-checkbox>
         <el-text type="info" size="small">后端未启动时使用</el-text>
       </div>
 
       <!-- 添加后端连接测试按钮 -->
       <div v-if="showDiagnosticTools" class="flex-x-between w-full mt-2">
-        <el-button size="small" type="info" @click="testBackendConnection">
-          测试后端连接
-        </el-button>
+        <el-button size="small" type="info" @click="testBackendConnection">测试后端连接</el-button>
         <el-text v-if="connectionStatus" type="info" size="small">{{ connectionStatus }}</el-text>
       </div>
 
@@ -115,14 +111,15 @@
 <script setup lang="ts">
 import type { FormInstance } from "element-plus";
 import { useI18n } from "vue-i18n";
-import { type LoginFormData } from "@/api/myuser.api";
+import { type LoginFormData, type LoginFromDataLMZ } from "@/api/myuser.api";
 import CommonWrapper from "@/components/CommonWrapper/index.vue";
 import { Auth } from "@/utils/auth";
 import { ElMessage } from "element-plus";
 import { ApiDetector } from "@/utils/apiDetector";
 import { useUserStore } from "@/store/modules/user.store";
 import { useRoute, useRouter } from "vue-router";
-
+import { usePermissionStore } from "@/store/modules/permission.store";
+const permissionStore = usePermissionStore();
 const { t } = useI18n();
 
 // 获取路由实例
@@ -146,20 +143,34 @@ const useMockData = ref(localStorage.getItem("useMockData") === "true");
 // 显示诊断工具（开发环境）
 const showDiagnosticTools = ref(import.meta.env.DEV);
 // 连接状态信息
-const connectionStatus = ref('');
+const connectionStatus = ref("");
 
 // 测试后端连接
 async function testBackendConnection() {
   try {
     connectionStatus.value = '正在测试连接...';
-    const baseUrl = 'https://localhost:44394/';
+    const baseUrl = 'https://localhost:44394/index.html'; // 替换为实际的后端地址
     const result = await ApiDetector.testConnection(baseUrl);
     connectionStatus.value = result;
   } catch (error: any) {
-    connectionStatus.value = `测试失败: ${error.message || '未知错误'}`;
+    connectionStatus.value = `测试失败: ${error.message || "未知错误"}`;
   }
 }
-
+const LoginFormDataLmz = ref<LoginFromDataLMZ>({
+  username: "admin",
+  password: "123456",
+  captchaKey: "", // 保留字段但不使用
+  captchaCode: "", // 保留字段但不使用
+  rememberMe,
+  userEmail: "",
+  userPhone: "",
+  userSex: true,
+  accessToken: "",
+  accessTokenExpires: "",
+  userNumber: "",
+  refreshToken: "",
+  refreshTokenExpires: "",
+});
 const loginFormData = ref<LoginFormData>({
   username: "admin",
   password: "123456",
@@ -177,7 +188,7 @@ const loginRules = computed(() => {
         message: t("login.message.username.required"),
       },
     ],
-    password: [
+    userPwd: [
       {
         required: true,
         trigger: "blur",
@@ -231,12 +242,16 @@ async function handleLoginSubmit() {
     // 2. 调用登录API
     const userStore = useUserStore();
     await userStore.login(loginFormData.value);
-
+    //console.log("userStore.permissions", userStore.permissions);
     // 3. 登录成功
-    ElMessage.success(t("login.loginSuccess"));
-
+    ElMessage.success(t("login.loginSuccess",));
+    // 2. 动态路由注册（如果需要）
+    //await permissionStore.generateRoutes();
     // 4. 获取重定向地址或默认跳转到仪表盘
-    const redirect = route.query.redirect?.toString() || '/dashboard';
+    const redirect = route.query.redirect?.toString() || "/dashboard/index";
+
+
+    console.log("redirect", redirect);
     await router.push(redirect);
   } catch (error: any) {
     console.error("登录失败:", error);
@@ -252,11 +267,13 @@ async function handleLoginSubmit() {
   }
 }
 
-// 检查输入大小写
+// 检查大写锁定
 function checkCapsLock(event: KeyboardEvent) {
-  // 防止浏览器密码自动填充时报错
-  if (event instanceof KeyboardEvent) {
-    isCapsLock.value = event.getModifierState("CapsLock");
+  const { key } = event;
+  if (key && key.length === 1 && /[a-zA-Z]/.test(key)) {
+    isCapsLock.value = event.getModifierState && event.getModifierState("CapsLock");
+  } else {
+    isCapsLock.value = false;
   }
 }
 

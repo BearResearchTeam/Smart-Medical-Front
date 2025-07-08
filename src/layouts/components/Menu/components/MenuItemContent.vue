@@ -15,14 +15,24 @@
 
 <script setup lang="ts">
 import { translateRouteTitle } from "@/utils/i18n";
-
+import * as ElIcons from '@element-plus/icons-vue'
 const props = defineProps<{
   icon?: string;
   title?: string;
 }>();
 
-const isElIcon = computed(() => props.icon?.startsWith("el-icon"));
-const iconComponent = computed(() => props.icon?.replace("el-icon-", ""));
+// const isElIcon = computed(() => props.icon?.startsWith("el-icon"));
+// const iconComponent = computed(() => props.icon?.replace("el-icon-", ""));
+// 判断是否是 Element Plus 图标（比如 "User", "Menu", "Setting"）
+const isElIcon = computed(() => !!props.icon && props.icon in ElIcons);
+
+// 获取 Element Plus 图标组件
+const iconComponent = computed(() => {
+  if (isElIcon.value && props.icon) {
+    return ElIcons[props.icon as keyof typeof ElIcons];
+  }
+  return null;
+});
 </script>
 
 <style lang="scss" scoped>

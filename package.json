@@ -16,7 +16,7 @@
     "lint:lint-staged": "lint-staged",
     "lint": "npm run lint:eslint && npm run lint:prettier && npm run lint:stylelint",
     "preinstall": "npx only-allow pnpm",
-    "prepare": "husky",
+    "prepare": "husky install",
     "commit": "git-cz"
   },
   "config": {
@@ -64,6 +64,7 @@
     "path-browserify": "^1.0.1",
     "path-to-regexp": "^8.2.0",
     "pinia": "^3.0.3",
+    "pinia-plugin-persistedstate": "^4.4.1",
     "qs": "^6.14.0",
     "sortablejs": "^1.15.6",
     "vue": "^3.5.16",
@@ -122,6 +123,12 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test",
+      "pre-push": "npm run build"
+    }
   },
   "repository": "https://gitee.com/youlaiorg/vue3-element-admin.git",
   "author": "有来开源组织",
