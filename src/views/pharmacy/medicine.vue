@@ -499,7 +499,7 @@ const stockInRules = reactive({
   stockInTime: [{ required: true, message: "请选择入库时间", trigger: "change" }],
 });
 /**
- * 规范化后端返回的药品数据，处理中英文混合键名和测试数据问题
+ * 规范化后端返回的药品数据，处理中英文混合键名和测试数据问题1
  * @param drug 后端返回的原始药品对象
  * @returns 规范化后的药品对象
  */
