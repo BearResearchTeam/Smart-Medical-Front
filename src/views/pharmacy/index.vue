@@ -4,7 +4,7 @@
       <el-button @click="switchTheme('blue')">蓝色主题</el-button>
       <el-button @click="switchTheme('green')">绿色主题</el-button>
     </div>
-    <!-- 查询区域 -->
+    <!-- 查询区域 1-->
     <div class="search-container horizontal-search">
       <ElForm :model="queryParams" :inline="true" class="search-form">
         <ElFormItem label="公司名称" prop="companyName">
