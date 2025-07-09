@@ -1,5 +1,5 @@
 import request from "@/utils/request";
-import axios from "axios";
+
 
 /**
  * 用户API接口

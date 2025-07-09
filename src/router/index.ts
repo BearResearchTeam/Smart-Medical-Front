@@ -180,16 +180,16 @@ export const constantRoutes: RouteRecordRaw[] = [
   //     },
   //   ],
   // },
-  {
-    path: "/401",
-    component: () => import("@/views/error/401.vue"),
-    meta: { hidden: true },
-  },
-  {
-    path: "/404",
-    component: () => import("@/views/error/404.vue"),
-    meta: { hidden: true },
-  },
+  // {
+  //   path: "/401",
+  //   component: () => import("@/views/error/401.vue"),
+  //   meta: { hidden: true },
+  // },
+  // {
+  //   path: "/404",
+  //   component: () => import("@/views/error/404.vue"),
+  //   meta: { hidden: true },
+  // },
 ];
 
 /**
