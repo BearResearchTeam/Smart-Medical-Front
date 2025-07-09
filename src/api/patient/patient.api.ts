@@ -1,7 +1,6 @@
 import request from "@/utils/request";
 import type { AxiosInstance } from "axios";
 import { useUserStoreHook } from "@/store/modules/user.store";
-import { Guide } from "@element-plus/icons-vue/dist/types";
 
 // 患者信息接口 (用于主列表显示)
 export interface PatientInfo {
@@ -65,9 +64,28 @@ export interface PatientPageVO {
   total: number;
 }
 
-// 患者管理相关接口
-export default {
-  // 获取患者列表
+export interface PatientFormData {
+  patientName: string;
+  age: number | undefined;
+  ageUnit: string;
+  gender: boolean;
+  contactPhone: string;
+  idNumber: string;
+  visitType: string;
+  isInfetiousDisease: boolean;
+  diseaseOnsetTime: string | undefined;
+  emergencyTime: string | undefined;
+  visitStatus: string;
+  visitDate: string;
+}
+
+/**
+ * 患者 API
+ */
+export const PatientAPI = {
+  /**
+   * 获取患者分页列表
+   */
   getPage(params: PatientPageQuery) {
     // 模拟接口返回数据
     return new Promise<PatientPageVO>((resolve) => {
@@ -108,15 +126,34 @@ export default {
     // return (request as AxiosInstance).get<PatientPageVO>('/patient/page', { params });
   },
 
-  // 获取患者预约信息 (用于预约详情弹窗)
- 
+  /**
+   * 获取患者预约信息
+   */
   getAppointments(patientId: string, params?: { MaxResultCount: string; SkipCount: string }) {
-    return request<any, { items: AppointmentInfo[]; totalCount: number }>({
-      url: `api/app/patient/appointments/${patientId}`,
+    return request<any, { data: AppointmentInfo[]; totleCount: number }>({
+      url: `/api/app/patient/appointment`,
       method: "get",
-      params,
+      params: {
+        PatientId: patientId,
+        ...params,
+      },
     });
   },
+
+  /**
+   * 根据用户ID添加并关联患者信息
+   * @param userId 当前登录用户的ID
+   * @param data 患者信息
+   */
+  addPatientForUser(userId: string, data: PatientFormData) {
+    return request({
+      url: `/api/app/user/patient-info/${userId}`,
+      method: "post",
+      data,
+    });
+  },
+
+  // 获取单个预约的详细信息
 
   // 根据用户ID获取关联患者的就诊记录
   getAssociatedPatients() {

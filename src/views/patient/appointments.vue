@@ -1,129 +1,58 @@
 <!-- 患者预约记录页面 -->
 <template>
   <div class="app-container">
-    <!-- 页面标题 -->
-    <div class="page-header mb-4">
-      <el-page-header @back="goBack">
-        <template #content>
-          <span class="page-title">{{ patientName }}的预约记录</span>
-        </template>
-      </el-page-header>
-    </div>
+    <el-card shadow="never">
+      <div class="flex justify-between mb-2">
+        <h3 class="text-lg font-semibold">
+          {{ patientName ? `${patientName} 的预约记录` : "预约记录" }}
+        </h3>
+        <el-button @click="goBack">
+          <i-ep-arrow-left />
+          返回
+        </el-button>
+      </div>
 
-    <!-- 表格内容 -->
-    <el-table
-      v-loading="loading"
-      :data="appointmentList"
-      border
-      stripe
-      style="width: 100%"
-      :header-cell-style="{ background: '#f5f7fa', color: '#606266' }"
-    >
-      <el-table-column prop="departmentName" label="科室名称" min-width="120" align="center" />
+      <el-table v-loading="loading" :data="appointmentList" border>
+        <el-table-column prop="patientName" label="患者名称" align="center" />
+        <el-table-column prop="appointmentDateTime" label="预约时间" align="center" />
+        <el-table-column prop="isInfectiousDisease" label="是否传染病" align="center">
+          <template #default="scope">
+            <span>{{ scope.row.isInfectiousDisease ? "否" : "是" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="idNumber" label="身份证号" align="center" />
+      </el-table>
 
-      <el-table-column prop="doctorName" label="医生姓名" width="120" align="center" />
-
-      <el-table-column prop="visitType" label="就诊类型" width="100" align="center" />
-
-      <el-table-column label="是否传染病" width="100" align="center">
-        <template #default="{ row }">
-          <el-tag :type="row.isinfectiousDisease ? 'danger' : 'info'">
-            {{ row.isinfectiousDisease ? "是" : "否" }}
-          </el-tag>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="diseaseOnsettime" label="发病时间" width="120" align="center">
-        <template #default="{ row }">
-          {{ row.diseaseOnsettime?.substring(0, 10) }}
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="emergencyTime" label="紧急时间" width="120" align="center">
-        <template #default="{ row }">
-          {{ row.emergencyTime?.substring(0, 10) }}
-        </template>
-      </el-table-column>
-
-      <el-table-column label="就诊状态" width="100" align="center">
-        <template #default="{ row }">
-          <el-tag
-            :type="
-              row.visitStatus === '已完成'
-                ? 'success'
-                : row.visitStatus === '待就诊'
-                  ? 'warning'
-                  : 'info'
-            "
-          >
-            {{ row.visitStatus }}
-          </el-tag>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="visitDate" label="就诊日期" width="120" align="center">
-        <template #default="{ row }">
-          {{ row.visitDate?.substring(0, 10) }}
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="createdTime" label="创建时间" width="120" align="center">
-        <template #default="{ row }">
-          {{ row.createdTime?.substring(0, 10) }}
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <!-- 分页 -->
-    <div class="pagination-container">
-      <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :page-sizes="[10, 20, 30, 50]"
-        :total="total"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
-
-    <!-- 刷新按钮 -->
-    <div class="refresh-btn mt-4">
-      <el-button :loading="loading" type="primary" @click="fetchAppointmentData">
-        <el-icon>
-          <Refresh />
-        </el-icon>
-        刷新
-      </el-button>
-    </div>
+      <div class="flex justify-end mt-4">
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 50, 100]"
+          :total="total" layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
+          @current-change="handleCurrentChange" />
+      </div>
+    </el-card>
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Refresh } from "@element-plus/icons-vue";
-import PatientAPI from "@/api/patient/patient.api";
-import type { AppointmentInfo } from "@/api/patient/patient.api";
+import { PatientAPI, AppointmentInfo } from "@/api/patient/patient.api";
+import { ElMessage } from "element-plus";
 
 const route = useRoute();
 const router = useRouter();
 
-// 获取路由参数
-const patientId = route.query.patientId as string;
-const patientName = route.query.patientName as string;
+const patientId = ref<string | null>(route.query.patientId as string);
+const patientName = ref<string | null>(route.query.patientName as string);
 
-// 定义响应式数据
 const appointmentList = ref<AppointmentInfo[]>([]);
 const loading = ref(false);
-const total = ref(0);
 const currentPage = ref(1);
 const pageSize = ref(10);
+const total = ref(0);
 
-// 获取预约记录数据
 const fetchAppointmentData = async () => {
-  if (!patientId) {
-    console.error("未提供患者ID");
+  if (!patientId.value) {
+    ElMessage.error("未找到患者ID");
     return;
   }
 
@@ -133,52 +62,42 @@ const fetchAppointmentData = async () => {
       MaxResultCount: pageSize.value.toString(),
       SkipCount: ((currentPage.value - 1) * pageSize.value).toString(),
     };
+    const response = await PatientAPI.getAppointments(patientId.value, params);
 
-    const response = await PatientAPI.getAppointments(patientId, params);
-    console.log("获取到的预约记录:", response);
+    console.log(response);
 
-    if (response && typeof response === "object") {
-      // 假设返回的数据结构是 { items: AppointmentInfo[], totalCount: number }
-      appointmentList.value = Array.isArray(response.items) ? response.items : [];
-      total.value = response.totalCount || 0;
+    if (response && Array.isArray(response.data)) {
+      appointmentList.value = response.data;
+      total.value = response.totleCount;
     } else {
-      appointmentList.value = Array.isArray(response) ? response : [];
-      total.value = Array.isArray(response) ? response.length : 0;
+      appointmentList.value = [];
+      total.value = 0;
     }
   } catch (error) {
     console.error("获取预约记录失败:", error);
+    ElMessage.error("获取预约记录失败");
+    appointmentList.value = [];
+    total.value = 0;
   } finally {
     loading.value = false;
   }
 };
 
-// 处理每页显示数量变化
 const handleSizeChange = (val: number) => {
   pageSize.value = val;
-  currentPage.value = 1; // 重置到第一页
   fetchAppointmentData();
 };
 
-// 处理页码变化
 const handleCurrentChange = (val: number) => {
   currentPage.value = val;
   fetchAppointmentData();
 };
 
-// 返回上一页
 const goBack = () => {
   router.back();
 };
 
-// 在组件挂载后获取数据
 onMounted(() => {
-  // 从路由参数中获取初始分页设置
-  const maxResults = parseInt(route.query.MaxResultCount as string) || 10;
-  const skipCount = parseInt(route.query.SkipCount as string) || 0;
-
-  pageSize.value = maxResults;
-  currentPage.value = Math.floor(skipCount / maxResults) + 1;
-
   fetchAppointmentData();
 });
 </script>

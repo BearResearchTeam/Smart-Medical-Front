@@ -29,7 +29,6 @@ export function setupPermission() {
 
     // 已登录用户处理逻辑
     if (isLoggedIn) {
-      
       // 如果已登录用户尝试访问登录页，重定向到首页
       if (to.path === "/login") {
         console.log("已登录用户访问登录页，重定向到首页");
@@ -41,13 +40,13 @@ export function setupPermission() {
       await handleAuthenticatedUser(to, from, next);
       return;
     }
-    
+
     // 未登录用户访问非白名单页面，重定向到登录页
     console.log(`⚠️ User not logged in, redirecting to login page from: ${to.path}`);
     redirectToLogin(to, next);
   });
 
- // ...你的守卫逻辑...
+  // ...你的守卫逻辑...
   console.log("当前所有已注册的路由：", router.getRoutes());
   // 后置守卫，确保进度条关闭
   router.afterEach((to, from) => {
@@ -78,18 +77,15 @@ async function handleAuthenticatedUser(
 
     // 检查路由是否已生成
     if (!permissionStore.routesLoaded) {
-      
       console.log("⚠️ Routes not loaded, initiating generation for:", to.path);
 
       // 防止重复生成路由
       if (isGeneratingRoutes) {
-        
         console.log("⏳ Routes already generating, waiting for completion.");
         // 等待当前路由生成完成
         await waitForRoutesGeneration(permissionStore);
         console.log("✅ Routes generation completed (waited).");
       } else {
-       
         console.log("🚀 Generating and adding routes now.");
         await generateAndAddRoutes(permissionStore);
         console.log("✅ Routes generated and added.");
