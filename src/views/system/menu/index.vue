@@ -164,7 +164,7 @@ const queryParams = reactive<MenuQuery>({
   PermissionName: undefined,
   Sorting: "0",
   SkipCount: 1,
-  MaxResultCount: 50, // 每页数量
+  MaxResultCount: 60, // 每页数量
 });
 
 const pageData = reactive<tables>({
