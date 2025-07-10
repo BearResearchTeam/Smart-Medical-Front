@@ -114,7 +114,8 @@
 						<el-date-picker v-model="formData.diseaseOnsetTime" type="datetime" disabled style="width: 220px" />
 					</el-col>
 					<el-col :span="5" style="text-align: right;">
-						<el-button type="primary" @click="viewRecords(formData.idNumber)">就诊事件</el-button>
+						<el-button type="primary" :disabled="activeTab !== 'pending'"
+							@click="viewRecords(formData.idNumber)">就诊事件</el-button>
 					</el-col>
 				</el-row>
 			</el-card>
@@ -142,49 +143,128 @@
 			<el-card class="middle-info-card">
 				<template #header>
 					<span class="base-info-title">处方</span>
+					<el-button type="primary" style="float: right;" :disabled="!canEditDosage"
+						@click.stop="handleAddRow">插入</el-button>
 				</template>
-				<el-table :data="drugInfo" @row-click="handleSickFormClick">
-					<el-table-column prop="drugName" label="药品名称">
+
+
+				<el-table :data="drugInfo">
+					<!-- 保留原来的药品名称 -->
+					<el-table-column v-if="canEditDosage" prop="drugName" label="药品名称">
+						<template #default="scope">
+							<el-select v-model="scope.row.drugId" placeholder="请选择药品" filterable style="width: 100%;"
+								:disabled="!canEditDosage" @change="() => handleDrugChange(scope.row)">
+								<el-option-group v-for="group in drugList" :key="group.drugType" :label="group.drugType">
+									<el-option v-for="drug in group.drugs" :key="drug.id" :label="drug.drugName" :value="drug.id" />
+								</el-option-group>
+							</el-select>
+						</template>
+					</el-table-column>
+
+					<el-table-column v-if="!canEditDosage" prop="drugName" label="药品名称">
 						<template #default="scope">
 							<el-select v-model="scope.row.drugName" placeholder="请选择药品" filterable style="width: 100%;"
-								:disabled="!canEditDosage" @change="handleDrugChange(scope.row)">
-								<el-option v-for="drug in drugList" :key="drug.id" :label="drug.name" :value="drug.name" />
+								:disabled="!canEditDosage" @change="() => handleDrugChange(scope.row)">
+								<el-option-group v-for="group in drugList" :key="group.drugType" :label="group.drugType">
+									<el-option v-for="drug in group.drugs" :key="drug.id" :label="drug.drugName" :value="drug.drugName" />
+								</el-option-group>
 							</el-select>
 						</template>
 					</el-table-column>
 
 					<el-table-column prop="dosage" label="单次用药剂量">
 						<template #default="scope">
-							<el-input v-model="scope.row.dosage" :readonly="!canEditDosage" />
+							<el-select v-model="scope.row.dosage" placeholder="选择剂量" :disabled="!canEditDosage" style="width: 100%;">
+								<el-option label="0.5" value="0.5" />
+								<el-option label="1" value="1" />
+								<el-option label="2" value="2" />
+								<el-option label="5" value="5" />
+							</el-select>
 						</template>
 					</el-table-column>
+
 					<el-table-column prop="dosageUnit" label="剂量单位">
 						<template #default="scope">
-							<el-input v-model="scope.row.dosageUnit" :readonly="!canEditDosage" />
+							<el-select v-model="scope.row.dosageUnit" placeholder="选择单位" :disabled="!canEditDosage"
+								style="width: 100%;">
+								<el-option label="mg" value="mg" />
+								<el-option label="ml" value="ml" />
+								<el-option label="片" value="片" />
+								<el-option label="颗" value="颗" />
+							</el-select>
 						</template>
 					</el-table-column>
+
 					<el-table-column prop="usage" label="用法">
 						<template #default="scope">
-							<el-input v-model="scope.row.usage" :readonly="!canEditDosage" />
+							<el-select v-model="scope.row.usage" placeholder="选择用法" :disabled="!canEditDosage" style="width: 100%;">
+								<el-option label="口服" value="口服" />
+								<el-option label="注射" value="注射" />
+								<el-option label="外用" value="外用" />
+								<el-option label="滴眼" value="滴眼" />
+							</el-select>
 						</template>
 					</el-table-column>
+
 					<el-table-column prop="frequency" label="用药频率">
 						<template #default="scope">
-							<el-input v-model="scope.row.frequency" :readonly="!canEditDosage" />
+							<el-select v-model="scope.row.frequency" placeholder="选择频率" :disabled="!canEditDosage"
+								style="width: 100%;">
+								<el-option label="每天一次" value="每天一次" />
+								<el-option label="每天两次" value="每天两次" />
+								<el-option label="饭前服用" value="饭前服用" />
+								<el-option label="睡前一次" value="睡前一次" />
+							</el-select>
 						</template>
 					</el-table-column>
+
 					<el-table-column prop="number" label="开药总数量">
 						<template #default="scope">
-							<el-input v-model="scope.row.number" :readonly="!canEditDosage" />
+							<el-select v-model="scope.row.number" placeholder="选择数量" :disabled="!canEditDosage" style="width: 100%;">
+								<el-option :label="1" :value="1" />
+								<el-option :label="2" :value="2" />
+								<el-option :label="5" :value="5" />
+								<el-option :label="10" :value="10" />
+								<el-option :label="20" :value="20" />
+							</el-select>
 						</template>
 					</el-table-column>
+
 					<el-table-column prop="numberUnit" label="数量单位">
 						<template #default="scope">
-							<el-input v-model="scope.row.numberUnit" :readonly="!canEditDosage" />
+							<el-select v-model="scope.row.numberUnit" placeholder="选择单位" :disabled="!canEditDosage"
+								style="width: 100%;">
+								<el-option label="盒" value="盒" />
+								<el-option label="瓶" value="瓶" />
+								<el-option label="支" value="支" />
+								<el-option label="袋" value="袋" />
+							</el-select>
 						</template>
 					</el-table-column>
-					<el-table-column prop="medicalAdvice" label="医嘱内容" />
+
+					<el-table-column prop="medicalAdvice" label="药品备注">
+						<template #default="scope">
+							<el-input v-model="scope.row.medicalAdvice" :disabled="!canEditDosage" />
+						</template>
+					</el-table-column>
+
+					<el-table-column>
+						<template #default="scope">
+							<el-button type="primary" :disabled="!canEditDosage" link size="small" icon="edit"
+								@click.stop="handleOpenDialog(scope.row.drugId)">删除</el-button>
+						</template>
+					</el-table-column>
+
+
 				</el-table>
+				<el-form-item label="" prop="remarks">
+					<el-input v-model="DoctorPrescriptionparameter.medicalAdvice" :disabled="!canEditDosage" type="textarea"
+						:rows="3" placeholder="请输入医嘱信息" />
+				</el-form-item>
+				<el-button type="primary" style="float: right;" :disabled="!canEditDosage"
+					@click.stop="handleSavePrescription(drugInfo)">保存</el-button>
+
+
 			</el-card>
 		</div>
 	</div>
@@ -195,19 +275,46 @@ import { ref, onMounted } from 'vue';
 import { Search, Plus, ArrowRight } from '@element-plus/icons-vue';
 import UserAPI, {
 	IPatient, PatientListQuery, FormData,
-	patientsickFormData, DrugItem
+	patientsickFormData, DrugItem, DoctorPrescription
 } from '@/api/system/patient.api';
 import { ElMessage } from 'element-plus';
 import eldialogpatient from './AddPatientCon.vue'
 //#region  参数列表
 
+// 开具处方信息
+const DoctorPrescriptionparameter = ref<DoctorPrescription>({
+	"prescriptionTemplateNumber": 0,
+	"patientNumber": "",
+	"isActive": true,
+	"drugIds": "",
+	"prescriptionItems": [
+		{
+			"drugId": 0,
+			"dosage": 0,
+			"dosageUnit": "",
+			"usage": "",
+			"frequency": "",
+			"number": 0,
+			"numberUnit": "",
+			"medicalAdvice": ""
+		}
+	],
+	"medicalAdvice": ""
+})
+
+
+const PatientdialogVisible = ref(false)
+// 是否可以编辑处方
+const canEditDosage = ref(false);
 // 药品列表
-const drugList = ref<{ id: string; name: string }[]>([]);
+const drugList = ref<any[]>([]);
 // 搜索框的值
 const searchQuery = ref('');
 // 当前激活的 Tab
 const activeTab = ref('pending');
-
+watch(activeTab, () => {
+	canEditDosage.value = false
+})
 // 分页相关状态
 const currentPage = ref(1);
 const pageSize = ref(10);
@@ -290,7 +397,6 @@ const drugInfo = ref<DrugItem[]>([{
 //#endregion
 
 //#region  显示方法列表
-
 //清空 drugInfo
 const resetdrugInfo = () => {
 	drugInfo.value = [{
@@ -369,6 +475,9 @@ const handlePageChange = (newPage: number) => {
 
 // 患者列表项点击事件
 const handlePatientClick = async (id: string) => {
+
+	canEditDosage.value = false
+	DoctorPrescriptionparameter.value.patientNumber = id
 	resetFormData();
 	resetdrugInfo();
 	const way = await UserAPI.getPatientIDWay(id);
@@ -382,28 +491,31 @@ const handlePatientClick = async (id: string) => {
 };
 
 const handleSickFormClick = (row: patientsickFormData) => {
-	console.log(row.drugItems);
-	drugInfo.value = row.drugItems.map((item: any) => ({
+	const items = Array.isArray(row.drugItems) ? row.drugItems : [];
+
+	drugInfo.value = items.map((item: any) => ({
 		drugName: item.drugName ?? '',
-		// ==>   ...item   <== 
-		// 对象展开语法，把 item 里的所有其他字段都带上
 		...item
 	}));
 };
 
 // 获取药品表数据
 const fetchDrugList = async () => {
-	// 假设有 UserAPI.getDrugList() 方法
+	// 获取药品分组数据
 	const res = await UserAPI.getDrugList();
-	drugList.value = Array.isArray(res) ? res : [];
+	// 只取分组数据
+	if (res && Array.isArray(res)) {
+		drugList.value = res;
+	} else {
+		drugList.value = [];
+	}
+	console.log(drugList.value);
 };
 
 // 药品选择变化时的处理（如需联动其他字段可在此处理）
 const handleDrugChange = (row: any) => {
-	console.log(row);
-	// 例如根据药品名自动填充剂量单位等
-	// const selected = drugList.value.find(d => d.name === row.drugName);
-	// if (selected) row.dosageUnit = selected.defaultUnit;
+	console.log("row", row)
+	console.log("drugInfo", drugInfo.value);
 };
 
 //#endregion
@@ -414,9 +526,58 @@ const handleQuickReception = () => {
 
 };
 
-const PatientdialogVisible = ref(false)
-// 是否可以编辑处方
-const canEditDosage = ref(false);
+// 页面删除行
+const handleOpenDialog = (drugId: any) => {
+	console.log(drugId)
+	// 如果 drugInfo 是空的，啥也别干
+	if (!drugInfo.value.length) return;
+
+	// 如果 drugId 为空，则删除最后一条
+	if (!drugId) {
+		drugInfo.value.pop(); // 删除最后一个
+		return;
+	}
+	// 正常删除指定 drugId 的项
+	const idx = drugInfo.value.findIndex(item => item.drugId === drugId);
+	if (idx !== -1) {
+		drugInfo.value.splice(idx, 1);
+	}
+}
+//页面插入行
+const handleAddRow = () => {
+	drugInfo.value.push({
+		drugId: '',
+		drugName: '',
+		dosage: '',
+		dosageUnit: '',
+		usage: '',
+		frequency: '',
+		number: '',
+		numberUnit: '',
+		medicalAdvice: '',
+	});
+}
+
+// 保存处方
+const handleSavePrescription = (row: any) => {
+	try {
+		DoctorPrescriptionparameter.value.prescriptionTemplateNumber = 0;
+		DoctorPrescriptionparameter.value.drugIds = "1";
+		DoctorPrescriptionparameter.value.isActive = false;
+		DoctorPrescriptionparameter.value.prescriptionItems = row
+		DoctorPrescriptionparameter.value.prescriptionItems = drugInfo.value
+
+		const result = UserAPI.Prescribe(DoctorPrescriptionparameter.value)
+		if (result.isSuc || result == undefined) {
+			ElMessage.success('发药成功！🎉');
+		} else {
+			ElMessage.error(result.msg || '患者信息提交失败，请重试！😢');
+		}
+
+	} catch (error) {
+		console.log(error)
+	}
+}
 
 // 就诊事件按钮事件
 const viewRecords = (idNumber: string) => {
@@ -427,8 +588,6 @@ const viewRecords = (idNumber: string) => {
 	//获取药品数据
 	fetchDrugList()
 };
-
-
 // 组件挂载时默认加载待就诊列表
 onMounted(() => {
 	//清空处方数据
@@ -438,6 +597,34 @@ onMounted(() => {
 
 </script>
 <style lang="scss" scoped>
+.awesome-purple-button i {
+	transition: transform 0.3s ease;
+}
+
+.awesome-purple-button:hover i {
+	transform: rotate(90deg);
+}
+
+.awesome-purple-button {
+	background: linear-gradient(135deg, #9c27b0, #7e57c2);
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	padding: 6px 14px;
+	font-weight: bold;
+	box-shadow: 0 2px 8px rgba(156, 39, 176, 0.3);
+	transition: all 0.3s ease;
+}
+
+.awesome-purple-button:hover {
+	background: linear-gradient(135deg, #8e24aa, #673ab7);
+	box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+}
+
+.awesome-purple-button:active {
+	transform: scale(0.96);
+	box-shadow: 0 2px 6px rgba(156, 39, 176, 0.2);
+}
 .main-layout {
 	display: flex;
 	align-items: flex-start;
