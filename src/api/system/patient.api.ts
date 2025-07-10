@@ -77,11 +77,32 @@ const UserAPI = {
       method: "get",
       params: {},
     })
-  }
+  },
 
+  /**
+     * 根据科室获取医生
+     * @param query 科室Id
+     */
+  getDrugList() {
+    return request<any, GetDoctor>({
+      url: `/api/app/drug/drugs-grouped-by-type`,
+      method: "get",
+      params: {},
+    })
+  },
 
-
-
+  /**
+   * 开具处方
+   * @param data 医生为患者开具处方一次完整开方
+   * @returns 
+   */
+  Prescribe(data: DoctorPrescription) {
+    return request<any, ApiResponse>({
+      url: `${USER_BASE_URL}doctors-prescription`,
+      method: "post",
+      data
+    })
+  },
 };
 
 
@@ -106,7 +127,7 @@ export interface patientsickFormData {
   drugIds: null,
   prescriptionTemplateNumber: string;
   medicalAdvice: string,
-  drugItems: [
+  drugItems?: [
     {
       drugId: string;
       dosage: string;
@@ -218,4 +239,24 @@ export interface GetDoctorDepartMent {
 export interface GetDoctor {
   id: string,
   employeeName: string
+}
+
+export interface DoctorPrescription {
+  "prescriptionTemplateNumber": number,
+  "patientNumber": string,
+  "isActive": boolean,
+  "drugIds": string,
+  "prescriptionItems": [
+    {
+      "drugId": number,
+      "dosage": number,
+      "dosageUnit": string,
+      "usage": string,
+      "frequency": string,
+      "number": number,
+      "numberUnit": string,
+      "medicalAdvice": string
+    }
+  ],
+  medicalAdvice: string
 }

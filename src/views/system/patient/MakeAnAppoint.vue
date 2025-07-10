@@ -1,8 +1,6 @@
 <template>
-  <el-dialog v-model="PatientdialogVisible" :title="isViewMode ? '查看患者信息' : '新增/编辑患者信息'" width="80%"
-    :before-close="handleClose" draggable center>
-    <el-form ref="ruleFormRef" :model="RegistraPatientForm" label-width="auto" :rules="formRules"
-      :disabled="isViewMode">
+  <el-card class="mt-5">
+    <el-form ref="ruleFormRef" :model="RegistraPatientForm" label-width="auto" :rules="formRules">
       <el-row :gutter="20"> <el-col :span="12">
           <el-form-item label="姓名" prop="patientName">
             <el-input v-model="RegistraPatientForm.patientName" placeholder="请输入患者姓名" />
@@ -128,39 +126,27 @@
       </el-row>
     </el-form>
 
-    <template #footer>
+    <div class="dialog-footer">
       <div class="dialog-footer">
-        <template v-if="!isViewMode">
-          <el-button @click="submitForm(ruleFormRef)">提 交</el-button>
-          <el-button type="info" @click="resetForm(ruleFormRef)">重 置</el-button>
-        </template>
-        <el-button @click="PatientdialogVisible = false">
-          {{ isViewMode ? '关 闭' : '取 消' }}
-        </el-button>
+        <el-button @click="submitForm(ruleFormRef)">提 交</el-button> <el-button type="info"
+          @click="resetForm(ruleFormRef)">重 置</el-button> <el-button @click="PatientdialogVisible = false">取
+          消</el-button>
       </div>
-    </template>
-  </el-dialog>
+    </div>
+  </el-card>
 </template>
 
+
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits, reactive, computed } from 'vue';
-import { ElMessageBox, ElMessage, FormInstance, FormRules } from 'element-plus'; // 导入 FormInstance, FormRules
+import { ref, watch, defineProps, defineEmits, reactive } from 'vue';
+import { ElMessage, FormInstance, FormRules } from 'element-plus'; // 导入 FormInstance, FormRules
 import UserAPI, {
   RegistrationPatient, GetDoctorDepartMent, GetDoctor
 } from '@/api/system/patient.api'; // 确保路径正确，RegistrationPatient已导入
-import type { RegistrationItem } from '@/api/system/Distribute.api';
-
 // 接收父组件传入的modelValue，控制弹窗显示/隐藏
-const props = defineProps<{
-  modelValue: boolean,
-  patientData?: RegistrationItem | null,
-  mode?: 'add' | 'view'
-}>();
-
+const props = defineProps<{ modelValue: boolean }>();
 // 定义触发的事件，用于更新父组件的modelValue
 const emit = defineEmits(['update:modelValue', 'submitSuccess']); // 添加一个提交成功事件
-
-const isViewMode = computed(() => props.mode === 'view');
 
 // 控制弹窗的显示与隐藏，通过 watch 同步 props.modelValue
 const PatientdialogVisible = ref(props.modelValue);
@@ -168,11 +154,8 @@ watch(() => props.modelValue, val => {
   PatientdialogVisible.value = val;
   if (val) {
     // 弹窗打开时重置表单（或加载数据）
-    if (isViewMode.value && props.patientData) {
-      Object.assign(RegistraPatientForm, props.patientData);
-    } else {
-      resetForm(ruleFormRef.value); // 打开时重置表单
-    }
+    resetForm(ruleFormRef.value); // 打开时重置表单
+    // 如果是编辑模式，这里可以根据传入的ID加载数据
   }
 });
 watch(PatientdialogVisible, val => emit('update:modelValue', val));
@@ -268,23 +251,11 @@ const formRules = reactive<FormRules<RegistrationPatient>>({
   departmentName: [{ required: true, message: '请输入科室名称', trigger: 'blur' }],
   visitType: [{ required: true, message: '请选择就诊类型', trigger: 'change' }],
   // 日期类型用string校验
-  visitDate: [{ type: 'string', required: true, message: '请选择就诊时间', trigger: 'change' }], 
+  visitDate: [{ type: 'string', required: true, message: '请选择就诊时间', trigger: 'change' }],
   // 其他字段根据后端要求和实际情况添加校验
   bloodPressure: [{ required: true, message: '请输入血压', trigger: 'blur' }]
 });
 
-
-// 弹窗关闭前的处理
-const handleClose = (done: () => void) => {
-  ElMessageBox.confirm('确定要关闭此弹窗吗？未保存的数据会丢失哦！')
-    .then(() => {
-      resetForm(ruleFormRef.value); // 关闭前重置表单，保持良好习惯
-      done();
-    })
-    .catch(() => {
-      // 用户点击取消，不关闭弹窗
-    });
-};
 
 // 提交表单
 const submitForm = async (formEl: FormInstance | undefined) => {
@@ -340,5 +311,11 @@ defineExpose({
 .dialog-footer {
   text-align: right;
   /* 让按钮靠右对齐 */
+}
+
+.mt-5 {
+  margin-top: 20px;
+  width: 155vh;
+  height: 80vh;
 }
 </style>
