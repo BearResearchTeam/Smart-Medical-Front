@@ -70,7 +70,8 @@
                 <el-button type="primary" link size="small" icon="edit" @click="handleuserrole(row)">
                   分配角色
                 </el-button>
-                <el-button type="primary" link size="small" icon="edit" @click="handleOpenDialog(row)">
+                <el-button type="primary" link size="small" icon="edit" v-if="canEditUser"
+                  @click="handleOpenDialog(row)">
                   编辑
                 </el-button>
                 <el-button type="danger" link size="small" icon="delete" @click="handleDelete(row.id)">
@@ -161,7 +162,14 @@ import { useDebounceFn } from "@vueuse/core";
 
 import UserImport from "./components/UserImport.vue";
 import MyRoleAPI, { type RoleItems } from "@/api/myrole.api";
+import { useUserStore } from "@/store"; // 路径按你的实际情况
 
+const userStore = useUserStore();
+const permissionCode = userStore.userInfo.perms;
+const dictype=userStore.dictypeselectdata;
+const canEditUser = computed(() => permissionCode.includes("user:edit"));
+console.log(permissionCode);
+console.log(userStore.userInfo);
 defineOptions({
   name: "User",
   inheritAttrs: false,

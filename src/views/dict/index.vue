@@ -138,7 +138,7 @@ const total = ref(0);
 // 查询参数
 const queryParams = reactive<DictPageQuery>({
   pageIndex: 1,
-  pageSize: 2,
+  pageSize: 5,
 });
 interface tableDatas {
   data: DictForm[];

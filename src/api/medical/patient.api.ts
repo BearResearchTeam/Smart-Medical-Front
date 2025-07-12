@@ -54,7 +54,14 @@ class PatientAPI {
       method: "get",
     });
   }
-
+  // 获取单个患者预约信息
+static getPatientbyid(patientId:string,data:any) {
+    return request({
+      url: `/api/app/patient/patient-info/${patientId}`,
+      method: "get",
+      data,
+    });
+  }
   // 新增患者
   static addPatient(data: PatientForm): Promise<{ success: boolean; message: string }> {
     return request({

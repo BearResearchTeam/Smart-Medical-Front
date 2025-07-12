@@ -139,9 +139,9 @@ const UserAPI = {
   },
 
   /** 获取个人中心用户信息 */
-  getProfile() {
+  getProfile(userId:any) {
     return request<any, UserProfileVO>({
-      url: `${USER_BASE_URL}/profile`,
+      url: `/api/app/user-role/batch-create/${userId}`,
       method: "get",
     });
   },

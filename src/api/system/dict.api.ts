@@ -23,7 +23,12 @@ const DictAPI = {
     });
   },
  
-
+getdictypeselectlist(){
+    return request({
+      url: `/api/app/dictionary-type/dictionarytypeselectlist`,
+      method: "get",
+    });
+  },
   /**
    * 新增字典
    *
