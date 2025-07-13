@@ -1,4 +1,3 @@
-
 import axios, {
   type InternalAxiosRequestConfig,
   type AxiosResponse,
@@ -22,7 +21,7 @@ import type { BackendApiResponse } from "@/types/api";
  * - 如果后端服务未启动，可以将baseURL设置为空字符串，前端将使用模拟数据
  */
 const httpRequest = axios.create({
-  baseURL: "https://localhost:44394/",
+  baseURL: "http://8.140.51.34:44394/",
   timeout: 50000,
   headers: { "Content-Type": "application/json;charset=utf-8" },
   paramsSerializer: (params) => qs.stringify(params),
@@ -31,10 +30,6 @@ const httpRequest = axios.create({
 
 // 打印baseURL值，方便调试
 console.log("HTTP请求baseURL:", httpRequest.defaults.baseURL);
-
-
-
-
 
 /**
  * 请求拦截器 - 添加 Authorization 头
@@ -158,9 +153,6 @@ httpRequest.interceptors.response.use(
   }
 );
 
-
-
-
 /**
  * 重试请求的回调函数类型
  */
@@ -267,4 +259,3 @@ export default httpRequest;
 // const request = <T = any>(config: AxiosRequestConfig): Promise<T> => {
 //   return service(config);
 // };
-

@@ -24,7 +24,7 @@ import "default-passive-events";
 console.log("🚀 应用启动...");
 
 // 检测后端API是否可用
-ApiDetector.testConnection("https://localhost:44394/index.html")
+ApiDetector.testConnection("http://8.140.51.34:44394/index.html")
   .then((status) => {
     console.log(`🔌 API连接状态: ${status}`);
 

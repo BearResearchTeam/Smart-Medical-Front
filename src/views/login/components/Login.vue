@@ -149,7 +149,7 @@ const connectionStatus = ref("");
 async function testBackendConnection() {
   try {
     connectionStatus.value = '正在测试连接...';
-    const baseUrl = 'https://localhost:44394/index.html'; // 替换为实际的后端地址
+    const baseUrl = 'http://8.140.51.34:44394/index.html'; // 替换为实际的后端地址
     const result = await ApiDetector.testConnection(baseUrl);
     connectionStatus.value = result;
   } catch (error: any) {
