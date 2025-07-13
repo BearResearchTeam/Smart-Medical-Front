@@ -5,8 +5,15 @@ import request from "@/utils/request";
 /** 制药公司列表项 */
 export interface PharmaceuticalCompanyItem {
   id: string;
-  name: string;
-  // 可根据实际接口补充其它字段
+  name: string; // 厂家名称
+  contact: string; // 联系人
+  address: string; // 地址
+  phone: string; // 电话
+  createBy: string; // 创建者
+  createTime: string; // 创建时间
+  enabled: boolean; // 启用状态
+  enabledRemark: string; // 启用标记（如✔）
+  companyType: string; // 厂商类型
 }
 
 /** 新增制药公司请求体 */
@@ -40,8 +47,7 @@ const PharmaceuticalCompanyAPI = {
     });
   },
 
-
-// ... existing code ...
+  // ... existing code ...
   /**
    * 新增制药公司
    * @param data 公司数据
@@ -54,7 +60,5 @@ const PharmaceuticalCompanyAPI = {
     });
   },
 };
-
-   
 
 export default PharmaceuticalCompanyAPI;
