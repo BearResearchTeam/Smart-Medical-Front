@@ -100,11 +100,68 @@ const UserAPI = {
       params: query,
     });
   },
+
+  // UserAPI 内部添加
+  getEquipmentList(query: EquipmentQuery) {
+    return request<EquipmentListResponse>({
+      url: '/api/app/equipment',
+      method: 'get',
+      params: query,
+    });
+  },
+
+  // UserAPI 内部添加
+  addEquipment(data: EquipmentAddRequest) {
+    return request<ApiResponse>({
+      url: '/api/app/equipment',
+      method: 'post',
+      data,
+    });
+  },
 };
 
 
 
 export default UserAPI;
+
+// 类型定义
+export interface EquipmentAddRequest {
+  name: string;
+  model: string;
+  manufacturer: string;
+  purchaseDate: string;
+  department: string;
+  status: string;
+  inUse: boolean;
+  location: string;
+  lastMaintenanceTime: string;
+  remark: string;
+}
+
+// 文件末尾添加类型
+export interface EquipmentQuery {
+  PageIndex: number;
+  PageSize: number;
+}
+
+export interface EquipmentItem {
+  name: string;
+  model: string;
+  manufacturer: string;
+  purchaseDate: string;
+  department: string;
+  inUse: boolean;
+  status: string;
+  location: string;
+  maintenanceTime: string;
+  remark: string;
+  isDeleted: boolean;
+}
+
+export interface EquipmentListResponse {
+  total: number;
+  list: EquipmentItem[];
+}
 
 /*所有住院记录*/
 export interface AllPatient {
