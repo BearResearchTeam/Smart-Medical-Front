@@ -39,6 +39,16 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: "/",
     redirect: "/login",
   },
+
+  {
+    path: "/ai-chat",
+    component: () => import("@/views/ai-chat/index.vue"),
+    meta: { 
+      title: "AI智能助手",
+      hidden: false,
+      keepAlive: true 
+    },
+  },
   // {
   //   path: "/dashboard",
   //   component: Layout,
