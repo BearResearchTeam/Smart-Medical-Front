@@ -69,8 +69,9 @@ const fetchData = async () => {
   loading.value = true;
   try {
     const response = await UserAPI.getEquipmentList(query);
-    list.value = response.data.list;
-    total.value = response.data.total;
+    console.log(response);
+    list.value = response.items;
+    total.value = response.totalCount;
   } catch (error) {
     console.error('获取设备列表失败:', error);
     ElMessage.error('获取设备列表失败');
