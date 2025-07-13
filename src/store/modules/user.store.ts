@@ -8,6 +8,8 @@ import MyUserAPI from "@/api/myuser.api";
 import { defineStore } from "pinia";
 import { log } from "console";
 
+import newAvatar from "@/assets/images/new_avatar.png";
+
 // 用户信息的存储键
 const USER_INFO_KEY = "user_info";
 
