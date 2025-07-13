@@ -25,7 +25,7 @@
     <el-card shadow="hover" class="data-table">
       <div class="data-table__toolbar">
         <div class="data-table__toolbar--actions">
-          <el-button type="success" icon="plus" @click="handleOpenDialog(1)">
+          <el-button type="success" icon="plus" @click="handleOpenDialog()">
             新增患者
           </el-button>
           <el-button type="danger" :disabled="selectIds.length === 0" icon="delete" @click="handleDelete()">

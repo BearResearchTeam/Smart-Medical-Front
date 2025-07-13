@@ -7,23 +7,17 @@
           <div class="user-info">
             <div class="avatar-wrapper">
               <el-avatar :src="userProfile.avatar" :size="100" />
-              <el-button
-                type="info"
-                class="avatar-edit-btn"
-                circle
-                :icon="Camera"
-                size="small"
-                @click="triggerFileUpload"
-              />
+              <!-- <el-button type="info" class="avatar-edit-btn" circle :icon="Camera" size="small"
+                @click="triggerFileUpload" /> -->
               <input ref="fileInput" type="file" style="display: none" @change="handleFileChange" />
             </div>
             <div class="user-name">
-              <span class="nickname">{{ userProfile.nickname }}</span>
-              <el-icon class="edit-icon" @click="handleOpenDialog(DialogType.ACCOUNT)">
+              <span class="nickname">{{ userStore.userInfo.realName }}</span>
+              <!-- <el-icon class="edit-icon" @click="handleOpenDialog(DialogType.ACCOUNT)">
                 <Edit />
-              </el-icon>
+              </el-icon> -->
             </div>
-            <div class="user-role">{{ userProfile.roleNames }}</div>
+            <div class="user-role">{{ userStore.userInfo.roles }}</div>
           </div>
           <el-divider />
           <div class="user-stats">
@@ -53,58 +47,43 @@
           </template>
           <el-descriptions :column="1" border>
             <el-descriptions-item label="用户名">
-              {{ userProfile.username }}
-              <el-icon v-if="userProfile.gender === 1" class="gender-icon male">
+              {{ userStore.userInfo.username }}
+              <el-icon v-if="userStore.userInfo.userSex == true" class="gender-icon male">
                 <Male />
               </el-icon>
               <el-icon v-else class="gender-icon female">
                 <Female />
               </el-icon>
             </el-descriptions-item>
+            <el-descriptions-item label="用户性别">
+              <span v-if="userStore.userInfo.userSex==false">女</span>
+              <span v-if="userStore.userInfo.userSex == true">男</span>
+              <span v-if="userStore.userInfo.userSex == undefined">未知</span>
+            </el-descriptions-item>
             <el-descriptions-item label="手机号码">
-              {{ userProfile.mobile || "未绑定" }}
-              <el-button
-                v-if="userProfile.mobile"
-                type="primary"
-                link
-                @click="() => handleOpenDialog(DialogType.MOBILE)"
-              >
+              {{ userStore.userInfo.userPhone || "未绑定" }}
+              <!-- <el-button v-if="userStore.userInfo.userPhone" type="primary" link
+                @click="() => handleOpenDialog(DialogType.MOBILE)">
                 更换
               </el-button>
-              <el-button
-                v-else
-                type="primary"
-                link
-                @click="() => handleOpenDialog(DialogType.MOBILE)"
-              >
+              <el-button v-else type="primary" link @click="() => handleOpenDialog(DialogType.MOBILE)">
                 绑定
-              </el-button>
+              </el-button> -->
             </el-descriptions-item>
             <el-descriptions-item label="邮箱">
-              {{ userProfile.email || "未绑定" }}
-              <el-button
-                v-if="userProfile.email"
-                type="primary"
-                link
-                @click="() => handleOpenDialog(DialogType.EMAIL)"
-              >
+              {{ userStore.userInfo.userEmail || "未绑定" }}
+              <!-- <el-button v-if="userStore.userInfo.userEmail" type="primary" link
+                @click="() => handleOpenDialog(DialogType.EMAIL)">
                 更换
               </el-button>
-              <el-button
-                v-else
-                type="primary"
-                link
-                @click="() => handleOpenDialog(DialogType.EMAIL)"
-              >
+              <el-button v-else type="primary" link @click="() => handleOpenDialog(DialogType.EMAIL)">
                 绑定
-              </el-button>
+              </el-button> -->
             </el-descriptions-item>
-            <el-descriptions-item label="部门">
+            <!-- <el-descriptions-item label="部门">
               {{ userProfile.deptName }}
-            </el-descriptions-item>
-            <el-descriptions-item label="创建时间">
-              {{ userProfile.createTime }}
-            </el-descriptions-item>
+            </el-descriptions-item> -->
+
           </el-descriptions>
         </el-card>
 
@@ -130,12 +109,8 @@
     <!-- 弹窗 -->
     <el-dialog v-model="dialog.visible" :title="dialog.title" :width="500">
       <!-- 账号资料 -->
-      <el-form
-        v-if="dialog.type === DialogType.ACCOUNT"
-        ref="userProfileFormRef"
-        :model="userProfileForm"
-        :label-width="100"
-      >
+      <el-form v-if="dialog.type === DialogType.ACCOUNT" ref="userProfileFormRef" :model="userProfileForm"
+        :label-width="100">
         <el-form-item label="昵称">
           <el-input v-model="userProfileForm.nickname" />
         </el-form-item>
@@ -145,13 +120,8 @@
       </el-form>
 
       <!-- 修改密码 -->
-      <el-form
-        v-if="dialog.type === DialogType.PASSWORD"
-        ref="passwordChangeFormRef"
-        :model="passwordChangeForm"
-        :rules="passwordChangeRules"
-        :label-width="100"
-      >
+      <el-form v-if="dialog.type === DialogType.PASSWORD" ref="passwordChangeFormRef" :model="passwordChangeForm"
+        :rules="passwordChangeRules" :label-width="100">
         <el-form-item label="原密码" prop="oldPassword">
           <el-input v-model="passwordChangeForm.oldPassword" type="password" show-password />
         </el-form-item>
@@ -164,13 +134,8 @@
       </el-form>
 
       <!-- 绑定手机 -->
-      <el-form
-        v-else-if="dialog.type === DialogType.MOBILE"
-        ref="mobileBindingFormRef"
-        :model="mobileUpdateForm"
-        :rules="mobileBindingRules"
-        :label-width="100"
-      >
+      <el-form v-else-if="dialog.type === DialogType.MOBILE" ref="mobileBindingFormRef" :model="mobileUpdateForm"
+        :rules="mobileBindingRules" :label-width="100">
         <el-form-item label="手机号码" prop="mobile">
           <el-input v-model="mobileUpdateForm.mobile" style="width: 250px" />
         </el-form-item>
@@ -186,13 +151,8 @@
       </el-form>
 
       <!-- 绑定邮箱 -->
-      <el-form
-        v-else-if="dialog.type === DialogType.EMAIL"
-        ref="emailBindingFormRef"
-        :model="emailUpdateForm"
-        :rules="emailBindingRules"
-        :label-width="100"
-      >
+      <el-form v-else-if="dialog.type === DialogType.EMAIL" ref="emailBindingFormRef" :model="emailUpdateForm"
+        :rules="emailBindingRules" :label-width="100">
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="emailUpdateForm.email" style="width: 250px" />
         </el-form-item>
@@ -218,18 +178,28 @@
 </template>
 
 <script lang="ts" setup>
-import UserAPI, {
-  UserProfileVO,
-  PasswordChangeForm,
-  MobileUpdateForm,
-  EmailUpdateForm,
-  UserProfileForm,
-} from "@/api/system/user.api";
-
+// import UserAPI, {
+//   UserProfileVO,
+//   PasswordChangeForm,
+//   MobileUpdateForm,
+//   EmailUpdateForm,
+//   UserProfileForm,
+// } from "@/api/system/user.api";
+import MyUserAPI, {
+  type UserListItem,
+  type UserAddRequest,
+  type UserUpdateRequest,
+  type UserPageResult
+} from "@/api/myuser.api";
 import FileAPI from "@/api/file.api";
 
 import { Camera } from "@element-plus/icons-vue";
-
+import { useUserStore } from "@/store";
+import { use } from "vxe-table";
+const userStore = useUserStore();
+const res = () => {
+  userStore.userInfo.username
+}
 const userProfile = ref<UserProfileVO>({});
 
 const enum DialogType {

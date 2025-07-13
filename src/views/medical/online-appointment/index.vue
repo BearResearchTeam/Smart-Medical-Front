@@ -1,68 +1,136 @@
 <template>
   <div class="app-container">
-    <el-card shadow="never">
-      <template #header>
-        <div class="flex justify-between">
-          <span class="text-sm">线上预约</span>
-        </div>
-      </template>
+    <!-- 主体容器 -->
+    <el-container style="padding: 20px; background-color: #f9fbfd;">
+      <el-main>
+        <!-- 卡片容器 -->
+        <el-card shadow="hover" class="form-card">
+          <template #header>
+            <div class="card-header">
+              <h3 class="title">
+                <i class="el-icon-document-add"></i> 线上预约
+              </h3>
+            </div>
+          </template>
 
-      <el-form ref="appointmentFormRef" :model="appointmentFormData" :rules="appointmentRules" label-width="120px">
-        <el-divider content-position="left">预约信息</el-divider>
-        <el-form-item label="预约时间" prop="appointmentDateTime">
-          <el-date-picker v-model="appointmentFormData.appointmentDateTime" type="datetime" placeholder="选择预约时间"
-            value-format="YYYY-MM-DDTHH:mm:ss" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remarks">
-          <el-input v-model="appointmentFormData.remarks" type="textarea" :rows="3" placeholder="请输入备注" />
-        </el-form-item>
+          <!-- 表单区域 -->
+          <el-form ref="appointmentFormRef" :model="appointmentFormData" :rules="appointmentRules" label-width="140px"
+            label-position="right">
+            <!-- 预约信息 -->
+            <el-divider content-position="left">
+              <span class="section-title">📅 预约信息</span>
+            </el-divider>
 
-        <el-divider content-position="left">患者信息</el-divider>
-        <el-form-item label="患者姓名" prop="patientName">
-          <el-input v-model="appointmentFormData.patientName" placeholder="请输入患者姓名" />
-        </el-form-item>
-        <el-form-item label="性别" prop="gender">
-          <el-radio-group v-model="appointmentFormData.gender">
-            <el-radio :label="1">男</el-radio>
-            <el-radio :label="2">女</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="年龄" prop="age">
-          <el-input-number v-model="appointmentFormData.age" :min="0" :max="150" style="width: 100%" />
-        </el-form-item>
-        <el-form-item label="年龄单位" prop="ageUnit">
-          <el-input v-model="appointmentFormData.ageUnit" placeholder="请输入年龄单位(岁/月/日)" />
-        </el-form-item>
-        <el-form-item label="联系电话" prop="contactPhone">
-          <el-input v-model="appointmentFormData.contactPhone" placeholder="请输入联系电话" />
-        </el-form-item>
-        <el-form-item label="身份证号" prop="idNumber">
-          <el-input v-model="appointmentFormData.idNumber" placeholder="请输入身份证号" />
-        </el-form-item>
-        <el-form-item label="就诊类型" prop="visitType">
-          <el-select v-model="appointmentFormData.visitType" placeholder="请选择就诊类型" style="width: 100%">
-            <el-option label="初诊" value="初诊" />
-            <el-option label="复诊" value="复诊" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="传染病" prop="isInfectiousDisease">
-          <el-switch v-model="appointmentFormData.isInfectiousDisease" />
-        </el-form-item>
-        <el-form-item v-if="appointmentFormData.isInfectiousDisease" label="发病时间" prop="diseaseOnsetDateTime">
-          <el-date-picker v-model="appointmentFormData.diseaseOnsetDateTime" type="datetime" placeholder="选择发病时间"
-            value-format="YYYY-MM-DDTHH:mm:ss" style="width: 100%" />
-        </el-form-item>
-        <el-form-item v-if="appointmentFormData.isInfectiousDisease" label="急诊时间" prop="emergencyTime">
-          <el-date-picker v-model="appointmentFormData.emergencyTime" type="datetime" placeholder="选择急诊时间"
-            value-format="YYYY-MM-DDTHH:mm:ss" style="width: 100%" />
-        </el-form-item>
+            <el-row :gutter="20">
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="预约时间" prop="appointmentDateTime">
+                  <el-date-picker v-model="appointmentFormData.appointmentDateTime" type="datetime" placeholder="选择预约时间"
+                    value-format="YYYY-MM-DDTHH:mm:ss" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="备注" prop="remarks">
+                  <el-input v-model="appointmentFormData.remarks" type="textarea" :rows="3" placeholder="请输入备注" />
+                </el-form-item>
+              </el-col>
+            </el-row>
 
-        <el-form-item>
-          <el-button type="primary" @click="submitForm">提交预约</el-button>
-          <el-button @click="resetForm">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+            <!-- 患者信息 -->
+            <el-divider content-position="left">
+              <span class="section-title">🧍 患者信息</span>
+            </el-divider>
+
+            <el-row :gutter="20">
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="患者姓名" prop="patientName">
+                  <el-input v-model="appointmentFormData.patientName" placeholder="请输入患者姓名" />
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="性别" prop="gender">
+                  <el-radio-group v-model="appointmentFormData.gender">
+                    <el-radio :label="1">男</el-radio>
+                    <el-radio :label="2">女</el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="年龄" prop="age">
+                  <el-input-number v-model="appointmentFormData.age" :min="0" :max="150" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="年龄单位" prop="ageUnit">
+                  <el-select v-model="appointmentFormData.ageUnit" placeholder="请选择" style="width: 100%">
+                    <el-option label="岁" value="岁" />
+                    <el-option label="月" value="月" />
+                    <el-option label="日" value="日" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="联系电话" prop="contactPhone">
+                  <el-input v-model="appointmentFormData.contactPhone" placeholder="请输入手机号" />
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="身份证号" prop="idNumber">
+                  <el-input v-model="appointmentFormData.idNumber" placeholder="请输入身份证号" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20">
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="就诊类型" prop="visitType">
+                  <el-select v-model="appointmentFormData.visitType" placeholder="请选择" style="width: 100%">
+                    <el-option label="初诊" value="初诊" />
+                    <el-option label="复诊" value="复诊" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :xs="24" :sm="12">
+                <el-form-item label="传染病" prop="isInfectiousDisease">
+                  <el-switch v-model="appointmentFormData.isInfectiousDisease" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+
+            <!-- 条件显示字段 -->
+            <transition name="fade">
+              <div v-if="appointmentFormData.isInfectiousDisease">
+                <el-row :gutter="20">
+                  <el-col :xs="24" :sm="12">
+                    <el-form-item label="发病时间" prop="diseaseOnsetDateTime">
+                      <el-date-picker v-model="appointmentFormData.diseaseOnsetDateTime" type="datetime"
+                        placeholder="选择发病时间" value-format="YYYY-MM-DDTHH:mm:ss" style="width: 100%" />
+                    </el-form-item>
+                  </el-col>
+                  <el-col :xs="24" :sm="12">
+                    <el-form-item label="急诊时间" prop="emergencyTime">
+                      <el-date-picker v-model="appointmentFormData.emergencyTime" type="datetime" placeholder="选择急诊时间"
+                        value-format="YYYY-MM-DDTHH:mm:ss" style="width: 100%" />
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </div>
+            </transition>
+
+            <!-- 提交按钮 -->
+            <el-form-item>
+              <el-button type="primary" @click="submitForm" style="width: 100%; margin-top: 10px;">提交预约</el-button>
+              <el-button @click="resetForm" style="width: 100%; margin-top: 10px;">重置</el-button>
+            </el-form-item>
+          </el-form>
+        </el-card>
+      </el-main>
+    </el-container>
   </div>
 </template>
 
@@ -71,7 +139,10 @@ import { reactive, ref, watch } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import type { ElForm } from "element-plus";
 import AppointmentAPI, { type AppointmentFormData } from "@/api/medical/appointment.api";
-
+import PatientAPI from "@/api/medical/patient.api";
+import { useRoute, useRouter } from "vue-router";
+const route = useRoute();
+const patientId = ref<string | null>(route.query.patientId as string);
 const appointmentFormRef = ref<InstanceType<typeof ElForm>>();
 
 const appointmentFormData = reactive<AppointmentFormData>({
@@ -130,7 +201,15 @@ watch(
     }
   }
 );
-
+const getpatientlist = async () => {
+  const result = await PatientAPI.getPatientbyid(patientId.value || "", {})
+  Object.assign(appointmentFormData, result);
+  console.log("获取到的患者数据:", result);
+  // 处理 diseaseOnsetDateTime 字段
+  appointmentFormData.emergencyTime = result.diseaseOnsetTime
+    ? new Date(result.diseaseOnsetTime).toISOString()
+    : undefined;
+}
 const submitForm = async () => {
   if (!appointmentFormRef.value) return;
 
@@ -184,6 +263,11 @@ const resetForm = () => {
   appointmentFormData.diseaseOnsetDateTime = undefined;
   appointmentFormData.emergencyTime = undefined;
 };
+onMounted(() => {
+  console.log("patientId:", patientId.value); // 打印患者ID
+  getpatientlist();
+
+});
 </script>
 
 <style scoped>

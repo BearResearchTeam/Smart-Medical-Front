@@ -1,7 +1,15 @@
  import request from "@/utils/request";
-import { Interface } from "readline";
-const BASE_URL = "/api/app/doctor-account-serivce";
+const BASE_URL = "/api/app/prescription/";
 const PrescriptionAPI = {
+  //新增处方
+createPrescriptiondata(data: any) {
+    return request({
+      url: `/api/app/prescription`,
+      method: "post",
+      data,
+    });
+  },
+
   // 获取处方列表
   getPrescriptionList(params:any) {
     return request({
@@ -11,23 +19,35 @@ const PrescriptionAPI = {
     });
   },
 
-  // 获取处方详情
-  getPrescriptionDetail(id:string) {
+  // 批量删除处方下的指定药品
+  basthdeletePrescription(prescriptionId:number,drugIdsToDeleteString:string) {
     return request({
-      url: `${BASE_URL}/prescriptions/${id}`,
+      url: `/api/app/prescription/prescription-drugs/${prescriptionId}`,
+      method: "delete",
+      params: {drugIdsToDeleteString}
+    });
+  },
+
+  // 新增处方药品 (批量修改)
+  createPrescription(prescriptionId:any,newDrugIdsString:string) {
+    return request({
+      url: `/api/app/prescription/prescription-drugs/${prescriptionId}`,
+      method: "put",
+      params: {newDrugIdsString},
+    });
+  },
+/**
+   * 获取处方中的药品
+   * @param prescriptionId 处方id
+   * @param drugIdsToDeleteString 删除的药品id
+   */
+  drugselectlist()
+  {
+    return request({
+      url: `/api/app/prescription/drug-select`,
       method: "get",
     });
   },
-
-  // 新增处方
-  createPrescription(data:any) {
-    return request({
-      url: `/api/app/prescription`,
-      method: "post",
-      data,
-    });
-  },
-
   // 更新处方
   updatePrescription(id: string, data: any) {
     return request({
@@ -45,6 +65,14 @@ const PrescriptionAPI = {
       params: {pid:pid},
     });
   },
+  // 获取处方列表 下拉
+  getprelistselect(pid:any) {
+  return request({
+      url: `/api/app/prescription/start-prescriptions`,
+      method: "get",
+      params: {pid:pid},
+    });
+}
 };
 
  export interface PrescriptionListQuery {

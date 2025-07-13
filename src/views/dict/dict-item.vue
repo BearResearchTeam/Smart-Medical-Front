@@ -144,7 +144,7 @@ const total = ref(0);
 
 const queryParams = reactive<DictItemPageQuery>({
   pageIndex: 1,
-  pageSize: 2,
+  pageSize: 5,
   DictionaryLabel: "",
   datetype: dictCode.value || "",
 });

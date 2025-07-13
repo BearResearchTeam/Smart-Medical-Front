@@ -128,7 +128,7 @@ const selectIds = ref<number[]>([]);
 const queryParams = reactive<DeptQuery>({
   DepartmentName: "",
   PageIndex: 1,
-  PageSize: 2
+  PageSize: 5
 });
 
 const dialog = reactive({

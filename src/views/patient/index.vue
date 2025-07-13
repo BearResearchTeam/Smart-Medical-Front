@@ -12,14 +12,13 @@
         </el-form-item>
       </el-form>
 
-      <el-row :gutter="10" class="mb-2">
-        <el-col :span="1.5">
-          <el-button type="primary" plain @click="handleAdd"><i-ep-plus />新增</el-button>
-        </el-col>
-      </el-row>
+      
     </div>
 
     <el-card shadow="never" class="table-container">
+
+      <el-button type="success" icon="plus" @click="handleAdd" style="margin-bottom: 20px;">新增</el-button>
+      
       <el-table v-loading="loading" :data="patientList" border>
         <el-table-column prop="patientName" label="患者姓名" min-width="100" align="center" />
 
@@ -83,7 +82,11 @@
         <!-- 操作列 -->
         <el-table-column label="操作" width="200" align="center">
           <template #default="scope">
-            <el-button type="primary" link @click="viewAppointments(scope.row.patientId)"><i-ep-view />查看预约</el-button>
+            <el-button type="success" link icon="edit"
+              @click="onlineAppointments(scope.row.patientId)"><i-ep-view />在线预约</el-button>
+
+            <el-button type="primary" link icon="documentRemove"
+              @click="viewAppointments(scope.row.patientId)"><i-ep-view />查看预约</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -245,6 +248,9 @@ function cancel() {
   dialogVisible.value = false;
 }
 
+function onlineAppointments(patientId: string) {
+  router.push({ path: "/medical/online-appointment/index", query: { patientId } });
+}
 function viewAppointments(patientId: string) {
   router.push({ path: "/patient/appointments", query: { patientId } });
 }

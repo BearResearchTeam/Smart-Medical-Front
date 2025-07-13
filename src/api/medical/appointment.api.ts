@@ -18,7 +18,7 @@ export interface AppointmentFormData {
   idNumber: string;
   visitType: string;
   isInfectiousDisease: boolean;
-  diseaseOnsetDateTime?: string; // ISO 字符串用于日期时间
+  diseaseOnsetDateTime?: string | undefined; // ISO 字符串用于日期时间
   emergencyTime?: string; // ISO 字符串用于日期时间
 }
 

@@ -25,7 +25,7 @@ const props = defineProps({
   pageSizes: {
     type: Array as PropType<number[]>,
     default() {
-      return [5, 10, 15, 20]; // 默认分页大小选项
+      return [5, 10, 15, 20, 30, 40, 50, 60,70]; // 默认分页大小选项
     },
   },
   // 分页组件的布局

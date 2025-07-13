@@ -131,7 +131,7 @@ const queryParams = reactive<RoleListParams>({
   RoleName: "",
   Sorting: "",
   SkipCount: 1,
-  MaxResultCount: 2,
+  MaxResultCount: 5,
 });
 
 const pageData = reactive<RolePageResult>({

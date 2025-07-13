@@ -1,5 +1,6 @@
 <template>
-  <div class="app-container" v-if="userStore.userInfo.username == formData.auditName"
+  <div class="app-container"
+    v-if="userStore.userInfo.username == formData.auditName || userStore.userInfo.username == formData.employeeName">
     <!-- 搜索区域 -->
     <div class="search-container">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true">
@@ -18,16 +19,6 @@
     </div>
 
     <el-card shadow="hover" class="data-table">
-      <div class="data-table__toolbar">
-        <div class="data-table__toolbar--actions">
-          <!-- <el-button type="success" icon="plus" @click="handleAddDoctor">
-            新增
-          </el-button>
-          <el-button type="danger" :disabled="selectIds.length === 0" icon="delete" @click="handleDelete()">
-            删除
-          </el-button> -->
-        </div>
-      </div>
 
       <el-table v-loading="loading" :data="tableData.data" default-expand-all class="data-table__content"
         @selection-change="handleSelectionChange" stripe highlight-current-row border>
@@ -45,19 +36,14 @@
 
           </template>
         </el-table-column>
+        <el-table-column prop="auditDesc" label="审核意见" width="200" />
 
 
         <el-table-column label="操作" fixed="right" align="left" width="200">
           <template #default="scope">
             <div class="table-action-row">
-              <!-- <el-button type="primary" link size="small" icon="view" @click.stop="handleViewDoctor(scope.row)">
+              <el-button type="primary" link size="small" icon="view" @click.stop="handleOpenDialog(scope.row)">
                 查看
-              </el-button> -->
-              <el-button type="success" link size="small" icon="edit" @click.stop="handleOpenDialog(scope.row)">
-                审核
-              </el-button>
-              <el-button type="danger" link size="small" icon="delete" @click.stop="handleDelete(scope.row.id)">
-                删除
               </el-button>
             </div>
           </template>
@@ -95,11 +81,10 @@
         <el-form-item label="医生手机号" prop="employeePhone">
           <el-input v-model="formData.employeePhone" placeholder="请输入医生手机号" :readonly="isAuditDialog" />
         </el-form-item>
-        <!--  -->
         <el-form-item label="医生性别" prop="sex">
           <el-radio-group v-model="formData.sex" :disabled="isAuditDialog">
-            <el-radio v-for="item in genderOptions" :key="item.dictionaryLabel" :value="item.dictionaryLabel">{{
-              item.dictionaryValue }}</el-radio>
+            <el-radio :label="1">男</el-radio>
+            <el-radio :label="2">女</el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -133,56 +118,18 @@
         </el-form-item>
       </el-form>
       <el-form-item label="审核意见" prop="auditDesc">
-        <el-input v-model="formData.auditDesc" type="textarea" />
+        <el-input v-model="formData.auditDesc" type="textarea" :readonly="isAuditDialog" />
       </el-form-item>
       <template #footer>
         <div class="dialog-footer">
-          <el-button type="primary" @click="handleSubmit">确 定</el-button>
           <el-button @click="handleCloseDialog">取 消</el-button>
         </div>
       </template>
     </el-dialog>
 
-    <!-- 查看医生信息弹窗 -->
-    <el-dialog v-model="viewDialog.visible" :title="viewDialog.title" width="600px" @closed="handleCloseViewDialog">
-      <el-form ref="viewFormRef" :model="viewFormData" label-width="80px" :disabled="true">
-        <el-form-item label="科室名称" prop="departmentId">
-          <el-select v-model="viewFormData.departmentId" placeholder="请选择科室" filterable>
-            <el-option v-for="item in deptOptions" :key="item.id" :label="item.departmentName" :value="item.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="医生单号" prop="employeeId">
-          <el-input v-model="viewFormData.employeeId" placeholder="请输入医生单号" />
-        </el-form-item>
 
-        <el-form-item label="医生名称" prop="employeeName">
-          <el-input v-model="viewFormData.employeeName" placeholder="请输入医生名称" />
-        </el-form-item>
-        <el-form-item label="账号标识" prop="accountId">
-          <el-input v-model="viewFormData.accountId" placeholder="请输入账号标识" />
-        </el-form-item>
-        <el-form-item label="机构名称" prop="institutionName">
-          <el-input v-model="viewFormData.institutionName" placeholder="请输入机构名称" />
-        </el-form-item>
-
-        <el-form-item label="医生是否请假">
-          <el-radio-group v-model="viewFormData.isActive">
-            <el-radio :value="true">已审核</el-radio>
-            <el-radio :value="false">待审核</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="handleCloseViewDialog">关 闭</el-button>
-        </div>
-      </template>
-    </el-dialog>
   </div>
-  <div v-else>
-    <span>您不是审核人 无法查看</span>
-  </div>
+  <div v-else> <b>当前无与您相关的审核记录</b></div>
 </template>
 
 <script setup lang="ts">
@@ -196,13 +143,8 @@ import DoctorAPI, { DoctorAuditform, DoctorPageVO, DoctorPageQuery, DoctorForm, 
 import { computed } from 'vue';
 import type { UploadProps } from 'element-plus'
 import request from "@/utils/request";
-import { useUserStore } from "@/store";
+import { useUserStore } from '@/store';
 const userStore = useUserStore();
-// 只取“性别”类型
-const genderOptions: any = computed(() =>
-  userStore.dictypeselectdata.filter((item: any) => item.dictionaryDataType === "sys_sex")
-
-);
 const baseURL = ref(request.defaults.baseURL + "api/Imgs/UploadFile");
 const handleCertificateSuccess = (res: any) => {
   formData.certificate = request.defaults.baseURL + res
@@ -313,7 +255,7 @@ async function fetchDeptOptions() {
 async function handleQuery() {
   loading.value = true;
   const param = {
-    States: 0,
+    States: 1 || 2,
     EmployeeName: queryParams.EmployeeName,
     Sorting: queryParams.Sorting,
     SkipCount: (queryParams.SkipCount - 1) * queryParams.MaxResultCount,
@@ -339,76 +281,25 @@ function handleSelectionChange(selection: any) {
 }
 
 /**
- * 打开医生弹窗
- * @param deptId 医生ID
+ * 打开记录弹窗
+ * 
  */
 async function handleOpenDialog(row?: any) {
-
-  console.log("打开医生弹窗:", row); // 打印传入的
-  dialog.visible = true;
-
-  dialog.title = "审核";
+  dialog.title = row.employeeName + "-审核记录详情";
   Object.assign(formData, row); // 使用 Object.assign 合并对象
 
+  console.log("打开弹窗，deptId:", row); // 打印传入的 deptId
+  dialog.visible = true;
+  // if (dept.id) {
+  //   dialog.title = "审核";
+
+  // } else {
+  //   dialog.title = "新增医生";
+  //   //formData.parentId = parentId || "0";
+  // }
 }
 
-// 提交医生表单
-async function handleSubmit() {
-  deptFormRef.value.validate(async (valid: any) => {
-    if (valid) {
-      loading.value = true;
-      if (!formData.id) {
-        formData.employeeId = "0"; // 确保 employeeId 有值
 
-        // await DoctorAPI.createdoctor(formData)
-        //   .then(() => {
-        //     ElMessage.success("新增成功");
-        //     handleCloseDialog();
-        //     handleQuery();
-        //   })
-        //   .finally(() => (loading.value = false));
-      } else {
-        await DoctorAPI.updatedoctor(formData.id, formData)
-          .then(() => {
-            ElMessage.success("审核成功");
-            handleCloseDialog();
-            handleQuery();
-          })
-          .finally(() => (loading.value = false));
-      }
-    }
-  });
-}
-
-// 删除医生
-function handleDelete(deptId?: number) {
-  const deptIds = [deptId || selectIds.value].join(",").toString();
-
-  if (!deptIds) {
-    ElMessage.warning("请勾选删除项");
-    return;
-  }
-
-  ElMessageBox.confirm("确认删除已选中的数据项?", "警告", {
-    confirmButtonText: "确定",
-    cancelButtonText: "取消",
-    type: "warning",
-  }).then(
-    () => {
-      console.log("deptIds:", deptIds); // 打印要删除医生ID
-      loading.value = true;
-      DoctorAPI.deletedoctor(deptIds)
-        .then(() => {
-          ElMessage.success("删除成功");
-          handleResetQuery();
-        })
-        .finally(() => (loading.value = false));
-    },
-    () => {
-      ElMessage.info("已取消删除");
-    }
-  );
-}
 
 // 重置表单
 function resetForm() {
@@ -424,35 +315,11 @@ function handleCloseDialog() {
   resetForm();
 }
 
-function handleAddDoctor() {
-  dialog.title = "新增医生";
-  dialog.visible = true;
-  Object.assign(formData, {
-    id: undefined,
-    departmentId: "",
-    isActive: true,
-    accountId: "",
-    employeeId: "",
-    employeeName: "",
-    institutionName: "",
-    departmentName: ""
-  });
-}
 
-// 打开查看医生信息弹窗
-function handleViewDoctor(row: any) {
-  viewDialog.visible = true;
-  viewDialog.title = "查看医生信息";
-  Object.assign(viewFormData, row); // 反填数据
-}
 
-// 关闭查看医生信息弹窗
-function handleCloseViewDialog() {
-  viewDialog.visible = false;
-  viewFormRef.value.resetFields(); // 重置表单
-}
 
-const isAuditDialog = computed(() => dialog.visible && dialog.title === '审核');
+
+const isAuditDialog = computed(() => dialog.visible);
 
 onMounted(() => {
   fetchDeptOptions();

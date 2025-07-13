@@ -6,7 +6,7 @@ import { Storage } from "@/utils/storage";
 import { AUTH_KEYS } from "@/constants";
 import MyUserAPI from "@/api/myuser.api";
 import { defineStore } from "pinia";
-import { log } from "console";
+import DictAPI from "@/api/system/dict.api";
 
 import newAvatar from "@/assets/images/new_avatar.png";
 
@@ -43,7 +43,7 @@ export const useUserStore = defineStore(
       Storage.set(USER_INFO_KEY, userInfo.value);
     };
 
-    const permissions = ref<string[]>([]);
+    const dictypeselectdata = ref<string[]>([]);
     // 登录
     async function login(loginData: LoginFormData) {
       try {
@@ -51,16 +51,19 @@ export const useUserStore = defineStore(
         //console.log("调用真实API登录");
         // 使用类型断言 将返回值转换为LoginFromDataLMZ类型
         const result = (await MyUserAPI.login(loginData)) as unknown as LoginFromDataLMZ;
+        dictypeselectdata.value = await DictAPI.getdictypeselectlist();
+        userInfo.value.perms = result.permissionCode;
+        userInfo.value.roles = result.roleName;
 
         console.log("result", result);
-        //console.log(result);
-        //console.log(result);
 
         //将返回的用户信息存入localStorage
         localStorage.setItem("userInfo", JSON.stringify(result));
+        
+
         //console.log("result", result);
 
-        //permissions.value = result.permissions ?? [];
+        //userInfo.value.perms = result.permissions ?? [];
         // 保存记住我选项
         Storage.set(AUTH_KEYS.REMEMBER_ME, loginData.rememberMe);
 
@@ -169,7 +172,7 @@ export const useUserStore = defineStore(
 
     return {
       userInfo,
-      permissions,
+      dictypeselectdata,
       hasPerm,
       login,
       getUserInfo,
@@ -178,9 +181,8 @@ export const useUserStore = defineStore(
     };
   },
   {
-    persist: {
-      storage: sessionStorage,
-    },
+    persist: true,
+  
   }
 );
 
