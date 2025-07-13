@@ -7,7 +7,7 @@ import { ElMessage } from "element-plus";
 import { createPinia } from "pinia";
 
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
-// 暗黑主题样式
+// 暗黑主题样式11
 import "element-plus/theme-chalk/dark/css-vars.css";
 import "vxe-table/lib/style.css";
 // 暗黑模式自定义变量
