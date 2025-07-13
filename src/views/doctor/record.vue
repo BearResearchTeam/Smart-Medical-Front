@@ -1,6 +1,5 @@
 <template>
-  <div class="app-container"
-    v-if="userStore.userInfo.username == formData.auditName || userStore.userInfo.username == formData.employeeName">
+  <div class="app-container" v-if="canViewPage">
     <!-- 搜索区域 -->
     <div class="search-container">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true">
@@ -20,7 +19,7 @@
 
     <el-card shadow="hover" class="data-table">
 
-      <el-table v-loading="loading" :data="tableData.data" default-expand-all class="data-table__content"
+      <el-table v-loading="loading" :data="filteredTableData" default-expand-all class="data-table__content"
         @selection-change="handleSelectionChange" stripe highlight-current-row border>
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" label="序号" width="130" />
@@ -129,7 +128,9 @@
 
 
   </div>
-  <div v-else> <b>当前无与您相关的审核记录</b></div>
+  <div v-else>
+    <span>当前无与您相关的审核记录</span>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -320,6 +321,23 @@ function handleCloseDialog() {
 
 
 const isAuditDialog = computed(() => dialog.visible);
+
+// 检查当前用户是否有权限查看页面
+const canViewPage = computed(() => {
+  // 检查当前用户是否是任何一条记录中的审核人或医生
+  return tableData.data.some(item =>
+    item.auditName === userStore.userInfo.username ||
+    item.employeeName === userStore.userInfo.username
+  );
+});
+
+// 过滤出当前用户有权限查看的记录
+const filteredTableData = computed(() => {
+  return tableData.data.filter(item =>
+    item.auditName === userStore.userInfo.username ||
+    item.employeeName === userStore.userInfo.username
+  );
+});
 
 onMounted(() => {
   fetchDeptOptions();

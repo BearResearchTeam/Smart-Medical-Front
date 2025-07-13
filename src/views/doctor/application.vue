@@ -120,7 +120,7 @@ const beforeCertificateUpload: UploadProps['beforeUpload'] = (rawFile) => {
     ElMessage.error('图片格式不是JPG/PNG/gif格式!')
     return false
   } else if (rawFile.size / 1024 / 1024 > 2) {
-    ElMessage.error('Certificate picture size can not exceed 2MB!')
+    ElMessage.error('图片大小不超过 2MB!')
     return false
   }
   return true

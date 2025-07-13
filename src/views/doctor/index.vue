@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container" v-if="userStore.userInfo.username == formData.auditName"
+  <div class="app-container" v-if="canViewPage">
     <!-- 搜索区域 -->
     <div class="search-container">
       <el-form ref="queryFormRef" :model="queryParams" :inline="true">
@@ -29,7 +29,7 @@
         </div>
       </div>
 
-      <el-table v-loading="loading" :data="tableData.data" default-expand-all class="data-table__content"
+      <el-table v-loading="loading" :data="filteredTableData" default-expand-all class="data-table__content"
         @selection-change="handleSelectionChange" stripe highlight-current-row border>
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" label="序号" width="130" />
@@ -53,7 +53,8 @@
               <!-- <el-button type="primary" link size="small" icon="view" @click.stop="handleViewDoctor(scope.row)">
                 查看
               </el-button> -->
-              <el-button type="success" link size="small" icon="edit" @click.stop="handleOpenDialog(scope.row)">
+              <el-button v-if="canAuditRecord(scope.row)" type="success" link size="small" icon="edit"
+                @click.stop="handleOpenDialog(scope.row)">
                 审核
               </el-button>
               <el-button type="danger" link size="small" icon="delete" @click.stop="handleDelete(scope.row.id)">
@@ -181,7 +182,7 @@
     </el-dialog>
   </div>
   <div v-else>
-    <span>您不是审核人 无法查看</span>
+    <span>当前无与您相关的医生申请待办</span>
   </div>
 </template>
 
@@ -453,10 +454,32 @@ function handleCloseViewDialog() {
 }
 
 const isAuditDialog = computed(() => dialog.visible && dialog.title === '审核');
+const currentAuditName = computed(() => {
+  // 检查当前用户是否是任何一条记录中的审核人
+  const hasAuditPermission = tableData.data.some(item => item.auditName === userStore.userInfo.username);
+  return hasAuditPermission ? userStore.userInfo.username : '';
+});
+
+// 或者如果您想要更精确的控制，可以使用这个计算属性
+const canViewPage = computed(() => {
+  // 检查当前用户是否是任何一条记录中的审核人
+  return tableData.data.some(item => item.auditName === userStore.userInfo.username);
+});
+
+// 过滤出当前用户有权限审核的记录
+const filteredTableData = computed(() => {
+  return tableData.data.filter(item => item.auditName === userStore.userInfo.username);
+});
+
+// 检查用户是否有权限审核特定记录
+const canAuditRecord = (record: any) => {
+  return record.auditName === userStore.userInfo.username;
+};
 
 onMounted(() => {
   fetchDeptOptions();
   handleQuery();
+  console.log("userStore.userInfo.username", formData.auditName);
 });
 
 </script>
