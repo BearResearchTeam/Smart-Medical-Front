@@ -36,4 +36,24 @@ class AppointmentAPI {
   }
 }
 
+/**
+ * 获取药品入库+药品+制药公司联合信息列表
+ * GET /api/app/medical/drug-in-stock-company-full-list
+ */
+export function getDrugInStockCompanyFullList() {
+  return request({
+    url: "/api/app/medical/drug-in-stock-company-full-list",
+    method: "get",
+  });
+}
+
+// 病历信息导出Excel
+export function exportSickExcel() {
+  return request({
+    url: "/api/app/medical/export-sick-excel",
+    method: "GET",
+    responseType: "blob", // 关键：返回文件流
+  });
+}
+
 export default new AppointmentAPI();
